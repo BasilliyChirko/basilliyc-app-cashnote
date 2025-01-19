@@ -2,7 +2,20 @@ plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
+	alias(libs.plugins.kotlin.kapt)
+	alias(libs.plugins.room)
+	alias(libs.plugins.google.services)
+	alias(libs.plugins.firebase.crashlytics)
+	alias(libs.plugins.ksp)
+	alias(libs.plugins.kotlinx.serialization)
 }
+
+val versionMajor = 0
+val versionMinor = 0
+val versionPatch = 0
+val versionBuild = 1
+
+var versionBuildName = "$versionMajor.$versionMinor.$versionPatch-$versionBuild"
 
 android {
 	namespace = "basilliyc.cashnote"
@@ -12,8 +25,10 @@ android {
 		applicationId = "basilliyc.cashnote"
 		minSdk = 29
 		targetSdk = 35
-		versionCode = 1
-		versionName = "1.0"
+		
+		versionCode = versionBuild
+		versionName = versionBuildName
+		setProperty("archivesBaseName", "Obsidian5-$versionName")
 		
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
@@ -25,6 +40,15 @@ android {
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
 			)
+			resValue("bool", "crashlytics_enable", "true")
+		}
+		debug {
+			isMinifyEnabled = false
+			proguardFiles(
+				getDefaultProguardFile("proguard-android-optimize.txt"),
+				"proguard-rules.pro"
+			)
+			resValue("bool", "crashlytics_enable", "false")
 		}
 	}
 	compileOptions {
@@ -38,6 +62,9 @@ android {
 		compose = true
 		buildConfig = true
 	}
+	room {
+		schemaDirectory("$projectDir/db_schema")
+	}
 }
 
 dependencies {
@@ -50,6 +77,19 @@ dependencies {
 	implementation(libs.androidx.ui.graphics)
 	implementation(libs.androidx.ui.tooling.preview)
 	implementation(libs.androidx.material3)
+	
+	implementation(libs.androidx.navigation)
+	
+	implementation(libs.di.koin)
+	implementation(libs.bundles.room)
+	ksp(libs.room.compiler)
+	
+	implementation(platform(libs.firebase.bom))
+	implementation(libs.firebase.analytics)
+	implementation(libs.firebase.crashlytics)
+	
+	implementation(libs.kotlinx.serialization.json)
+	
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)

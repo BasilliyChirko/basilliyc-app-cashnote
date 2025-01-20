@@ -1,43 +1,25 @@
 package basilliyc.cashnote.utils
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation.NavController
 
-abstract class NavigationItem<Argument>(
-	baseRoute: String = "",
-	val argument: Argument,
-) {
-	private val baseRoute: String = baseRoute.ifEmpty { this.javaClass.name }
-
-}
-
-abstract class NavigationSubject<Argument>(
-	val content: @Composable (Argument) -> Unit
-) {
-
-}
+const val KEY_NAV_REQUEST_SUCCESS = "navRequestSuccess"
+const val KEY_NAV_REQUEST_RESULT = "navRequestResult"
 
 fun <T> NavController.setResult(success: Boolean, result: T?) {
 	previousBackStackEntry?.savedStateHandle?.apply {
-		set("navRequestSuccess", success)
-		set("navRequestResult", result)
+		set(KEY_NAV_REQUEST_SUCCESS, success)
+		set(KEY_NAV_REQUEST_RESULT, result)
 	}
 }
 
+fun NavController.isResultSuccess(): Boolean? {
+	return currentBackStackEntry?.savedStateHandle?.get<Boolean>(KEY_NAV_REQUEST_SUCCESS)
+}
 
-//abstract class NavigationPage<Argument>(
-//
-//) : NavigationSubject<Argument>() {
-//
-//}
-
-//fun <T> NavController.setResult(success: Boolean, result: T?) {
-//	previousBackStackEntry?.savedStateHandle?.apply {
-//		set("previousPageSuccess", success)
-//		set("previousPageResult", result)
-//	}
-//}
+inline fun <reified T> NavController.getResult(): T? {
+	return currentBackStackEntry?.savedStateHandle?.get<T>(KEY_NAV_REQUEST_RESULT)
+}
 
 val LocalNavController = compositionLocalOf<NavController> {
 	throw IllegalStateException("There is no default NavController provided.")

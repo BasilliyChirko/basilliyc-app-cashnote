@@ -3,6 +3,7 @@
 package basilliyc.cashnote.utils
 
 import android.util.Log
+import androidx.compose.runtime.compositionLocalOf
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlin.apply
 import kotlin.collections.forEach
@@ -11,7 +12,10 @@ import kotlin.math.min
 import kotlin.stackTraceToString
 import kotlin.text.isNotEmpty
 import kotlin.text.substring
-import kotlin.toString
+
+val LocalLogcat = compositionLocalOf {
+	Logcat()
+}
 
 class Logcat(tag: String = "") {
 	
@@ -134,7 +138,8 @@ class Logcat(tag: String = "") {
 		interceptor?.onError(tag, throwable, message)
 	}
 	
-	private fun buildMessage(vararg x: Any?) = x.joinToString(separator = "; ") { it?.toString() ?: "null" }
+	private fun buildMessage(vararg x: Any?) =
+		x.joinToString(separator = "; ") { it?.toString() ?: "null" }
 	
 	private inline fun sliceLog(message: String, call: (String) -> Unit) {
 		if (message.length < LOG_MAX_LENGTH) {
@@ -144,7 +149,10 @@ class Logcat(tag: String = "") {
 		
 		var loggedSymbols = 0
 		while (loggedSymbols < message.length) {
-			val take = message.substring(loggedSymbols, min(loggedSymbols + LOG_MAX_LENGTH, message.length))
+			val take = message.substring(
+				loggedSymbols,
+				min(loggedSymbols + LOG_MAX_LENGTH, message.length)
+			)
 			call(take)
 			loggedSymbols += take.length
 		}

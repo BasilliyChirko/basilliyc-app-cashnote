@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import basilliyc.cashnote.data.Account
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class AppDatabaseAccountRepository {
@@ -34,5 +35,8 @@ abstract class AppDatabaseAccountRepository {
 	
 	@Delete
 	abstract suspend fun deleteAccount(accounts: List<Account>): Int
+	
+	@Query("SELECT * FROM Account")
+	abstract fun getAccountsListAsFlow(): Flow<List<Account>>
 	
 }

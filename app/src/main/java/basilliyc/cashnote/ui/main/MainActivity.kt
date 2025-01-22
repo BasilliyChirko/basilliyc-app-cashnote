@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -19,24 +20,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import basilliyc.cashnote.R
-import basilliyc.cashnote.ui.account_list.AccountList
-import basilliyc.cashnote.ui.account_statictic.AccountStatistic
-import basilliyc.cashnote.ui.app_settings.AppSettings
 import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalLogcat
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.Logcat
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
 	
@@ -98,12 +97,6 @@ class MainActivity : ComponentActivity() {
 		}
 		
 	}
-}
-
-private fun NavGraphBuilder.createNavigationGraph() = this.apply {
-	composable<AppNavigation.AccountList> { AccountList() }
-	composable<AppNavigation.AccountStatistic> { AccountStatistic() }
-	composable<AppNavigation.AppSettings> { AppSettings() }
 }
 
 @Composable

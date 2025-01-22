@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account_list
+package basilliyc.cashnote.ui.account.list
 
 import basilliyc.cashnote.data.Account
 

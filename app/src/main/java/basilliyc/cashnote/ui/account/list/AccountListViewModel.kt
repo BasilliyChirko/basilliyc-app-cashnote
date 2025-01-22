@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account_list
+package basilliyc.cashnote.ui.account.list
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

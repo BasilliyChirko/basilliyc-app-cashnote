@@ -3,7 +3,17 @@
     <string name="main_nav_account_list">Accounts</string>
     <string name="main_nav_account_statistic">Statistic</string>
     <string name="main_nav_app_settings">Settings</string>
+    <string name="common_navigation_back">To previous page</string>
     <string name="add_new_account">Add new account</string>
     <string name="account_list_empty_title">There is no any account</string>
     <string name="account_list_empty_submit">Add First Account</string>
+    <string name="account_form_label_currency">Currency</string>
+    <string name="account_form_label_name">Name</string>
+    <string name="account_form_label_balance">Balance</string>
+    <string name="account_form_title_create">Account creation</string>
+    <string name="account_form_title_edit">Account editing</string>
+    <string name="text_field_error_should_not_be_empty">Should not be empty</string>
+    <string name="text_field_error_incorrect_value">Incorrect value</string>
+    <string name="account_form_label_color">Background color</string>
+    <string name="account_form_action_save">Save account</string>
 </resources>

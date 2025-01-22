@@ -4,7 +4,7 @@ import androidx.room.Room
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.AppDatabaseMigrations
 import basilliyc.cashnote.backend.manager.AccountManager
-import basilliyc.cashnote.ui.account_list.AccountListViewModel
+import basilliyc.cashnote.ui.account.list.AccountListViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module

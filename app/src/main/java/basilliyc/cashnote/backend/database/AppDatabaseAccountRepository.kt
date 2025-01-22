@@ -19,13 +19,13 @@ abstract class AppDatabaseAccountRepository {
 	abstract suspend fun getAccountsList(): List<Account>
 	
 	@Query("SELECT * FROM Account WHERE id=:id")
-	abstract suspend fun getAccount(id: Long): Account?
+	abstract suspend fun getAccountById(id: Long): Account?
 	
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	abstract suspend fun saveAccount(account: Account): Long
+	abstract suspend fun insertAccount(account: Account): Long
 	
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	abstract suspend fun saveAccount(accounts: List<Account>): List<Long>
+	abstract suspend fun insertAccount(accounts: List<Account>): List<Long>
 	
 	@Query("DELETE FROM Account WHERE id=:id")
 	abstract suspend fun deleteAccount(id: Long): Int

@@ -1,11 +1,12 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package basilliyc.cashnote.ui.account_list
+package basilliyc.cashnote.ui.account.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 
 
@@ -49,10 +54,11 @@ import basilliyc.cashnote.utils.OutlinedButton
 fun AccountList() {
 	val viewModel = viewModel<AccountListViewModel>()
 	val logcat = viewModel.logcat
-	AccountListContent(
+	val navController = LocalNavController.current
+	Content(
 		state = viewModel.state,
 		onClickAddNewAccount = {
-			logcat.info("onClickAddNewAccount")
+			navController.navigate(AppNavigation.AccountForm(id = null))
 		},
 		onClickAccount = {
 			logcat.info("onClickAccount(id=$it)")
@@ -63,17 +69,17 @@ fun AccountList() {
 @Preview(showBackground = true)
 @Composable
 private fun AccountListPreview() = DefaultPreview {
-	AccountListContent(
+	Content(
 		state = AccountListState.Page(
 			content = AccountListState.Content.Data(
 				listOf(
-					Account(id = 1, name = "Account 1"),
-					Account(id = 2, name = "Account 2"),
-					Account(id = 3, name = "Account 3"),
+					Account(id = 1, name = "Account 1", balance = 100.0, currency = AccountCurrency.UAH, color = null),
+					Account(id = 2, name = "Account 2", balance = 200.0, currency = AccountCurrency.UAH, color = null),
+					Account(id = 3, name = "Account 3", balance = 300.0, currency = AccountCurrency.UAH, color = null),
 				)
-			)
-//			content = AccountListState.Content.Loading
-//			content = AccountListState.Content.DataEmpty
+			),
+//			content = AccountListState.Content.Loading,
+//			content = AccountListState.Content.DataEmpty,
 		)
 	)
 }
@@ -82,9 +88,8 @@ private fun AccountListPreview() = DefaultPreview {
 //  CONTENT
 //--------------------------------------------------------------------------------------------------
 
-
 @Composable
-private fun AccountListContent(
+private fun Content(
 	state: AccountListState.Page,
 	onClickAddNewAccount: () -> Unit = {},
 	onClickAccount: (id: Long) -> Unit = {},
@@ -100,17 +105,17 @@ private fun AccountListContent(
 			val modifier = Modifier.padding(innerPadding)
 			
 			when (val content = state.content) {
-				is AccountListState.Content.Data -> AccountListContentData(
+				is AccountListState.Content.Loading -> BoxLoading(
+					modifier = modifier
+				)
+				
+				is AccountListState.Content.Data -> ContentData(
 					modifier = modifier,
 					content = content,
 					onClickAccount = onClickAccount,
 				)
 				
-				is AccountListState.Content.Loading -> AccountListContentLoading(
-					modifier = modifier
-				)
-				
-				AccountListState.Content.DataEmpty -> AccountListContentDataEmpty(
+				is AccountListState.Content.DataEmpty -> ContentDataEmpty(
 					modifier = modifier,
 					onClickAddNewAccount = onClickAddNewAccount
 				)
@@ -120,28 +125,13 @@ private fun AccountListContent(
 	)
 }
 
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.LOADING
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun AccountListContentLoading(
-	modifier: Modifier = Modifier,
-) {
-	Box(
-		modifier = modifier.fillMaxSize(),
-		contentAlignment = Alignment.Center,
-	) {
-		CircularProgressIndicator()
-	}
-}
 
 //--------------------------------------------------------------------------------------------------
 //  CONTENT.DATA_EMPTY
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun AccountListContentDataEmpty(
+private fun ContentDataEmpty(
 	modifier: Modifier = Modifier,
 	onClickAddNewAccount: () -> Unit,
 ) {
@@ -178,7 +168,7 @@ private fun AccountListContentDataEmpty(
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun AccountListContentData(
+private fun ContentData(
 	modifier: Modifier = Modifier,
 	content: AccountListState.Content.Data,
 	onClickAccount: (id: Long) -> Unit,
@@ -186,12 +176,16 @@ private fun AccountListContentData(
 	LazyVerticalGrid(
 		modifier = modifier,
 		columns = GridCells.Adaptive(128.dp),
+		horizontalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+		contentPadding = PaddingValues(8.dp),
 	) {
 		items(
 			count = content.accounts.size,
 			key = { content.accounts[it].id },
 		) {
-			AccountListContentListItem(
+			ContentDataItem(
+				modifier = Modifier.animateItem(),
 				account = content.accounts[it],
 				onClickAccount = onClickAccount,
 			)
@@ -200,12 +194,14 @@ private fun AccountListContentData(
 }
 
 @Composable
-private fun AccountListContentListItem(
+private fun ContentDataItem(
+	modifier: Modifier,
 	account: Account,
 	onClickAccount: (id: Long) -> Unit,
 ) {
+	//TODO replace mock data with real
 	Card(
-		modifier = Modifier.padding(8.dp),
+		modifier = modifier,
 		onClick = { onClickAccount(account.id) },
 	) {
 		Column {
@@ -233,7 +229,6 @@ private fun ActionBar(
 	onClickAddNewAccount: () -> Unit,
 ) = TopAppBar(
 	title = { Text(text = stringResource(R.string.main_nav_account_list)) },
-//	title = { },
 	actions = {
 		IconButton(
 			onClick = onClickAddNewAccount

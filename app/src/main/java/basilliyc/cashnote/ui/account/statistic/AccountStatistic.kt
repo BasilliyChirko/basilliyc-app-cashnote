@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account_statictic
+package basilliyc.cashnote.ui.account.statistic
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

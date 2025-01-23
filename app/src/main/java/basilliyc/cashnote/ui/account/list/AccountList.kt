@@ -4,12 +4,12 @@ package basilliyc.cashnote.ui.account.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Kayaking
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +30,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,11 +41,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.Account
 import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.color
+import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
+import basilliyc.cashnote.utils.asPriceString
 
 
 //--------------------------------------------------------------------------------------------------
@@ -73,9 +78,27 @@ private fun AccountListPreview() = DefaultPreview {
 		state = AccountListState.Page(
 			content = AccountListState.Content.Data(
 				listOf(
-					Account(id = 1, name = "Account 1", balance = 100.0, currency = AccountCurrency.UAH, color = null),
-					Account(id = 2, name = "Account 2", balance = 200.0, currency = AccountCurrency.UAH, color = null),
-					Account(id = 3, name = "Account 3", balance = 300.0, currency = AccountCurrency.UAH, color = null),
+					Account(
+						id = 1,
+						name = "Account 1",
+						balance = 100.0,
+						currency = AccountCurrency.UAH,
+						color = null
+					),
+					Account(
+						id = 2,
+						name = "Account 2",
+						balance = 200.0,
+						currency = AccountCurrency.UAH,
+						color = null
+					),
+					Account(
+						id = 3,
+						name = "Account 3",
+						balance = 300.0,
+						currency = AccountCurrency.UAH,
+						color = null
+					),
 				)
 			),
 //			content = AccountListState.Content.Loading,
@@ -203,18 +226,28 @@ private fun ContentDataItem(
 	Card(
 		modifier = modifier,
 		onClick = { onClickAccount(account.id) },
+		colors = CardDefaults.cardColors(
+			containerColor = account.color?.color ?: Color.Unspecified
+		)
 	) {
 		Column {
 			Text(text = account.name, modifier = Modifier.padding(8.dp))
 			Row {
-				Text(text = "$", modifier = Modifier.padding(horizontal = 8.dp))
+				Text(text = account.currency.symbol, modifier = Modifier.padding(horizontal = 8.dp))
 				Spacer(modifier = Modifier.weight(1F))
-				Text(text = "1000.00", modifier = Modifier.padding(horizontal = 8.dp))
+				Text(
+					text = account.balance.asPriceString(showPlus = false),
+					modifier = Modifier.padding(horizontal = 8.dp)
+				)
 			}
-			Row {
-				Spacer(modifier = Modifier.weight(1F))
-				Text(text = "-150.40", modifier = Modifier.padding(8.dp))
-			}
+			//TODO set real day difference
+			Text(
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth(),
+				text = (-50.7).asPriceString(showPlus = true),
+				textAlign = TextAlign.End
+			)
 		}
 	}
 }

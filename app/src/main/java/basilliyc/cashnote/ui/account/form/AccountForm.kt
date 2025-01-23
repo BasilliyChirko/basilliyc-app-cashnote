@@ -191,17 +191,19 @@ private fun ContentData(
 			value = content.color,
 			onChanged = onColorChanged,
 		)
-		Spacer(modifier = Modifier.weight(1F))
 		Button(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(16.dp),
+				.padding(
+					top = 32.dp,
+					start = 16.dp,
+					end = 16.dp,
+					bottom = 16.dp
+				),
 			onClick = onSaveClicked,
 			text = stringResource(R.string.account_form_action_save),
 			icon = Icons.Filled.Save,
-			enabled = !content.isSaving,
 		)
-		Spacer(modifier = Modifier.height(16.dp))
 	}
 }
 
@@ -267,7 +269,7 @@ private fun ColumnScope.AccountName(
 	error: TextFieldError?,
 	onChanged: (String) -> Unit,
 ) {
-	Spacer(modifier = Modifier.height(12.dp))
+	Spacer(modifier = Modifier.height(8.dp))
 	TextField(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -329,10 +331,10 @@ private fun ColumnScope.AccountColor(
 	LazyVerticalGrid(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(horizontal = 8.dp),
+			.padding(vertical = 8.dp, horizontal = 16.dp),
 		columns = GridCells.Adaptive(100.dp),
 		verticalArrangement = Arrangement.spacedBy(0.dp),
-		horizontalArrangement = Arrangement.spacedBy(0.dp),
+		horizontalArrangement = Arrangement.spacedBy(8.dp),
 	) {
 		items(
 			count = AccountColor.entries.size,
@@ -342,8 +344,7 @@ private fun ColumnScope.AccountColor(
 			Card(
 				modifier = Modifier
 					.animateItem()
-					.fillMaxWidth()
-					.padding(horizontal = 4.dp),
+					.fillMaxWidth(),
 				colors = CardDefaults.cardColors(
 					containerColor = if (accountColor == value) {
 						accountColor.color

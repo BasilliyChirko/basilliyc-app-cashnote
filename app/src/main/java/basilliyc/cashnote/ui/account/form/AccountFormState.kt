@@ -21,7 +21,6 @@ object AccountFormState {
 			val balance: String,
 			val balanceError: TextFieldError? = null,
 			val color: AccountColor?,
-			val isSaving: Boolean = false,
 		) : Content {
 			constructor(account: Account) : this(
 				isNew = account.id == 0L,

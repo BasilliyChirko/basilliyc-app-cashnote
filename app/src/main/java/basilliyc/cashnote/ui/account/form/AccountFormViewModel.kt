@@ -139,17 +139,12 @@ class AccountFormViewModel(
 			balance = balance.toDouble()
 		)
 		
-		updateStateContentData {
-			copy(isSaving = true)
-		}
 		viewModelScope.launch {
 			try {
 				accountManager.saveAccount(account)
 				navController.popBackStack()
-			} finally {
-				updateStateContentData {
-					copy(isSaving = false)
-				}
+			} catch (t: Throwable) {
+				logcat.error(t)
 			}
 		}
 		

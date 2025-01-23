@@ -5,23 +5,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,7 +36,6 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalLogcat
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.Logcat
-import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
 	
@@ -63,33 +63,7 @@ class MainActivity : ComponentActivity() {
 				}
 				
 				CashNoteTheme {
-					
-					Surface(
-						color = MaterialTheme.colorScheme.background,
-					) {
-						Column {
-							NavHost(
-								navController = LocalNavController.current as NavHostController,
-								startDestination = AppNavigation.AccountList,
-								modifier = Modifier.weight(1F),
-								builder = { createNavigationGraph() },
-							)
-							MainBottomNavigationBar()
-						}
-					}
-
-//					Scaffold(
-//						modifier = Modifier.fillMaxSize(),
-//						bottomBar = { MainBottomNavigationBar() }
-//					) { innerPadding ->
-//						NavHost(
-//							navController = LocalNavController.current as NavHostController,
-//							startDestination = AppNavigation.AccountList,
-//							modifier = Modifier.padding(innerPadding),
-//							builder = { createNavigationGraph() },
-//						)
-//					}
-				
+					Main()
 				}
 				
 			}
@@ -97,6 +71,29 @@ class MainActivity : ComponentActivity() {
 		}
 		
 	}
+}
+
+@Composable
+private fun Main() {
+	Scaffold(
+		modifier = Modifier.fillMaxSize(),
+		bottomBar = { MainBottomNavigationBar() }
+	) { innerPadding ->
+		NavHost(
+			navController = LocalNavController.current as NavHostController,
+			startDestination = AppNavigation.AccountList,
+			modifier = Modifier
+				.padding(innerPadding)
+				.consumeWindowInsets(innerPadding),
+			builder = { createNavigationGraph() },
+		)
+	}
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun MainPreview() = DefaultPreview {
+	Main()
 }
 
 @Composable
@@ -143,7 +140,11 @@ private fun MainBottomNavigationBar() {
 		currentDestination?.route == it.page::class.qualifiedName
 	}
 	
-	if (isNavBarVisible) {
+	AnimatedVisibility(
+		visible = isNavBarVisible,
+		enter = fadeIn(),
+		exit = fadeOut(),
+	) {
 		NavigationBar(
 			modifier = Modifier.fillMaxWidth()
 		) {
@@ -151,85 +152,3 @@ private fun MainBottomNavigationBar() {
 		}
 	}
 }
-
-@Composable
-@Preview(showBackground = true)
-fun MainBottomNavigationBarPreview() = DefaultPreview {
-	MainBottomNavigationBar()
-}
-
-
-//
-//@Composable
-//fun Page1(
-//	argument: AppNavigation.AccountList,
-//) {
-//	val navController = LocalNavController.current
-//	val number = navController.getResult<Int>()
-//	Column {
-//		Text(text = "Hello Page! $number", modifier = Modifier)
-//		Button(
-//			onClick = {
-//				navController.navigate(AppNavigation.PageTest3(55))
-//			}
-//		) {
-//			Text(text = "Go to page 2")
-//		}
-//	}
-//}
-//
-//@Composable
-//fun Page2(argument: AppNavigation.Page2) {
-//	Column(modifier = Modifier.padding(16.dp)) {
-//		Text("NUMBER ${argument.number}", style = MaterialTheme.typography.displayLarge)
-//		Text("displayLarge", style = MaterialTheme.typography.displayLarge)
-//		Text("displayMedium", style = MaterialTheme.typography.displayMedium)
-//		Text("displaySmall", style = MaterialTheme.typography.displaySmall)
-//		Text("headlineLarge", style = MaterialTheme.typography.headlineLarge)
-//		Text("headlineMedium", style = MaterialTheme.typography.headlineMedium)
-//		Text("headlineSmall", style = MaterialTheme.typography.headlineSmall)
-//		Text("titleLarge", style = MaterialTheme.typography.titleLarge)
-//		Text("titleMedium", style = MaterialTheme.typography.titleMedium)
-//		Text("titleSmall", style = MaterialTheme.typography.titleSmall)
-//		Text("bodyLarge", style = MaterialTheme.typography.bodyLarge)
-//		Text("bodyMedium", style = MaterialTheme.typography.bodyMedium)
-//		Text("bodySmall", style = MaterialTheme.typography.bodySmall)
-//		Text("labelLarge", style = MaterialTheme.typography.labelLarge)
-//		Text("labelMedium", style = MaterialTheme.typography.labelMedium)
-//		Text("labelSmall", style = MaterialTheme.typography.labelSmall)
-//	}
-//}
-//
-//@Composable
-//fun PageTest3(
-//	argument: AppNavigation.PageTest3,
-//) {
-//	val navController = LocalNavController.current
-//
-//	fun onClick(it: Int) {
-//		navController.setResult(true, it)
-//		navController.popBackStack()
-//	}
-//
-//	Column(
-//		verticalArrangement = Arrangement.Center,
-//		horizontalAlignment = Alignment.CenterHorizontally,
-//	) {
-//		Text(text = "PageTest3 ${argument.testInput}")
-//		Button(
-//			onClick = { onClick(1) }
-//		) {
-//			Text(text = "Button 1")
-//		}
-//		Button(
-//			onClick = { onClick(2) }
-//		) {
-//			Text(text = "Button 2")
-//		}
-//		Button(
-//			onClick = { onClick(3) }
-//		) {
-//			Text(text = "Button 3")
-//		}
-//	}
-//}

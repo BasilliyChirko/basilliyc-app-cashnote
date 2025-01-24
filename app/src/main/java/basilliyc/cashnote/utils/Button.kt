@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -35,7 +36,8 @@ fun Button(
 ) {
 	Button(
 		onClick = onClick,
-		modifier = modifier,
+		modifier = modifier
+			.requiredHeight(48.dp),
 		enabled = enabled,
 		shape = shape,
 		colors = colors,

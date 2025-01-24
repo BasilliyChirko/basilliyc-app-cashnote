@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import basilliyc.cashnote.ui.account.balance.AccountBalance
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.account.statistic.AccountStatistic
@@ -27,6 +28,9 @@ sealed interface AppNavigation {
 	
 	@Serializable
 	data class AccountForm(val id: Long?) : AppNavigation
+	
+	@Serializable
+	data class AccountBalance(val id: Long) : AppNavigation
 }
 
 fun NavGraphBuilder.createNavigationGraph() = this.apply {
@@ -34,6 +38,7 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountStatistic> { AccountStatistic() }
 	composable<AppNavigation.AppSettings> { AppSettings() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
+	composable<AppNavigation.AccountBalance> { AccountBalance() }
 }
 
 

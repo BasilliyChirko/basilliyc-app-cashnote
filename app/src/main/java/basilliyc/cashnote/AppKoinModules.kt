@@ -28,5 +28,6 @@ fun AppValues.koinModules() = module {
 	}
 	
 	single { get<AppDatabase>().accountRepository() }
+	single { get<AppDatabase>().transactionRepository() }
 	
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,11 +28,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,13 +48,17 @@ import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
+import basilliyc.cashnote.ui.account.balance.AccountBalanceState
 import basilliyc.cashnote.ui.components.BoxLoading
-import basilliyc.cashnote.ui.components.DialogLoading
+import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldError
+import basilliyc.cashnote.ui.components.VerticalGrid
+import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
+import basilliyc.cashnote.utils.toast
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -62,6 +69,7 @@ fun AccountForm() {
 	val viewModel = viewModel<AccountFormViewModel>()
 	val state by remember { viewModel.state }
 	val navController = LocalNavController.current
+	val context = LocalContext.current
 	Content(
 		state = state,
 		onCurrencyChanged = viewModel::onCurrencyChanged,
@@ -70,6 +78,26 @@ fun AccountForm() {
 		onColorChanged = viewModel::onColorChanged,
 		onSaveClicked = { viewModel.onSaveClicked(navController) },
 	)
+	
+	val event = state.event
+	LaunchedEffect(event) {
+		when (event) {
+			AccountFormState.Event.Cancel -> {
+				navController.popBackStack()
+			}
+			
+			AccountFormState.Event.Save -> {
+				context.toast(R.string.account_form_toast_save)
+				navController.popBackStack()
+			}
+			
+			AccountFormState.Event.SaveError -> {
+				context.toast(R.string.account_form_toast_save_error)
+			}
+			
+			null -> Unit
+		}
+	}
 }
 
 @Composable
@@ -110,9 +138,16 @@ private fun Content(
 ) {
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
-		topBar = { ActionBar(state = state) },
+		topBar = {
+			ActionBar(
+				state = state,
+				onSaveClicked = onSaveClicked,
+			)
+		},
 		content = { innerPadding ->
-			val modifier = Modifier.padding(innerPadding)
+			val modifier = Modifier
+				.padding(innerPadding)
+				.verticalScroll(rememberScrollState())
 			
 			when (val content = state.content) {
 				is AccountFormState.Content.Loading -> BoxLoading(
@@ -131,7 +166,7 @@ private fun Content(
 			}
 		}
 	)
-
+	
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -139,7 +174,10 @@ private fun Content(
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun ActionBar(state: AccountFormState.Page) {
+private fun ActionBar(
+	state: AccountFormState.Page,
+	onSaveClicked: () -> Unit,
+) {
 	SimpleActionBar(
 		title = {
 			val content = state.content
@@ -153,6 +191,13 @@ private fun ActionBar(state: AccountFormState.Page) {
 				)
 			}
 		},
+		actions = {
+			IconButton(
+				onClick = onSaveClicked,
+				imageVector = Icons.Filled.Done,
+				contentDescription = stringResource(R.string.account_form_action_save)
+			)
+		}
 	)
 }
 
@@ -328,38 +373,32 @@ private fun ColumnScope.AccountColor(
 		style = MaterialTheme.typography.titleMedium,
 		modifier = Modifier.padding(horizontal = 16.dp)
 	)
-	LazyVerticalGrid(
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(vertical = 8.dp, horizontal = 16.dp),
-		columns = GridCells.Adaptive(100.dp),
-		verticalArrangement = Arrangement.spacedBy(0.dp),
-		horizontalArrangement = Arrangement.spacedBy(8.dp),
+	
+	VerticalGrid(
+		modifier = Modifier.padding(horizontal = 8.dp),
+		columns = VerticalGridCells.Adaptive(100.dp),
+		horizontalSpace = 8.dp,
+		itemsCount = 6,
 	) {
-		items(
-			count = AccountColor.entries.size,
-			key = { AccountColor.entries[it].ordinal }
+		val accountColor = AccountColor.entries[it]
+		Card(
+			modifier = Modifier
+				.fillMaxWidth(),
+			colors = CardDefaults.cardColors(
+				containerColor = if (accountColor == value) {
+					accountColor.color
+				} else Color.Unspecified,
+			),
+			onClick = { onChanged(accountColor) }
 		) {
-			val accountColor = AccountColor.entries[it]
-			Card(
+			Text(
 				modifier = Modifier
-					.animateItem()
-					.fillMaxWidth(),
-				colors = CardDefaults.cardColors(
-					containerColor = if (accountColor == value) {
-						accountColor.color
-					} else Color.Unspecified,
-				),
-				onClick = { onChanged(accountColor) }
-			) {
-				Text(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(vertical = 8.dp),
-					text = accountColor.name,
-					textAlign = TextAlign.Center,
-				)
-			}
+					.fillMaxWidth()
+					.padding(vertical = 8.dp),
+				text = accountColor.name,
+				textAlign = TextAlign.Center,
+			)
 		}
 	}
+
 }

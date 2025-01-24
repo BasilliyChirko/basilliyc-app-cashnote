@@ -58,7 +58,6 @@ import basilliyc.cashnote.utils.asPriceString
 @Composable
 fun AccountList() {
 	val viewModel = viewModel<AccountListViewModel>()
-	val logcat = viewModel.logcat
 	val navController = LocalNavController.current
 	Content(
 		state = viewModel.state,
@@ -66,7 +65,7 @@ fun AccountList() {
 			navController.navigate(AppNavigation.AccountForm(id = null))
 		},
 		onClickAccount = {
-			logcat.info("onClickAccount(id=$it)")
+			navController.navigate(AppNavigation.AccountBalance(id = it))
 		},
 	)
 }

@@ -35,3 +35,5 @@ fun Double.asPriceString(showPlus: Boolean): String {
 	
 	return "$symbol $decimal.$coins"
 }
+
+fun Double.asPriceWithCoins() = String.format(locale, "%.2f", this)

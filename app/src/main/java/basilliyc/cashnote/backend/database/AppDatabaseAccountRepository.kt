@@ -16,27 +16,27 @@ abstract class AppDatabaseAccountRepository {
 	//----------------------------------------------------------------------------------------------
 	
 	@Query("SELECT * FROM Account")
-	abstract suspend fun getAccountsList(): List<Account>
+	abstract suspend fun getList(): List<Account>
 	
 	@Query("SELECT * FROM Account WHERE id=:id")
-	abstract suspend fun getAccountById(id: Long): Account?
+	abstract suspend fun getById(id: Long): Account?
 	
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	abstract suspend fun insertAccount(account: Account): Long
+	abstract suspend fun insert(account: Account): Long
 	
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
-	abstract suspend fun insertAccount(accounts: List<Account>): List<Long>
+	abstract suspend fun insert(accounts: List<Account>): List<Long>
 	
 	@Query("DELETE FROM Account WHERE id=:id")
-	abstract suspend fun deleteAccount(id: Long): Int
+	abstract suspend fun delete(id: Long): Int
 	
 	@Delete
-	abstract suspend fun deleteAccount(account: Account): Int
+	abstract suspend fun delete(account: Account): Int
 	
 	@Delete
-	abstract suspend fun deleteAccount(accounts: List<Account>): Int
+	abstract suspend fun delete(accounts: List<Account>): Int
 	
 	@Query("SELECT * FROM Account")
-	abstract fun getAccountsListAsFlow(): Flow<List<Account>>
+	abstract fun getListAsFlow(): Flow<List<Account>>
 	
 }

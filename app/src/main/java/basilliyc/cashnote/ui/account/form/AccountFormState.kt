@@ -9,6 +9,7 @@ object AccountFormState {
 	
 	data class Page(
 		val content: Content = Content.Loading,
+		val event: Event? = null,
 	)
 	
 	sealed interface Content {
@@ -32,6 +33,12 @@ object AccountFormState {
 				color = account.color,
 			)
 		}
+	}
+	
+	sealed interface Event {
+		data object Save : Event
+		data object Cancel : Event
+		data object SaveError : Event
 	}
 	
 }

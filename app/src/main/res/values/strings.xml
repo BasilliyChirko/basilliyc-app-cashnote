@@ -16,4 +16,15 @@
     <string name="text_field_error_incorrect_value">Incorrect value</string>
     <string name="account_form_label_color">Background color</string>
     <string name="account_form_action_save">Save account</string>
+    <string name="account_balance_label_balance_difference">Transaction value</string>
+    <string name="account_balance_label_balance_new">New balance</string>
+    <string name="account_balance_action_save">Save transaction</string>
+    <string name="account_balance_label_balance_reduced">Balance reduced</string>
+    <string name="account_balance_label_balance_increased">Balance increased</string>
+    <string name="account_balance_label_balance_not_changed">Balance not changed</string>
+    <string name="account_balance_label_balance_comment">Comment</string>
+    <string name="account_balance_toast_save">Transaction saved</string>
+    <string name="account_balance_toast_save_error">Error while saving transaction</string>
+    <string name="account_form_toast_save">Account created</string>
+    <string name="account_form_toast_save_error">Account creation failed</string>
 </resources>

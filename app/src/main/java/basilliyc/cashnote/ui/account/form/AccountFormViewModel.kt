@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.backend.manager.AccountManager
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.backend.manager.FinancialManager
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.base.BaseViewModel
@@ -22,32 +22,30 @@ class AccountFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
-	private val accountManager: AccountManager by inject()
+	private val financialManager: FinancialManager by inject()
 	
 	val state = mutableStateOf(AccountFormState.Page())
 	private var mState by state
 	
-	private var accountId: Long = 0
+	private val route: AppNavigation.AccountForm = savedStateHandle.toRoute()
 	
 	//Initialization of the state
 	init {
 		mState = mState.copy(content = AccountFormState.Content.Loading)
-		val route = savedStateHandle.toRoute<AppNavigation.AccountForm>()
-		accountId = route.id ?: 0L
-		if (route.id != null) {
+		if (route.accountId != null) {
 			viewModelScope.launch {
-				val account = (accountManager.getAccountById(route.id)
-					?: throw IllegalStateException("Account with id ${route.id} is not present in database"))
+				val account = (financialManager.getAccountById(route.accountId)
+					?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
 				mState = mState.copy(content = AccountFormState.Content.Data(account))
 			}
 		} else {
-			val account = Account(
+			val financialAccount = FinancialAccount(
 				name = "",
 				currency = AccountCurrency.UAH,
 				color = null,
 				balance = 0.0
 			)
-			mState = mState.copy(content = AccountFormState.Content.Data(account))
+			mState = mState.copy(content = AccountFormState.Content.Data(financialAccount))
 		}
 	}
 	
@@ -146,8 +144,8 @@ class AccountFormViewModel(
 			return
 		}
 		
-		val account = Account(
-			id = accountId,
+		val financialAccount = FinancialAccount(
+			id = route.accountId ?: 0L,
 			name = nameString,
 			currency = content.currency,
 			color = content.color,
@@ -156,7 +154,7 @@ class AccountFormViewModel(
 		
 		handleEvent(skipIfBusy = true, postDelay = true) {
 			try {
-				accountManager.saveAccount(account)
+				financialManager.saveAccount(financialAccount)
 				mState = mState.copy(action = AccountFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)

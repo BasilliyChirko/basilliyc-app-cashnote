@@ -1,6 +1,6 @@
 package basilliyc.cashnote.ui.account.list
 
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.FinancialAccount
 
 object AccountListState {
 	
@@ -12,7 +12,7 @@ object AccountListState {
 		data object Loading : Content
 		data object DataEmpty : Content
 		data class Data(
-			val accounts: List<Account>,
+			val financialAccounts: List<FinancialAccount>,
 		) : Content
 	}
 	

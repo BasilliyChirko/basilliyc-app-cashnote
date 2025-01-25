@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.balance
+package basilliyc.cashnote.ui.account.transaction
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,51 +6,68 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.backend.manager.AccountManager
+import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.asPriceWithCoins
 import basilliyc.cashnote.utils.inject
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AccountBalanceViewModel(
+class AccountTransactionViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
-	private val accountManager: AccountManager by inject()
+	private val financialManager: FinancialManager by inject()
 	
-	val state = mutableStateOf(AccountBalanceState.Page())
+	val state = mutableStateOf(AccountTransactionState.Page())
 	private var mState by state
 	
 	//Initialization of the state
 	init {
-		mState = mState.copy(content = AccountBalanceState.Content.Loading)
-		val route = savedStateHandle.toRoute<AppNavigation.AccountBalance>()
+		mState = mState.copy(content = AccountTransactionState.Content.Loading)
+		val route = savedStateHandle.toRoute<AppNavigation.AccountTransaction>()
 		viewModelScope.launch {
-			val account = (accountManager.getAccountById(route.id)
-				?: throw IllegalStateException("Account with id ${route.id} is not present in database"))
+			
+			val account = (financialManager.getAccountById(route.accountId)
+				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
+			
+			val availableCategories = financialManager.getAvailableTransactionCategories()
+			
 			mState = mState.copy(
-				content = AccountBalanceState.Content.Data(
-					account = account,
+				content = AccountTransactionState.Content.Data(
+					financialAccount = account,
 					balanceDifference = TextFieldState(""),
 					balanceNew = TextFieldState(account.balance.asPriceWithCoins()),
 					comment = TextFieldState(""),
+					availableCategories = availableCategories,
+					selectedCategoryId = null,
 				)
 			)
 		}
 	}
 	
-	private fun updateStateContentData(call: AccountBalanceState.Content.Data.() -> AccountBalanceState.Content.Data) {
+	init {
+		viewModelScope.launch {
+			financialManager.getAvailableTransactionCategoriesAsFlow().collectLatest { categories ->
+				updateStateContentData {
+					copy(availableCategories = categories)
+				}
+			}
+		}
+	}
+	
+	private fun updateStateContentData(call: AccountTransactionState.Content.Data.() -> AccountTransactionState.Content.Data) {
 		val content = state.value.content
-		if (content is AccountBalanceState.Content.Data) {
+		if (content is AccountTransactionState.Content.Data) {
 			state.value = state.value.copy(content = content.call())
 		}
 	}
 	
 	fun onBalanceDifferenceChanged(balanceDifferenceString: String) {
-		val account = (mState.content as? AccountBalanceState.Content.Data)?.account ?: return
+		val account = (mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
 		
 		val balanceDifferenceString = balanceDifferenceString.replace(",", ".")
 		
@@ -63,13 +80,12 @@ class AccountBalanceViewModel(
 				balanceDifference = TextFieldState(balanceDifferenceString),
 				balanceNew = TextFieldState(balanceNewValue.asPriceWithCoins()),
 				isBalanceReduce = (balanceDifferenceValue < 0).takeIf { balanceNewValue != account.balance },
-				//TODO balanceDifferenceError
 			)
 		}
 	}
 	
 	fun onBalanceNewChanged(balanceNewString: String) {
-		val account = (mState.content as? AccountBalanceState.Content.Data)?.account ?: return
+		val account = (mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
 		
 		val balanceNewString = balanceNewString.replace(",", ".")
 		
@@ -95,10 +111,17 @@ class AccountBalanceViewModel(
 		}
 	}
 	
+	fun onCategoryChanged(categoryId: Long?) {
+		updateStateContentData {
+			copy(
+				selectedCategoryId = categoryId,
+			)
+		}
+	}
+	
 	fun onSaveClicked()  {
-		logcat.debug("onSaveClicked")
-		val data = (mState.content as? AccountBalanceState.Content.Data) ?: return
-		val account = data.account
+		val data = (mState.content as? AccountTransactionState.Content.Data) ?: return
+		val account = data.financialAccount
 		
 		val transactionValue = data.balanceDifference.value.toDoubleOrNull()
 		
@@ -118,23 +141,23 @@ class AccountBalanceViewModel(
 			postDelay = true,
 		) {
 			try {
-				accountManager.createTransaction(
+				financialManager.createTransaction(
 					accountId = account.id,
 					value = transactionValue,
 					comment = data.comment.value,
+					categoryId = data.selectedCategoryId,
 				)
-				mState = mState.copy(action = AccountBalanceState.Action.SaveSuccess)
+				mState = mState.copy(action = AccountTransactionState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(action = AccountBalanceState.Action.SaveError)
+				mState = mState.copy(action = AccountTransactionState.Action.SaveError)
 			}
-			logcat.debug("onSaveClicked", "handled")
 		}
 		
 	}
 	
 	fun onCancelClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
-		mState = mState.copy(action = AccountBalanceState.Action.Cancel)
+		mState = mState.copy(action = AccountTransactionState.Action.Cancel)
 	}
 	
 	

@@ -7,12 +7,15 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
-import basilliyc.cashnote.ui.account.balance.AccountBalance
+import basilliyc.cashnote.ui.account.transaction.AccountTransaction
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.account.statistic.AccountStatistic
 import basilliyc.cashnote.ui.app_settings.AppSettings
+import basilliyc.cashnote.ui.transaction.category.form.TransactionCategoryForm
+import basilliyc.cashnote.ui.transaction.category.list.TransactionCategoryList
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
@@ -27,10 +30,16 @@ sealed interface AppNavigation {
 	data object AppSettings : AppNavigation
 	
 	@Serializable
-	data class AccountForm(val id: Long?) : AppNavigation
+	data class AccountForm(val accountId: Long?) : AppNavigation
 	
 	@Serializable
-	data class AccountBalance(val id: Long) : AppNavigation
+	data class AccountTransaction(val accountId: Long) : AppNavigation
+	
+	@Serializable
+	data object TransactionCategoryList : AppNavigation
+	
+	@Serializable
+	data class TransactionCategoryForm(val categoryId: Long?) : AppNavigation
 }
 
 fun NavGraphBuilder.createNavigationGraph() = this.apply {
@@ -38,7 +47,9 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountStatistic> { AccountStatistic() }
 	composable<AppNavigation.AppSettings> { AppSettings() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
-	composable<AppNavigation.AccountBalance> { AccountBalance() }
+	composable<AppNavigation.AccountTransaction> { AccountTransaction() }
+	composable<AppNavigation.TransactionCategoryList> { TransactionCategoryList() }
+	dialog<AppNavigation.TransactionCategoryForm> { TransactionCategoryForm() }
 }
 
 

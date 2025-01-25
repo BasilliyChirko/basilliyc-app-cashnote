@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
@@ -62,10 +61,10 @@ fun AccountList() {
 	Content(
 		state = viewModel.state,
 		onClickAddNewAccount = {
-			navController.navigate(AppNavigation.AccountForm(id = null))
+			navController.navigate(AppNavigation.AccountForm(accountId = null))
 		},
 		onClickAccount = {
-			navController.navigate(AppNavigation.AccountBalance(id = it))
+			navController.navigate(AppNavigation.AccountTransaction(accountId = it))
 		},
 	)
 }
@@ -77,21 +76,21 @@ private fun AccountListPreview() = DefaultPreview {
 		state = AccountListState.Page(
 			content = AccountListState.Content.Data(
 				listOf(
-					Account(
+					FinancialAccount(
 						id = 1,
 						name = "Account 1",
 						balance = 100.0,
 						currency = AccountCurrency.UAH,
 						color = null
 					),
-					Account(
+					FinancialAccount(
 						id = 2,
 						name = "Account 2",
 						balance = 200.0,
 						currency = AccountCurrency.UAH,
 						color = null
 					),
-					Account(
+					FinancialAccount(
 						id = 3,
 						name = "Account 3",
 						balance = 300.0,
@@ -203,12 +202,12 @@ private fun ContentData(
 		contentPadding = PaddingValues(8.dp),
 	) {
 		items(
-			count = content.accounts.size,
-			key = { content.accounts[it].id },
+			count = content.financialAccounts.size,
+			key = { content.financialAccounts[it].id },
 		) {
 			ContentDataItem(
 				modifier = Modifier.animateItem(),
-				account = content.accounts[it],
+				financialAccount = content.financialAccounts[it],
 				onClickAccount = onClickAccount,
 			)
 		}
@@ -218,24 +217,24 @@ private fun ContentData(
 @Composable
 private fun ContentDataItem(
 	modifier: Modifier,
-	account: Account,
+	financialAccount: FinancialAccount,
 	onClickAccount: (id: Long) -> Unit,
 ) {
 	//TODO replace mock data with real
 	Card(
 		modifier = modifier,
-		onClick = { onClickAccount(account.id) },
+		onClick = { onClickAccount(financialAccount.id) },
 		colors = CardDefaults.cardColors(
-			containerColor = account.color?.color ?: Color.Unspecified
+			containerColor = financialAccount.color?.color ?: Color.Unspecified
 		)
 	) {
 		Column {
-			Text(text = account.name, modifier = Modifier.padding(8.dp))
+			Text(text = financialAccount.name, modifier = Modifier.padding(8.dp))
 			Row {
-				Text(text = account.currency.symbol, modifier = Modifier.padding(horizontal = 8.dp))
+				Text(text = financialAccount.currency.symbol, modifier = Modifier.padding(horizontal = 8.dp))
 				Spacer(modifier = Modifier.weight(1F))
 				Text(
-					text = account.balance.asPriceString(showPlus = false),
+					text = financialAccount.balance.asPriceString(showPlus = false),
 					modifier = Modifier.padding(horizontal = 8.dp)
 				)
 			}

@@ -1,9 +1,10 @@
-package basilliyc.cashnote.ui.account.balance
+package basilliyc.cashnote.ui.account.transaction
 
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.ui.components.TextFieldState
 
-object AccountBalanceState {
+object AccountTransactionState {
 	
 	data class Page(
 		val content: Content = Content.Loading,
@@ -13,11 +14,13 @@ object AccountBalanceState {
 	sealed interface Content {
 		data object Loading : Content
 		data class Data(
-			val account: Account,
+			val financialAccount: FinancialAccount,
 			val isBalanceReduce: Boolean? = null,
 			val balanceDifference: TextFieldState,
 			val balanceNew: TextFieldState,
 			val comment: TextFieldState,
+			val availableCategories: List<FinancialTransactionCategory>,
+			val selectedCategoryId: Long?,
 		) : Content
 	}
 	

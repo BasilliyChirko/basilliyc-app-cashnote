@@ -11,7 +11,7 @@ import basilliyc.cashnote.ui.theme.AccountColorTurquoise
 import basilliyc.cashnote.ui.theme.AccountColorYellow
 
 @Entity
-data class Account(
+data class FinancialAccount(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0L,
 	val name: String,
 	val currency: AccountCurrency,

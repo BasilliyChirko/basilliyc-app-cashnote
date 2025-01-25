@@ -2,7 +2,7 @@
 
 package basilliyc.cashnote.ui.account.form
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -37,7 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.color
@@ -100,7 +100,7 @@ private fun AccountFormPreview() = DefaultPreview {
 	Content(
 		state = AccountFormState.Page(
 			content = AccountFormState.Content.Data(
-				Account(
+				FinancialAccount(
 					id = 1,
 					name = "Account 1",
 					balance = 100.0,
@@ -267,12 +267,7 @@ private fun ColumnScope.CurrencyPicker(
 			Card(
 				modifier = Modifier
 					.padding(8.dp)
-					.weight(1F)
-					.border(
-						width = 1.dp,
-						color = MaterialTheme.colorScheme.primaryContainer,
-						shape = MaterialTheme.shapes.medium
-					),
+					.weight(1F),
 				onClick = { onChanged(currency) },
 				colors = CardDefaults.cardColors(
 					containerColor = if (currency == value) {
@@ -280,6 +275,10 @@ private fun ColumnScope.CurrencyPicker(
 					} else {
 						MaterialTheme.colorScheme.surface
 					}
+				),
+				border = BorderStroke(
+					width = 1.dp,
+					color = MaterialTheme.colorScheme.primaryContainer,
 				)
 			) {
 				Column(

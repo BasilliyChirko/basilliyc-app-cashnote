@@ -1,8 +1,17 @@
-package basilliyc.cashnote.ui.account.balance
+@file:OptIn(ExperimentalLayoutApi::class)
 
+package basilliyc.cashnote.ui.account.transaction
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +19,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -31,8 +45,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.Account
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialTransactionCategory
+import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
@@ -41,6 +57,7 @@ import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.modifier
+import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -52,8 +69,8 @@ import basilliyc.cashnote.utils.toast
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-fun AccountBalance() {
-	val viewModel = viewModel<AccountBalanceViewModel>()
+fun AccountTransaction() {
+	val viewModel = viewModel<AccountTransactionViewModel>()
 	val state by remember { viewModel.state }
 	val navController = LocalNavController.current
 	val context = LocalContext.current
@@ -64,22 +81,23 @@ fun AccountBalance() {
 		onCommentChanged = viewModel::onCommentChanged,
 		onSaveClicked = viewModel::onSaveClicked,
 		onCancelClicked = viewModel::onCancelClicked,
+		onCategoryChanged = viewModel::onCategoryChanged,
 	)
 	
 	val action = state.action
 	LaunchedEffect(action) {
 		when (action) {
-			AccountBalanceState.Action.Cancel -> {
+			AccountTransactionState.Action.Cancel -> {
 				navController.popBackStack()
 			}
 			
-			AccountBalanceState.Action.SaveSuccess -> {
+			AccountTransactionState.Action.SaveSuccess -> {
 //				context.toast(R.string.account_balance_toast_save)
 				navController.popBackStack()
 			}
 			
-			AccountBalanceState.Action.SaveError -> {
-				context.toast(R.string.account_balance_toast_save_error)
+			AccountTransactionState.Action.SaveError -> {
+				context.toast(R.string.account_transaction_toast_save_error)
 			}
 			
 			null -> Unit
@@ -89,22 +107,41 @@ fun AccountBalance() {
 
 @Composable
 @Preview(showBackground = true)
-private fun AccountBalancePreview() = DefaultPreview {
-	val account = Account(
+private fun AccountTransactionPreview() = DefaultPreview {
+	val financialAccount = FinancialAccount(
 		id = 1,
 		name = "Account 1",
 		balance = 100.0,
 		currency = AccountCurrency.UAH,
 		color = null,
 	)
+	val availableCategories = listOf(
+		FinancialTransactionCategory(
+			id = 1,
+			name = "Home",
+			icon = FinancialTransactionCategoryIcon.Home,
+		),
+		FinancialTransactionCategory(
+			id = 2,
+			name = "Person",
+			icon = FinancialTransactionCategoryIcon.Person,
+		),
+		FinancialTransactionCategory(
+			id = 3,
+			name = "Other",
+			icon = null,
+		),
+	)
 	Content(
-		state = AccountBalanceState.Page(
-			content = AccountBalanceState.Content.Data(
-				account = account,
+		state = AccountTransactionState.Page(
+			content = AccountTransactionState.Content.Data(
+				financialAccount = financialAccount,
 				isBalanceReduce = false,
 				balanceDifference = TextFieldState(""),
-				balanceNew = TextFieldState(account.balance.asPriceWithCoins()),
+				balanceNew = TextFieldState(financialAccount.balance.asPriceWithCoins()),
 				comment = TextFieldState(""),
+				availableCategories = availableCategories,
+				selectedCategoryId = availableCategories.getOrNull(0)?.id,
 			),
 		),
 		onBalanceDifferenceChanged = {},
@@ -112,6 +149,7 @@ private fun AccountBalancePreview() = DefaultPreview {
 		onCommentChanged = {},
 		onSaveClicked = {},
 		onCancelClicked = {},
+		onCategoryChanged = {},
 	)
 }
 
@@ -121,10 +159,11 @@ private fun AccountBalancePreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: AccountBalanceState.Page,
+	state: AccountTransactionState.Page,
 	onBalanceDifferenceChanged: (String) -> Unit,
 	onBalanceNewChanged: (String) -> Unit,
 	onCommentChanged: (String) -> Unit,
+	onCategoryChanged: (Long?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onCancelClicked: () -> Unit,
 ) {
@@ -142,8 +181,8 @@ private fun Content(
 				.verticalScroll(rememberScrollState())
 			
 			when (content) {
-				is AccountBalanceState.Content.Loading -> BoxLoading(modifier = modifier)
-				is AccountBalanceState.Content.Data -> ContentData(
+				is AccountTransactionState.Content.Loading -> BoxLoading(modifier = modifier)
+				is AccountTransactionState.Content.Data -> ContentData(
 					modifier = modifier,
 					content = content,
 					onBalanceDifferenceChanged = onBalanceDifferenceChanged,
@@ -151,6 +190,7 @@ private fun Content(
 					onCommentChanged = onCommentChanged,
 					onSaveClicked = onSaveClicked,
 					onCancelClicked = onCancelClicked,
+					onCategoryChanged = onCategoryChanged,
 				)
 			}
 		}
@@ -163,29 +203,29 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: AccountBalanceState.Page,
+	state: AccountTransactionState.Page,
 	onSaveClicked: () -> Unit,
 ) {
 	val content = state.content
 	
 	SimpleActionBar(
 		title = {
-			if (content is AccountBalanceState.Content.Data) {
-				val account = content.account
+			if (content is AccountTransactionState.Content.Data) {
+				val account = content.financialAccount
 				Text(
 					text = "${account.name} ${account.currency.symbol}",
 					style = MaterialTheme.typography.titleLarge
 				)
 			}
 		},
-		containerColor = (content as? AccountBalanceState.Content.Data)?.account?.let {
+		containerColor = (content as? AccountTransactionState.Content.Data)?.financialAccount?.let {
 			it.color?.color
 		} ?: Color.Unspecified,
 		actions = {
 			IconButton(
 				onClick = onSaveClicked,
 				imageVector = Icons.Filled.Done,
-				contentDescription = stringResource(R.string.account_balance_action_save)
+				contentDescription = stringResource(R.string.account_transaction_action_save)
 			)
 		}
 	)
@@ -198,9 +238,10 @@ private fun ActionBar(
 @Composable
 private fun ContentData(
 	modifier: Modifier = Modifier,
-	content: AccountBalanceState.Content.Data,
+	content: AccountTransactionState.Content.Data,
 	onBalanceDifferenceChanged: (String) -> Unit,
 	onBalanceNewChanged: (String) -> Unit,
+	onCategoryChanged: (Long?) -> Unit,
 	onCommentChanged: (String) -> Unit,
 	onSaveClicked: () -> Unit,
 	onCancelClicked: () -> Unit,
@@ -218,13 +259,12 @@ private fun ContentData(
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(horizontal = 16.dp)
-				.padding(top = 8.dp)
-			,
+				.padding(top = 8.dp),
 			text = stringResource(
 				when (content.isBalanceReduce) {
-					null -> R.string.account_balance_label_balance_not_changed
-					true -> R.string.account_balance_label_balance_reduced
-					false -> R.string.account_balance_label_balance_increased
+					null -> R.string.account_transaction_label_balance_not_changed
+					true -> R.string.account_transaction_label_balance_reduced
+					false -> R.string.account_transaction_label_balance_increased
 				}
 			),
 			style = MaterialTheme.typography.titleMedium,
@@ -241,11 +281,15 @@ private fun ContentData(
 			state = content.balanceNew,
 			onValueChanged = onBalanceNewChanged,
 		)
-		BalanceComment(
+		TransactionCategory(
+			availableCategories = content.availableCategories,
+			selectedCategoryId = content.selectedCategoryId,
+			onCategoryChanged = onCategoryChanged,
+		)
+		TransactionComment(
 			state = content.comment,
 			onValueChanged = onCommentChanged,
 		)
-		
 		Button(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -256,7 +300,7 @@ private fun ContentData(
 					bottom = 16.dp
 				),
 			onClick = onSaveClicked,
-			text = stringResource(R.string.account_balance_action_save),
+			text = stringResource(R.string.account_transaction_action_save),
 			icon = Icons.Filled.Save,
 		)
 	}
@@ -276,7 +320,7 @@ private fun BalanceDifference(
 		modifier = modifier,
 		state = state,
 		onValueChange = onValueChanged,
-		label = { Text(text = stringResource(R.string.account_balance_label_balance_difference)) },
+		label = { Text(text = stringResource(R.string.account_transaction_label_balance_difference)) },
 		singleLine = true,
 		keyboardOptions = KeyboardOptions(
 			keyboardType = KeyboardType.Number
@@ -296,7 +340,7 @@ private fun BalanceNew(
 	TextField(
 		state = state,
 		onValueChange = onValueChanged,
-		label = { Text(text = stringResource(R.string.account_balance_label_balance_new)) },
+		label = { Text(text = stringResource(R.string.account_transaction_label_balance_new)) },
 		singleLine = true,
 		keyboardOptions = KeyboardOptions(
 			keyboardType = KeyboardType.Number
@@ -304,20 +348,98 @@ private fun BalanceNew(
 	)
 }
 
+//--------------------------------------------------------------------------------------------------
+// CONTENT.CATEGORY
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun TransactionCategory(
+	availableCategories: List<FinancialTransactionCategory>,
+	selectedCategoryId: Long?,
+	onCategoryChanged: (Long?) -> Unit,
+) {
+	val navController = LocalNavController.current
+	Row(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 16.dp),
+		verticalAlignment = Alignment.CenterVertically,
+	) {
+		Text(
+			text = stringResource(R.string.account_transaction_category_label)
+		)
+		Spacer(modifier = Modifier.weight(1f))
+		IconButton(
+			onClick = {
+				navController.navigate(AppNavigation.TransactionCategoryList)
+			},
+			imageVector = Icons.Filled.Settings,
+			contentDescription = stringResource(R.string.account_transaction_category_settings),
+		)
+	}
+	
+	FlowRow(
+		modifier = Modifier
+			.padding(horizontal = 16.dp),
+		horizontalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+	) {
+		availableCategories.forEach { category ->
+			Card(
+				modifier = Modifier,
+				onClick = {
+					onCategoryChanged(category.id.takeIf { it != selectedCategoryId })
+				},
+				colors = CardDefaults.cardColors(
+					containerColor = if (category.id == selectedCategoryId) {
+						MaterialTheme.colorScheme.primaryContainer
+					} else {
+						MaterialTheme.colorScheme.surface
+					}
+				),
+				border = BorderStroke(
+					width = 1.dp,
+					color = MaterialTheme.colorScheme.primaryContainer,
+				),
+			) {
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+				) {
+					category.icon?.imageVector?.let { icon ->
+						Icon(
+							imageVector = icon,
+							contentDescription = category.name,
+							modifier = Modifier.padding(start = 8.dp)
+						)
+					}
+					Text(
+						modifier = Modifier.padding(8.dp),
+						text = category.name,
+						maxLines = 1,
+					)
+				}
+			}
+		}
+	}
+	
+	if (availableCategories.isNotEmpty()) {
+		Spacer(modifier = Modifier.height(8.dp))
+	}
+}
 
 //--------------------------------------------------------------------------------------------------
 // CONTENT.COMMENT
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun BalanceComment(
+private fun TransactionComment(
 	state: TextFieldState,
 	onValueChanged: (String) -> Unit,
 ) {
 	TextField(
 		state = state,
 		onValueChange = onValueChanged,
-		label = { Text(text = stringResource(R.string.account_balance_label_balance_comment)) },
+		label = { Text(text = stringResource(R.string.account_transaction_label_comment)) },
 		singleLine = false,
 		minLines = 3,
 		maxLines = 8,

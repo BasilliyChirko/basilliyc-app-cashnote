@@ -7,7 +7,7 @@ object AccountBalanceState {
 	
 	data class Page(
 		val content: Content = Content.Loading,
-		val event: Event? = null,
+		val action: Action? = null,
 	)
 	
 	sealed interface Content {
@@ -21,9 +21,9 @@ object AccountBalanceState {
 		) : Content
 	}
 	
-	sealed interface Event {
-		data object Save : Event
-		data object Cancel : Event
-		data object SaveError : Event
+	sealed interface Action {
+		data object SaveSuccess : Action
+		data object Cancel : Action
+		data object SaveError : Action
 	}
 }

@@ -66,19 +66,19 @@ fun AccountBalance() {
 		onCancelClicked = viewModel::onCancelClicked,
 	)
 	
-	val event = state.event
-	LaunchedEffect(event) {
-		when (event) {
-			AccountBalanceState.Event.Cancel -> {
+	val action = state.action
+	LaunchedEffect(action) {
+		when (action) {
+			AccountBalanceState.Action.Cancel -> {
 				navController.popBackStack()
 			}
 			
-			AccountBalanceState.Event.Save -> {
-				context.toast(R.string.account_balance_toast_save)
+			AccountBalanceState.Action.SaveSuccess -> {
+//				context.toast(R.string.account_balance_toast_save)
 				navController.popBackStack()
 			}
 			
-			AccountBalanceState.Event.SaveError -> {
+			AccountBalanceState.Action.SaveError -> {
 				context.toast(R.string.account_balance_toast_save_error)
 			}
 			

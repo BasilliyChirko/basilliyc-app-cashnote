@@ -16,7 +16,7 @@ import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.launch
 
 class AccountBalanceViewModel(
-	val savedStateHandle: SavedStateHandle,
+	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
 	private val accountManager: AccountManager by inject()
@@ -95,7 +95,8 @@ class AccountBalanceViewModel(
 		}
 	}
 	
-	fun onSaveClicked() {
+	fun onSaveClicked()  {
+		logcat.debug("onSaveClicked")
 		val data = (mState.content as? AccountBalanceState.Content.Data) ?: return
 		val account = data.account
 		
@@ -112,24 +113,28 @@ class AccountBalanceViewModel(
 			return
 		}
 		
-		viewModelScope.launch {
+		handleEvent(
+			skipIfBusy = true,
+			postDelay = true,
+		) {
 			try {
 				accountManager.createTransaction(
 					accountId = account.id,
 					value = transactionValue,
 					comment = data.comment.value,
 				)
-//				mState = mState.copy(event = AccountBalanceState.Event.Save)
+				mState = mState.copy(action = AccountBalanceState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(event = AccountBalanceState.Event.SaveError)
+				mState = mState.copy(action = AccountBalanceState.Action.SaveError)
 			}
+			logcat.debug("onSaveClicked", "handled")
 		}
 		
 	}
 	
-	fun onCancelClicked() {
-		mState = mState.copy(event = AccountBalanceState.Event.Cancel)
+	fun onCancelClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
+		mState = mState.copy(action = AccountBalanceState.Action.Cancel)
 	}
 	
 	

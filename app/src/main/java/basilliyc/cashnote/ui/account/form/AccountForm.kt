@@ -3,7 +3,6 @@
 package basilliyc.cashnote.ui.account.form
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,7 +45,6 @@ import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
-import basilliyc.cashnote.ui.account.balance.AccountBalanceState
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -76,17 +72,17 @@ fun AccountForm() {
 		onNameChanged = viewModel::onNameChanged,
 		onBalanceChanged = viewModel::onBalanceChanged,
 		onColorChanged = viewModel::onColorChanged,
-		onSaveClicked = { viewModel.onSaveClicked(navController) },
+		onSaveClicked = viewModel::onSaveClicked,
 	)
 	
-	val event = state.event
+	val event by remember { viewModel.event }
 	LaunchedEffect(event) {
 		when (event) {
 			AccountFormState.Event.Cancel -> {
 				navController.popBackStack()
 			}
 			
-			AccountFormState.Event.Save -> {
+			AccountFormState.Event.SaveSuccess -> {
 				context.toast(R.string.account_form_toast_save)
 				navController.popBackStack()
 			}

@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.AccountManager
 import basilliyc.cashnote.data.Account
@@ -26,6 +25,10 @@ class AccountFormViewModel(
 	
 	val state = mutableStateOf(AccountFormState.Page())
 	private var mState by state
+	
+	val event = mutableStateOf<AccountFormState.Event?>(null)
+	private var mEvent by event
+	
 	private var accountId: Long = 0
 	
 	//Initialization of the state
@@ -110,7 +113,11 @@ class AccountFormViewModel(
 		}
 	}
 	
-	fun onSaveClicked(navController: NavController) {
+	fun onCancelClicked() {
+		mEvent = AccountFormState.Event.Cancel
+	}
+	
+	fun onSaveClicked() {
 		val content = state.value.content as? AccountFormState.Content.Data ?: return
 		
 		val name = content.name
@@ -139,12 +146,13 @@ class AccountFormViewModel(
 			balance = balance.toDouble()
 		)
 		
-		viewModelScope.launch {
+		handleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				accountManager.saveAccount(account)
-				navController.popBackStack()
+				mEvent = AccountFormState.Event.SaveSuccess
 			} catch (t: Throwable) {
 				logcat.error(t)
+				mEvent = AccountFormState.Event.SaveError
 			}
 		}
 		

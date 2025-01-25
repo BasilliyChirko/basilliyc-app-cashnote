@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,12 +80,15 @@ private fun Main() {
 		modifier = Modifier.fillMaxSize(),
 		bottomBar = { MainBottomNavigationBar() }
 	) { innerPadding ->
+		val paddingValues = PaddingValues(
+			bottom = innerPadding.calculateBottomPadding()
+		)
 		NavHost(
 			navController = LocalNavController.current as NavHostController,
 			startDestination = AppNavigation.AccountList,
 			modifier = Modifier
-				.padding(innerPadding)
-				.consumeWindowInsets(innerPadding),
+				.padding(paddingValues)
+				.consumeWindowInsets(paddingValues),
 			builder = { createNavigationGraph() },
 		)
 	}

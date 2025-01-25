@@ -12,6 +12,7 @@ import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
+import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.letIf
@@ -25,9 +26,6 @@ class AccountFormViewModel(
 	
 	val state = mutableStateOf(AccountFormState.Page())
 	private var mState by state
-	
-	val event = mutableStateOf<AccountFormState.Event?>(null)
-	private var mEvent by event
 	
 	private var accountId: Long = 0
 	
@@ -68,7 +66,12 @@ class AccountFormViewModel(
 	
 	fun onNameChanged(name: String) {
 		updateStateContentData {
-			copy(name = name, nameError = getNameTextError(name))
+			copy(
+				name = TextFieldState(
+					value = name,
+					error = getNameTextError(name)
+				)
+			)
 		}
 	}
 	
@@ -80,7 +83,12 @@ class AccountFormViewModel(
 	fun onBalanceChanged(balance: String) {
 		val balance = balanceStringCorrection(balance)
 		updateStateContentData {
-			copy(balance = balance, balanceError = getBalanceTextError(balance))
+			copy(
+				balance = TextFieldState(
+					value = balance,
+					error = getBalanceTextError(balance)
+				)
+			)
 		}
 	}
 	
@@ -114,45 +122,45 @@ class AccountFormViewModel(
 	}
 	
 	fun onCancelClicked() {
-		mEvent = AccountFormState.Event.Cancel
+		mState = mState.copy(action = AccountFormState.Action.Cancel)
 	}
 	
 	fun onSaveClicked() {
 		val content = state.value.content as? AccountFormState.Content.Data ?: return
 		
-		val name = content.name
-		val nameTextError = getNameTextError(name)
+		val nameString = content.name.value
+		val nameTextError = getNameTextError(nameString)
 		if (nameTextError != null) {
 			updateStateContentData {
-				copy(nameError = nameTextError)
+				copy(name = name.copy(error = nameTextError))
 			}
 			return
 		}
 		
-		val balance = balanceStringCorrection(content.balance)
-		val balanceTextError = getBalanceTextError(balance)
+		val balanceString = balanceStringCorrection(content.balance.value)
+		val balanceTextError = getBalanceTextError(balanceString)
 		if (balanceTextError != null) {
 			updateStateContentData {
-				copy(balanceError = balanceTextError)
+				copy(balance = balance.copy(error = balanceTextError))
 			}
 			return
 		}
 		
 		val account = Account(
 			id = accountId,
-			name = name,
+			name = nameString,
 			currency = content.currency,
 			color = content.color,
-			balance = balance.toDouble()
+			balance = balanceString.toDouble()
 		)
 		
 		handleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				accountManager.saveAccount(account)
-				mEvent = AccountFormState.Event.SaveSuccess
+				mState = mState.copy(action = AccountFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mEvent = AccountFormState.Event.SaveError
+				mState = mState.copy(action = AccountFormState.Action.SaveError)
 			}
 		}
 		

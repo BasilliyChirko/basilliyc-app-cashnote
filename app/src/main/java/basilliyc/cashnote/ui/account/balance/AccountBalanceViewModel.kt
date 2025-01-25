@@ -9,7 +9,7 @@ import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.AccountManager
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
-import basilliyc.cashnote.ui.components.TextInputState
+import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.asPriceWithCoins
 import basilliyc.cashnote.utils.inject
@@ -34,9 +34,9 @@ class AccountBalanceViewModel(
 			mState = mState.copy(
 				content = AccountBalanceState.Content.Data(
 					account = account,
-					balanceDifference = TextInputState(""),
-					balanceNew = TextInputState(account.balance.asPriceWithCoins()),
-					comment = TextInputState(""),
+					balanceDifference = TextFieldState(""),
+					balanceNew = TextFieldState(account.balance.asPriceWithCoins()),
+					comment = TextFieldState(""),
 				)
 			)
 		}
@@ -60,8 +60,8 @@ class AccountBalanceViewModel(
 		
 		updateStateContentData {
 			copy(
-				balanceDifference = TextInputState(balanceDifferenceString),
-				balanceNew = TextInputState(balanceNewValue.asPriceWithCoins()),
+				balanceDifference = TextFieldState(balanceDifferenceString),
+				balanceNew = TextFieldState(balanceNewValue.asPriceWithCoins()),
 				isBalanceReduce = (balanceDifferenceValue < 0).takeIf { balanceNewValue != account.balance },
 				//TODO balanceDifferenceError
 			)
@@ -79,8 +79,8 @@ class AccountBalanceViewModel(
 		
 		updateStateContentData {
 			copy(
-				balanceDifference = TextInputState(balanceDifference.asPriceWithCoins()),
-				balanceNew = TextInputState(balanceNewString),
+				balanceDifference = TextFieldState(balanceDifference.asPriceWithCoins()),
+				balanceNew = TextFieldState(balanceNewString),
 				isBalanceReduce = (balanceDifference < 0).takeIf { balanceNewValue != account.balance },
 			)
 		}
@@ -90,7 +90,7 @@ class AccountBalanceViewModel(
 	fun onCommentChanged(comment: String) {
 		updateStateContentData {
 			copy(
-				comment = TextInputState(comment),
+				comment = TextFieldState(comment),
 			)
 		}
 	}

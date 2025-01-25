@@ -6,10 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +45,8 @@ import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.components.TextFieldError
+import basilliyc.cashnote.ui.components.TextField
+import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.utils.Button
@@ -75,19 +73,19 @@ fun AccountForm() {
 		onSaveClicked = viewModel::onSaveClicked,
 	)
 	
-	val event by remember { viewModel.event }
-	LaunchedEffect(event) {
-		when (event) {
-			AccountFormState.Event.Cancel -> {
+	val action = state.action
+	LaunchedEffect(action) {
+		when (action) {
+			AccountFormState.Action.Cancel -> {
 				navController.popBackStack()
 			}
 			
-			AccountFormState.Event.SaveSuccess -> {
+			AccountFormState.Action.SaveSuccess -> {
 				context.toast(R.string.account_form_toast_save)
 				navController.popBackStack()
 			}
 			
-			AccountFormState.Event.SaveError -> {
+			AccountFormState.Action.SaveError -> {
 				context.toast(R.string.account_form_toast_save_error)
 			}
 			
@@ -219,13 +217,11 @@ private fun ContentData(
 			onChanged = onCurrencyChanged
 		)
 		AccountName(
-			value = content.name,
-			error = content.nameError,
+			state = content.name,
 			onChanged = onNameChanged,
 		)
 		AccountBalance(
-			value = content.balance,
-			error = content.balanceError,
+			state = content.balance,
 			onChanged = onBalanceChanged,
 		)
 		AccountColor(
@@ -306,16 +302,11 @@ private fun ColumnScope.CurrencyPicker(
 
 @Composable
 private fun ColumnScope.AccountName(
-	value: String,
-	error: TextFieldError?,
+	state: TextFieldState,
 	onChanged: (String) -> Unit,
 ) {
-	Spacer(modifier = Modifier.height(8.dp))
 	TextField(
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 4.dp),
-		value = value,
+		state = state,
 		onValueChange = onChanged,
 		label = { Text(text = stringResource(R.string.account_form_label_name)) },
 		singleLine = true,
@@ -323,8 +314,6 @@ private fun ColumnScope.AccountName(
 			capitalization = KeyboardCapitalization.Sentences,
 			keyboardType = KeyboardType.Text
 		),
-		isError = error != null,
-		supportingText = { TextFieldError(error) }
 	)
 }
 
@@ -334,23 +323,17 @@ private fun ColumnScope.AccountName(
 
 @Composable
 private fun ColumnScope.AccountBalance(
-	value: String,
-	error: TextFieldError?,
+	state: TextFieldState,
 	onChanged: (String) -> Unit,
 ) {
 	TextField(
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 4.dp),
-		value = value,
+		state = state,
 		onValueChange = onChanged,
 		label = { Text(text = stringResource(R.string.account_form_label_balance)) },
 		singleLine = true,
 		keyboardOptions = KeyboardOptions(
 			keyboardType = KeyboardType.Number
 		),
-		isError = error != null,
-		supportingText = { TextFieldError(error) }
 	)
 }
 
@@ -367,14 +350,16 @@ private fun ColumnScope.AccountColor(
 	Text(
 		text = stringResource(R.string.account_form_label_color),
 		style = MaterialTheme.typography.titleMedium,
-		modifier = Modifier.padding(horizontal = 16.dp)
+		modifier = Modifier
+			.padding(horizontal = 16.dp)
+			.padding(bottom = 4.dp)
 	)
 	
 	VerticalGrid(
-		modifier = Modifier.padding(horizontal = 8.dp),
+		modifier = Modifier.padding(horizontal = 16.dp),
 		columns = VerticalGridCells.Adaptive(100.dp),
 		horizontalSpace = 8.dp,
-		itemsCount = 6,
+		itemsCount = AccountColor.entries.size,
 	) {
 		val accountColor = AccountColor.entries[it]
 		Card(
@@ -396,5 +381,5 @@ private fun ColumnScope.AccountColor(
 			)
 		}
 	}
-
+	
 }

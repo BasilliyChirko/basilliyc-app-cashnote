@@ -39,7 +39,7 @@ import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextField
-import basilliyc.cashnote.ui.components.TextInputState
+import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.modifier
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
@@ -102,9 +102,9 @@ private fun AccountBalancePreview() = DefaultPreview {
 			content = AccountBalanceState.Content.Data(
 				account = account,
 				isBalanceReduce = false,
-				balanceDifference = TextInputState(""),
-				balanceNew = TextInputState(account.balance.asPriceWithCoins()),
-				comment = TextInputState(""),
+				balanceDifference = TextFieldState(""),
+				balanceNew = TextFieldState(account.balance.asPriceWithCoins()),
+				comment = TextFieldState(""),
 			),
 		),
 		onBalanceDifferenceChanged = {},
@@ -217,9 +217,9 @@ private fun ContentData(
 		Text(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(
-					start = 16.dp, end = 16.dp, top = 16.dp
-				),
+				.padding(horizontal = 16.dp)
+				.padding(top = 8.dp)
+			,
 			text = stringResource(
 				when (content.isBalanceReduce) {
 					null -> R.string.account_balance_label_balance_not_changed
@@ -269,7 +269,7 @@ private fun ContentData(
 @Composable
 private fun BalanceDifference(
 	modifier: Modifier = Modifier,
-	state: TextInputState,
+	state: TextFieldState,
 	onValueChanged: (String) -> Unit,
 ) {
 	TextField(
@@ -290,7 +290,7 @@ private fun BalanceDifference(
 
 @Composable
 private fun BalanceNew(
-	state: TextInputState,
+	state: TextFieldState,
 	onValueChanged: (String) -> Unit,
 ) {
 	TextField(
@@ -311,7 +311,7 @@ private fun BalanceNew(
 
 @Composable
 private fun BalanceComment(
-	state: TextInputState,
+	state: TextFieldState,
 	onValueChanged: (String) -> Unit,
 ) {
 	TextField(

@@ -3,12 +3,13 @@ package basilliyc.cashnote.ui.account.form
 import basilliyc.cashnote.data.Account
 import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
-import basilliyc.cashnote.ui.components.TextFieldError
+import basilliyc.cashnote.ui.components.TextFieldState
 
 object AccountFormState {
 	
 	data class Page(
 		val content: Content = Content.Loading,
+		val action: Action? = null,
 	)
 	
 	sealed interface Content {
@@ -16,28 +17,24 @@ object AccountFormState {
 		data class Data(
 			val isNew: Boolean,
 			val currency: AccountCurrency,
-			val name: String,
-			val nameError: TextFieldError? = null,
-			val balance: String,
-			val balanceError: TextFieldError? = null,
+			val name: TextFieldState,
+			val balance: TextFieldState,
 			val color: AccountColor?,
 		) : Content {
 			constructor(account: Account) : this(
 				isNew = account.id == 0L,
 				currency = account.currency,
-				name = account.name,
-				nameError = null,
-				balance = account.balance.toString(),
-				balanceError = null,
+				name = TextFieldState(value = account.name),
+				balance = TextFieldState(value = account.balance.toString()),
 				color = account.color,
 			)
 		}
 	}
 	
-	sealed interface Event {
-		data object SaveSuccess : Event
-		data object Cancel : Event
-		data object SaveError : Event
+	sealed interface Action {
+		data object SaveSuccess : Action
+		data object Cancel : Action
+		data object SaveError : Action
 	}
 	
 }

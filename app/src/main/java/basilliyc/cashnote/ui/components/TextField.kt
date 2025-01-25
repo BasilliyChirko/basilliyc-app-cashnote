@@ -1,6 +1,5 @@
 package basilliyc.cashnote.ui.components
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,18 +11,16 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
-data class TextInputState(
+data class TextFieldState(
 	val value: String,
 	val error: TextFieldError? = null,
 )
 
-fun TextInputState.setError(error: TextFieldError?): TextInputState {
+fun TextFieldState.setError(error: TextFieldError?): TextFieldState {
 	return copy(error = error)
 }
 
@@ -38,7 +35,7 @@ val TextFieldDefaults.modifier
 
 @Composable
 fun TextField(
-	state: TextInputState,
+	state: TextFieldState,
 	onValueChange: (String) -> Unit,
 	modifier: Modifier = TextFieldDefaults.modifier,
 	enabled: Boolean = true,

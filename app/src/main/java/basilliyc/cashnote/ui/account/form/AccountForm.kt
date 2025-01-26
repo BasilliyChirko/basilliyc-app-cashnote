@@ -61,7 +61,7 @@ import basilliyc.cashnote.utils.toast
 @Composable
 fun AccountForm() {
 	val viewModel = viewModel<AccountFormViewModel>()
-	val state by remember { viewModel.state }
+	val state = viewModel.state
 	val navController = LocalNavController.current
 	val context = LocalContext.current
 	Content(
@@ -91,6 +91,7 @@ fun AccountForm() {
 			
 			null -> Unit
 		}
+		viewModel.onActionConsumed()
 	}
 }
 
@@ -98,7 +99,7 @@ fun AccountForm() {
 @Preview(showBackground = true)
 private fun AccountFormPreview() = DefaultPreview {
 	Content(
-		state = AccountFormState.Page(
+		state = AccountFormState(
 			content = AccountFormState.Content.Data(
 				FinancialAccount(
 					id = 1,
@@ -123,7 +124,7 @@ private fun AccountFormPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: AccountFormState.Page,
+	state: AccountFormState,
 	onCurrencyChanged: (AccountCurrency) -> Unit,
 	onNameChanged: (String) -> Unit,
 	onBalanceChanged: (String) -> Unit,
@@ -169,7 +170,7 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: AccountFormState.Page,
+	state: AccountFormState,
 	onSaveClicked: () -> Unit,
 ) {
 	SimpleActionBar(

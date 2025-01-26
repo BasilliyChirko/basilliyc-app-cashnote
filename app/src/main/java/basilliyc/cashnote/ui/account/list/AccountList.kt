@@ -73,7 +73,7 @@ fun AccountList() {
 @Composable
 private fun AccountListPreview() = DefaultPreview {
 	Content(
-		state = AccountListState.Page(
+		state = AccountListState(
 			content = AccountListState.Content.Data(
 				listOf(
 					FinancialAccount(
@@ -111,7 +111,7 @@ private fun AccountListPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: AccountListState.Page,
+	state: AccountListState,
 	onClickAddNewAccount: () -> Unit = {},
 	onClickAccount: (id: Long) -> Unit = {},
 ) {

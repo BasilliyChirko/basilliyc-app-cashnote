@@ -24,19 +24,32 @@ class AccountFormViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	val state = mutableStateOf(AccountFormState.Page())
-	private var mState by state
+	var state by mutableStateOf(AccountFormState())
+		private set
+	private var stateContentData
+		get() = state.content as? AccountFormState.Content.Data
+		set(value) {
+			if (value != null) state = state.copy(content = value)
+		}
+	
+	private fun updateStateContentData(call: AccountFormState.Content.Data.() -> AccountFormState.Content.Data) {
+		val content = stateContentData
+		if (content is AccountFormState.Content.Data) {
+			stateContentData = stateContentData?.call()
+		}
+	}
+	
 	
 	private val route: AppNavigation.AccountForm = savedStateHandle.toRoute()
 	
 	//Initialization of the state
 	init {
-		mState = mState.copy(content = AccountFormState.Content.Loading)
+		state = state.copy(content = AccountFormState.Content.Loading)
 		if (route.accountId != null) {
 			viewModelScope.launch {
 				val account = (financialManager.getAccountById(route.accountId)
 					?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
-				mState = mState.copy(content = AccountFormState.Content.Data(account))
+				state = state.copy(content = AccountFormState.Content.Data(account))
 			}
 		} else {
 			val financialAccount = FinancialAccount(
@@ -45,15 +58,12 @@ class AccountFormViewModel(
 				color = null,
 				balance = 0.0
 			)
-			mState = mState.copy(content = AccountFormState.Content.Data(financialAccount))
+			state = state.copy(content = AccountFormState.Content.Data(financialAccount))
 		}
 	}
 	
-	private fun updateStateContentData(call: AccountFormState.Content.Data.() -> AccountFormState.Content.Data) {
-		val content = state.value.content
-		if (content is AccountFormState.Content.Data) {
-			state.value = state.value.copy(content = content.call())
-		}
+	fun onActionConsumed() {
+		state = state.copy(action = null)
 	}
 	
 	fun onCurrencyChanged(currency: AccountCurrency) {
@@ -120,7 +130,7 @@ class AccountFormViewModel(
 	}
 	
 	fun onSaveClicked() {
-		val content = state.value.content as? AccountFormState.Content.Data ?: return
+		val content = stateContentData ?: return
 		
 		val nameString = content.name.value
 		val nameTextError = getNameTextError(nameString)
@@ -148,13 +158,13 @@ class AccountFormViewModel(
 			balance = balanceString.toDouble()
 		)
 		
-		handleEvent(skipIfBusy = true, postDelay = true) {
+		scheduleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.saveAccount(financialAccount)
-				mState = mState.copy(action = AccountFormState.Action.SaveSuccess)
+				state = state.copy(action = AccountFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(action = AccountFormState.Action.SaveError)
+				state = state.copy(action = AccountFormState.Action.SaveError)
 			}
 		}
 		

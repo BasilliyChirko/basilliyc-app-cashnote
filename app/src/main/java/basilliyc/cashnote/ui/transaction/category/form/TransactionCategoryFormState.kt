@@ -4,12 +4,10 @@ import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
 import basilliyc.cashnote.ui.components.TextFieldState
 
-object TransactionCategoryFormState {
-	
-	data class Page(
-		val content: Content = Content.Loading,
-		val action: Action? = null,
-	)
+data class TransactionCategoryFormState(
+	val content: Content = Content.Loading,
+	val action: Action? = null,
+) {
 	
 	sealed interface Content {
 		data object Loading : Content

@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -70,7 +69,6 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.asPriceWithCoins
 import basilliyc.cashnote.utils.toast
-import androidx.compose.runtime.setValue
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -79,7 +77,7 @@ import androidx.compose.runtime.setValue
 @Composable
 fun AccountTransaction() {
 	val viewModel = viewModel<AccountTransactionViewModel>()
-	val state by remember { viewModel.state }
+	val state = viewModel.state
 	val navController = LocalNavController.current
 	val context = LocalContext.current
 	Content(
@@ -95,9 +93,8 @@ fun AccountTransaction() {
 		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
 	)
 	
-	var mAction by remember { viewModel.action }
-	LaunchedEffect(mAction) {
-		val action = mAction
+	var action = state.action
+	LaunchedEffect(action) {
 		when (action) {
 			null -> Unit
 			
@@ -126,7 +123,7 @@ fun AccountTransaction() {
 //				navController.navigate(AppNavigation.AccountHistory(action.accountId))
 			}
 		}
-		mAction = null
+		viewModel.onActionConsumed()
 	}
 }
 
@@ -158,7 +155,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		),
 	)
 	Content(
-		state = AccountTransactionState.Page(
+		state = AccountTransactionState(
 			content = AccountTransactionState.Content.Data(
 				financialAccount = financialAccount,
 				isBalanceReduce = false,
@@ -187,7 +184,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: AccountTransactionState.Page,
+	state: AccountTransactionState,
 	onBalanceDifferenceChanged: (String) -> Unit,
 	onBalanceNewChanged: (String) -> Unit,
 	onCommentChanged: (String) -> Unit,
@@ -236,7 +233,7 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: AccountTransactionState.Page,
+	state: AccountTransactionState,
 	onSaveClicked: () -> Unit,
 	onAccountEditClicked: () -> Unit,
 	onAccountDeleteClicked: () -> Unit,

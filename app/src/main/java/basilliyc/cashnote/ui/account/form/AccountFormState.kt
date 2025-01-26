@@ -5,12 +5,10 @@ import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.components.TextFieldState
 
-object AccountFormState {
-	
-	data class Page(
-		val content: Content = Content.Loading,
-		val action: Action? = null,
-	)
+data class AccountFormState(
+	val content: Content = Content.Loading,
+	val action: Action? = null,
+) {
 	
 	sealed interface Content {
 		data object Loading : Content

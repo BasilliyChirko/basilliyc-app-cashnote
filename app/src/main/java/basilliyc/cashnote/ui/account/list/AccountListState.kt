@@ -2,11 +2,9 @@ package basilliyc.cashnote.ui.account.list
 
 import basilliyc.cashnote.data.FinancialAccount
 
-object AccountListState {
-	
-	data class Page(
-		val content: Content = Content.Loading,
-	)
+data class AccountListState(
+	val content: Content = Content.Loading,
+) {
 	
 	sealed interface Content {
 		data object Loading : Content

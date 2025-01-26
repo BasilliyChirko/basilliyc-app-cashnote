@@ -4,13 +4,11 @@ import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.ui.components.TextFieldState
 
-object AccountTransactionState {
-	
-	data class Page(
-		val content: Content = Content.Loading,
-		val action: Action? = null,
-		val dialog: Dialog? = null,
-	)
+data class AccountTransactionState(
+	val content: Content = Content.Loading,
+	val action: Action? = null,
+	val dialog: Dialog? = null,
+) {
 	
 	sealed interface Content {
 		data object Loading : Content

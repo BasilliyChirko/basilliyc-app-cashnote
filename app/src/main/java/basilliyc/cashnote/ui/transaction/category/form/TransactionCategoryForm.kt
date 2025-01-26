@@ -58,7 +58,7 @@ fun TransactionCategoryForm() {
 	val navController = LocalNavController.current
 	val context = LocalContext.current
 	val viewModel = viewModel<TransactionCategoryFormViewModel>()
-	val state by viewModel.state
+	val state = viewModel.state
 	
 	Content(
 		state = state,
@@ -75,13 +75,16 @@ fun TransactionCategoryForm() {
 			TransactionCategoryFormState.Action.DeleteError -> {
 				context.toast(R.string.transaction_category_form_delete_error)
 			}
+			
 			TransactionCategoryFormState.Action.DeleteSuccess -> {
 				context.toast(R.string.transaction_category_form_delete_success)
 				navController.popBackStack()
 			}
+			
 			TransactionCategoryFormState.Action.SaveError -> {
 				context.toast(R.string.transaction_category_form_save_error)
 			}
+			
 			TransactionCategoryFormState.Action.SaveSuccess -> {
 				val isNew = (state.content as? TransactionCategoryFormState.Content.Data)?.isNew
 				when (isNew) {
@@ -91,8 +94,10 @@ fun TransactionCategoryForm() {
 				}
 				navController.popBackStack()
 			}
+			
 			null -> Unit
 		}
+		viewModel.onActionConsumed()
 	}
 }
 
@@ -100,7 +105,7 @@ fun TransactionCategoryForm() {
 @Preview(showBackground = true)
 private fun TransactionCategoryFormPreview() = DefaultPreview {
 	Content(
-		state = TransactionCategoryFormState.Page(
+		state = TransactionCategoryFormState(
 			content = TransactionCategoryFormState.Content.Data(
 				isNew = true,
 				name = TextFieldState(value = ""),
@@ -120,7 +125,7 @@ private fun TransactionCategoryFormPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: TransactionCategoryFormState.Page,
+	state: TransactionCategoryFormState,
 	onNameChanged: (String) -> Unit,
 	onIconChanged: (FinancialTransactionCategoryIcon?) -> Unit,
 	onSaveClicked: () -> Unit,
@@ -158,7 +163,7 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: TransactionCategoryFormState.Page,
+	state: TransactionCategoryFormState,
 	onSaveClicked: () -> Unit,
 ) {
 	SimpleActionBar(

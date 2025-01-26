@@ -16,7 +16,7 @@ class AccountListViewModel : BaseViewModel() {
 	
 	private val accountsList = financialManager.getAccountsListAsFlow()
 	
-	var state: AccountListState.Page by mutableStateOf(AccountListState.Page())
+	var state: AccountListState by mutableStateOf(AccountListState())
 		private set
 	
 	init {

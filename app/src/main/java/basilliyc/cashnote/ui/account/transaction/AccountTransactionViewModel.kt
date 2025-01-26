@@ -22,39 +22,50 @@ class AccountTransactionViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	val state = mutableStateOf(AccountTransactionState.Page())
-	private var mState by state
-	private var mStateData
-		get() = mState.content as? AccountTransactionState.Content.Data
+	//----------------------------------------------------------------------------------------------
+	//  State declaration
+	//----------------------------------------------------------------------------------------------
+	
+	var state by mutableStateOf(AccountTransactionState())
+		private set
+	private var stateContentData
+		get() = state.content as? AccountTransactionState.Content.Data
 		set(value) {
-			if (value != null) {
-				mState = mState.copy(content = value)
-			}
+			if (value != null) state = state.copy(content = value)
 		}
-	private var mDialog
-		get() = mState.dialog
+	private var stateDialog
+		get() = state.dialog
 		set(value) {
-			if (value != null) {
-				mState = mState.copy(dialog = value)
-			}
+			state = state.copy(dialog = value)
+		}
+	private var stateAction
+		get() = state.action
+		set(value) {
+			state = state.copy(action = value)
 		}
 	
+	private fun updateContentData(call: AccountTransactionState.Content.Data.() -> AccountTransactionState.Content.Data) {
+		val content = stateContentData
+		if (content is AccountTransactionState.Content.Data) {
+			stateContentData = stateContentData?.call()
+		}
+	}
 	
-	val action = mutableStateOf<AccountTransactionState.Action?>(null)
-	private var mAction by action
+	//----------------------------------------------------------------------------------------------
+	//  Initialization of the state
+	//----------------------------------------------------------------------------------------------
 	
-	//Initialization of the state
 	init {
-		mState = mState.copy(content = AccountTransactionState.Content.Loading)
+		state = state.copy(content = AccountTransactionState.Content.Loading)
 		val route = savedStateHandle.toRoute<AppNavigation.AccountTransaction>()
 		viewModelScope.launch {
 			
-			val account = (financialManager.getAccountById(route.accountId)
-				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
+			val account = financialManager.getAccountById(route.accountId)
+				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database")
 			
 			val availableCategories = financialManager.getAvailableTransactionCategories()
 			
-			mState = mState.copy(
+			state = state.copy(
 				content = AccountTransactionState.Content.Data(
 					financialAccount = account,
 					balanceDifference = TextFieldState(""),
@@ -70,23 +81,23 @@ class AccountTransactionViewModel(
 	init {
 		viewModelScope.launch {
 			financialManager.getAvailableTransactionCategoriesAsFlow().collectLatest { categories ->
-				updateStateContentData {
-					copy(availableCategories = categories)
-				}
+				stateContentData = stateContentData?.copy(
+					availableCategories = categories
+				)
 			}
 		}
 	}
 	
-	private fun updateStateContentData(call: AccountTransactionState.Content.Data.() -> AccountTransactionState.Content.Data) {
-		val content = state.value.content
-		if (content is AccountTransactionState.Content.Data) {
-			state.value = state.value.copy(content = content.call())
-		}
+	//----------------------------------------------------------------------------------------------
+	//  Reaction methods
+	//----------------------------------------------------------------------------------------------
+	
+	fun onActionConsumed() {
+		stateAction = null
 	}
 	
 	fun onBalanceDifferenceChanged(balanceDifferenceString: String) {
-		val account =
-			(mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
+		val account = stateContentData?.financialAccount ?: return
 		
 		val balanceDifferenceString = balanceDifferenceString.replace(",", ".")
 		
@@ -94,59 +105,47 @@ class AccountTransactionViewModel(
 		
 		val balanceNewValue = account.balance + balanceDifferenceValue
 		
-		updateStateContentData {
-			copy(
-				balanceDifference = TextFieldState(balanceDifferenceString),
-				balanceNew = TextFieldState(balanceNewValue.asPriceWithCoins()),
-				isBalanceReduce = (balanceDifferenceValue < 0).takeIf { balanceNewValue != account.balance },
-			)
-		}
+		stateContentData = stateContentData?.copy(
+			balanceDifference = TextFieldState(balanceDifferenceString),
+			balanceNew = TextFieldState(balanceNewValue.asPriceWithCoins()),
+			isBalanceReduce = (balanceDifferenceValue < 0).takeIf { balanceNewValue != account.balance },
+		)
 	}
 	
 	fun onBalanceNewChanged(balanceNewString: String) {
-		val account =
-			(mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
+		val account = stateContentData?.financialAccount ?: return
 		
 		val balanceNewString = balanceNewString.replace(",", ".")
-		
 		val balanceNewValue = balanceNewString.toDoubleOrNull() ?: 0.0
-		
 		val balanceDifference = balanceNewValue - account.balance
 		
-		updateStateContentData {
-			copy(
-				balanceDifference = TextFieldState(balanceDifference.asPriceWithCoins()),
-				balanceNew = TextFieldState(balanceNewString),
-				isBalanceReduce = (balanceDifference < 0).takeIf { balanceNewValue != account.balance },
-			)
-		}
-		
+		stateContentData = stateContentData?.copy(
+			balanceDifference = TextFieldState(balanceDifference.asPriceWithCoins()),
+			balanceNew = TextFieldState(balanceNewString),
+			isBalanceReduce = (balanceDifference < 0).takeIf { balanceNewValue != account.balance },
+		)
 	}
 	
 	fun onCommentChanged(comment: String) {
-		updateStateContentData {
-			copy(
-				comment = TextFieldState(comment),
-			)
-		}
+		stateContentData = stateContentData?.copy(
+			comment = TextFieldState(comment),
+		)
 	}
 	
 	fun onCategoryChanged(categoryId: Long?) {
-		updateStateContentData {
-			copy(
-				selectedCategoryId = categoryId,
-			)
-		}
+		stateContentData = stateContentData?.copy(
+			selectedCategoryId = categoryId,
+		)
 	}
 	
 	fun onSaveClicked() {
-		val data = (mState.content as? AccountTransactionState.Content.Data) ?: return
+		val data = stateContentData ?: return
 		val account = data.financialAccount
 		
 		val transactionValue = data.balanceDifference.value.toDoubleOrNull()
 		
 		if (transactionValue == null) {
-			updateStateContentData {
+			updateContentData {
 				copy(
 					balanceDifference = balanceDifference.copy(
 						error = TextFieldError.IncorrectValue
@@ -156,7 +155,7 @@ class AccountTransactionViewModel(
 			return
 		}
 		
-		handleEvent(
+		scheduleEvent(
 			skipIfBusy = true,
 			postDelay = true,
 		) {
@@ -167,31 +166,31 @@ class AccountTransactionViewModel(
 					comment = data.comment.value,
 					categoryId = data.selectedCategoryId,
 				)
-				mState = mState.copy(action = AccountTransactionState.Action.SaveSuccess)
+				stateAction = AccountTransactionState.Action.SaveSuccess
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(action = AccountTransactionState.Action.SaveError)
+				stateAction = AccountTransactionState.Action.SaveError
 			}
 		}
 		
 	}
 	
-	fun onCancelClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
-		mState = mState.copy(action = AccountTransactionState.Action.Cancel)
+	fun onCancelClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+		stateAction = AccountTransactionState.Action.Cancel
 	}
 	
-	fun onAccountEditClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
-		val data = mStateData ?: return@handleEvent
-		mAction = AccountTransactionState.Action.AccountEdit(data.financialAccount.id)
+	fun onAccountEditClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+		val data = stateContentData ?: return@scheduleEvent
+		stateAction = AccountTransactionState.Action.AccountEdit(data.financialAccount.id)
 	}
 	
 	fun onAccountDeleteClicked() {
-		mDialog = AccountTransactionState.Dialog.AccountDeleteConfirmation
+		stateDialog = AccountTransactionState.Dialog.AccountDeleteConfirmation
 	}
 	
-	fun onAccountHistoryClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
-		val data = mStateData ?: return@handleEvent
-		mAction = AccountTransactionState.Action.AccountHistory(data.financialAccount.id)
+	fun onAccountHistoryClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+		val data = stateContentData ?: return@scheduleEvent
+		stateAction = AccountTransactionState.Action.AccountHistory(data.financialAccount.id)
 	}
 	
 	fun onAccountDeleteDialogCanceled() {

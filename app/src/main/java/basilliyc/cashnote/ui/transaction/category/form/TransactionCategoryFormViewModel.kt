@@ -23,32 +23,37 @@ class TransactionCategoryFormViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	val state = mutableStateOf(TransactionCategoryFormState.Page())
-	private var mState by state
+	var state by mutableStateOf(TransactionCategoryFormState())
+		private set
+	private var stateContentData
+		get() = state.content as? TransactionCategoryFormState.Content.Data
+		set(value) {
+			if (value != null) state = state.copy(content = value)
+		}
 	
 	private val route: AppNavigation.TransactionCategoryForm = savedStateHandle.toRoute()
 	
 	init {
-		mState = mState.copy(content = TransactionCategoryFormState.Content.Loading)
+		state = state.copy(content = TransactionCategoryFormState.Content.Loading)
 		if (route.categoryId != null) {
 			viewModelScope.launch {
 				val category = (financialManager.getTransactionCategoryById(route.categoryId)
 					?: throw IllegalStateException("TransactionCategory with id ${route.categoryId} is not present in database"))
-				mState = mState.copy(content = TransactionCategoryFormState.Content.Data(category))
+				state = state.copy(content = TransactionCategoryFormState.Content.Data(category))
 			}
 		} else {
 			val newCategory = FinancialTransactionCategory(
 				name = "",
 				icon = null,
 			)
-			mState = mState.copy(content = TransactionCategoryFormState.Content.Data(newCategory))
+			state = state.copy(content = TransactionCategoryFormState.Content.Data(newCategory))
 		}
 	}
 	
 	private fun updateStateContentData(call: TransactionCategoryFormState.Content.Data.() -> TransactionCategoryFormState.Content.Data) {
-		val content = state.value.content
+		val content = state.content
 		if (content is TransactionCategoryFormState.Content.Data) {
-			state.value = state.value.copy(content = content.call())
+			state = state.copy(content = content.call())
 		}
 	}
 	
@@ -75,7 +80,7 @@ class TransactionCategoryFormViewModel(
 	}
 	
 	fun onSaveClicked() {
-		val data = mState.content as? TransactionCategoryFormState.Content.Data ?: return
+		val data = stateContentData ?: return
 		
 		val nameString = data.name.value
 		val nameTextError = getNameTextError(nameString)
@@ -92,13 +97,13 @@ class TransactionCategoryFormViewModel(
 			icon = data.icon,
 		)
 		
-		handleEvent(skipIfBusy = true, postDelay = true) {
+		scheduleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.saveTransactionCategory(category)
-				mState = mState.copy(action = TransactionCategoryFormState.Action.SaveSuccess)
+				state = state.copy(action = TransactionCategoryFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(action = TransactionCategoryFormState.Action.SaveError)
+				state = state.copy(action = TransactionCategoryFormState.Action.SaveError)
 			}
 		}
 	}
@@ -106,13 +111,13 @@ class TransactionCategoryFormViewModel(
 	fun onDeleteClicked() {
 		if (route.categoryId == null) return
 		
-		handleEvent(skipIfBusy = true, postDelay = true) {
+		scheduleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.deleteTransactionCategory(route.categoryId)
-				mState = mState.copy(action = TransactionCategoryFormState.Action.DeleteSuccess)
+				state = state.copy(action = TransactionCategoryFormState.Action.DeleteSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				mState = mState.copy(action = TransactionCategoryFormState.Action.DeleteError)
+				state = state.copy(action = TransactionCategoryFormState.Action.DeleteError)
 			}
 		}
 	}

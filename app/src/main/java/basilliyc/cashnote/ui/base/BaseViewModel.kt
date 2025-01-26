@@ -40,7 +40,7 @@ abstract class BaseViewModel : ViewModel() {
 	)
 	
 	//Guaranty single thread consume events
-	fun handleEvent(
+	fun scheduleEvent(
 		skipIfBusy: Boolean = defaultEventSkipIfBusy,
 		cancelPrevious: Boolean = false,
 		context: CoroutineContext = Dispatchers.IO,

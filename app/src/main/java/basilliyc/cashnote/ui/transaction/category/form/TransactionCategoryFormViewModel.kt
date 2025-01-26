@@ -57,6 +57,10 @@ class TransactionCategoryFormViewModel(
 		}
 	}
 	
+	fun onActionConsumed() {
+		state = state.copy(action = null)
+	}
+	
 	fun onNameChanged(name: String) {
 		updateStateContentData {
 			copy(

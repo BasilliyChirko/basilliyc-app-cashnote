@@ -32,7 +32,8 @@ data class AccountTransactionState(
 		data object Cancel : Action
 		data object SaveError : Action
 		data class AccountEdit(val accountId: Long) : Action
-		data object AccountDeleted : Action
+		data object AccountDeletionSuccess : Action
+		data object AccountDeletionError : Action
 		data class AccountHistory(val accountId: Long) : Action
 	}
 }

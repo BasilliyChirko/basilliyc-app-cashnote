@@ -24,21 +24,23 @@ class FinancialManager {
 	private val transactionRepository: DatabaseTransactionRepository by inject()
 	private val transactionCategoryRepository: DatabaseTransactionCategoryRepository by inject()
 	
+	//----------------------------------------------------------------------------------------------
+	//  Account
+	//----------------------------------------------------------------------------------------------
+	
 	fun getAccountsListAsFlow() = accountRepository.getListAsFlow()
 	
 	suspend fun getAccountById(id: Long) = accountRepository.getById(id)
 	
+	fun getAccountByIdAsFlow(id: Long) = accountRepository.getByIdAsFlow(id)
+	
 	suspend fun saveAccount(financialAccount: FinancialAccount) = accountRepository.save(financialAccount)
 	
-	suspend fun getAvailableTransactionCategories() = transactionCategoryRepository.getList()
+	suspend fun deleteAccount(accountId: Long) = accountRepository.delete(accountId)
 	
-	fun getAvailableTransactionCategoriesAsFlow() = transactionCategoryRepository.getListAsFlow()
-	
-	suspend fun getTransactionCategoryById(id: Long) = transactionCategoryRepository.getById(id)
-	
-	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) = transactionCategoryRepository.save(category)
-	
-	suspend fun deleteTransactionCategory(categoryId: Long) = transactionCategoryRepository.delete(categoryId)
+	//----------------------------------------------------------------------------------------------
+	//  Transaction
+	//----------------------------------------------------------------------------------------------
 	
 	suspend fun createTransaction(
 		accountId: Long,
@@ -71,6 +73,24 @@ class FinancialManager {
 			accountRepository.save(account.copy(balance = account.balance + value))
 		}
 	}
+	
+	//----------------------------------------------------------------------------------------------
+	//  Transaction Category
+	//----------------------------------------------------------------------------------------------
+	
+	suspend fun getAvailableTransactionCategories() = transactionCategoryRepository.getList()
+	
+	fun getAvailableTransactionCategoriesAsFlow() = transactionCategoryRepository.getListAsFlow()
+	
+	suspend fun getTransactionCategoryById(id: Long) = transactionCategoryRepository.getById(id)
+	
+	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) = transactionCategoryRepository.save(category)
+	
+	suspend fun deleteTransactionCategory(categoryId: Long) = transactionCategoryRepository.delete(categoryId)
+	
+	//----------------------------------------------------------------------------------------------
+	//  Other
+	//----------------------------------------------------------------------------------------------
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
 		
@@ -124,5 +144,6 @@ class FinancialManager {
 //			)
 //		)
 	}
+	
 	
 }

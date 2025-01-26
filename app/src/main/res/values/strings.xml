@@ -25,7 +25,8 @@
     <string name="account_transaction_label_comment">Comment</string>
     <string name="account_transaction_toast_save">Transaction saved</string>
     <string name="account_transaction_toast_save_error">Error while saving transaction</string>
-    <string name="account_form_toast_save">Account created</string>
+    <string name="account_form_toast_save_new">Account created</string>
+    <string name="account_form_toast_save_update">Account updated</string>
     <string name="account_form_toast_save_error">Account creation failed</string>
     <string name="account_transaction_category_label">Category</string>
     <string name="account_transaction_category_settings">Categories settings</string>
@@ -45,4 +46,10 @@
     <string name="account_transaction_action_edit_accout">Edit account</string>
     <string name="account_transaction_action_delete_accout">Delete account</string>
     <string name="account_transaction_action_history">Account history</string>
+    <string name="account_transaction_account_delete_confirmation_submit">Delete</string>
+    <string name="account_transaction_account_delete_confirmation_cancel">Cancel</string>
+    <string name="account_transaction_account_delete_confirmation_title">Account deletion</string>
+    <string name="account_transaction_account_delete_confirmation_text">Are you sure?\nThis action can`t be undone</string>
+    <string name="account_transaction_toast_account_deletion_success">Account deleted</string>
+    <string name="account_transaction_toast_account_deletion_error">Error while account deletion</string>
 </resources>

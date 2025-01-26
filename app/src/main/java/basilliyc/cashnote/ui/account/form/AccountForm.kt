@@ -23,8 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,9 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
@@ -52,6 +50,7 @@ import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
+import basilliyc.cashnote.utils.castOrNull
 import basilliyc.cashnote.utils.toast
 
 //--------------------------------------------------------------------------------------------------
@@ -81,7 +80,11 @@ fun AccountForm() {
 			}
 			
 			AccountFormState.Action.SaveSuccess -> {
-				context.toast(R.string.account_form_toast_save)
+				when (state.content.castOrNull<AccountFormState.Content.Data>()?.isNew) {
+					true -> context.toast(R.string.account_form_toast_save_new)
+					false -> context.toast(R.string.account_form_toast_save_update)
+					null -> Unit
+				}
 				navController.popBackStack()
 			}
 			

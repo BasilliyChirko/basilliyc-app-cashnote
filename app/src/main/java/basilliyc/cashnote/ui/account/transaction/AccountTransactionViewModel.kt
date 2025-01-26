@@ -20,7 +20,14 @@ class AccountTransactionViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
+	init {
+		defaultEventSkipIfBusy = true
+		defaultEventPostDelay = true
+	}
+	
 	private val financialManager: FinancialManager by inject()
+	
+	private val route = savedStateHandle.toRoute<AppNavigation.AccountTransaction>()
 	
 	//----------------------------------------------------------------------------------------------
 	//  State declaration
@@ -57,7 +64,6 @@ class AccountTransactionViewModel(
 	
 	init {
 		state = state.copy(content = AccountTransactionState.Content.Loading)
-		val route = savedStateHandle.toRoute<AppNavigation.AccountTransaction>()
 		viewModelScope.launch {
 			
 			val account = financialManager.getAccountById(route.accountId)
@@ -86,6 +92,16 @@ class AccountTransactionViewModel(
 				)
 			}
 		}
+		viewModelScope.launch {
+			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
+				if (account != null) {
+					stateContentData = stateContentData?.copy(
+						financialAccount = account
+					)
+				}
+			}
+		}
+		
 	}
 	
 	//----------------------------------------------------------------------------------------------
@@ -175,11 +191,11 @@ class AccountTransactionViewModel(
 		
 	}
 	
-	fun onCancelClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+	fun onCancelClicked() = scheduleEvent {
 		stateAction = AccountTransactionState.Action.Cancel
 	}
 	
-	fun onAccountEditClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+	fun onAccountEditClicked() = scheduleEvent {
 		val data = stateContentData ?: return@scheduleEvent
 		stateAction = AccountTransactionState.Action.AccountEdit(data.financialAccount.id)
 	}
@@ -188,17 +204,30 @@ class AccountTransactionViewModel(
 		stateDialog = AccountTransactionState.Dialog.AccountDeleteConfirmation
 	}
 	
-	fun onAccountHistoryClicked() = scheduleEvent(skipIfBusy = true, postDelay = true) {
+	fun onAccountHistoryClicked() = scheduleEvent {
 		val data = stateContentData ?: return@scheduleEvent
 		stateAction = AccountTransactionState.Action.AccountHistory(data.financialAccount.id)
 	}
 	
 	fun onAccountDeleteDialogCanceled() {
-		//TODO implement
+		if (stateDialog != AccountTransactionState.Dialog.AccountDeleteConfirmation) return
+		stateDialog = null
 	}
 	
 	fun onAccountDeleteDialogConfirmed() {
-		//TODO implement
+		if (stateDialog != AccountTransactionState.Dialog.AccountDeleteConfirmation) return
+		stateDialog = null
+		
+		
+		scheduleEvent {
+			try {
+				financialManager.deleteAccount(route.accountId)
+				stateAction = AccountTransactionState.Action.AccountDeletionSuccess
+			} catch (t: Throwable) {
+				logcat.error(t)
+				stateAction = AccountTransactionState.Action.AccountDeletionError
+			}
+		}
 	}
 	
 	

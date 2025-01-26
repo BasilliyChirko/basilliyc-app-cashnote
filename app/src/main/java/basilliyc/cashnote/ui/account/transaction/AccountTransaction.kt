@@ -24,12 +24,14 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,7 +95,7 @@ fun AccountTransaction() {
 		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
 	)
 	
-	var action = state.action
+	val action = state.action
 	LaunchedEffect(action) {
 		when (action) {
 			null -> Unit
@@ -110,8 +112,13 @@ fun AccountTransaction() {
 				context.toast(R.string.account_transaction_toast_save_error)
 			}
 			
-			AccountTransactionState.Action.AccountDeleted -> {
+			AccountTransactionState.Action.AccountDeletionSuccess -> {
 				navController.popBackStack()
+				context.toast(R.string.account_transaction_toast_account_deletion_success)
+			}
+			
+			AccountTransactionState.Action.AccountDeletionError -> {
+				context.toast(R.string.account_transaction_toast_account_deletion_error)
 			}
 			
 			is AccountTransactionState.Action.AccountEdit -> {
@@ -124,6 +131,14 @@ fun AccountTransaction() {
 			}
 		}
 		viewModel.onActionConsumed()
+	}
+	
+	when (state.dialog) {
+		null -> Unit
+		AccountTransactionState.Dialog.AccountDeleteConfirmation -> DialogDeleteConfirmation(
+			onConfirm = viewModel::onAccountDeleteDialogConfirmed,
+			onCancel = viewModel::onAccountDeleteDialogCanceled,
+		)
 	}
 }
 
@@ -524,3 +539,38 @@ private fun TransactionComment(
 	)
 }
 
+//--------------------------------------------------------------------------------------------------
+// DIALOG.DELETE_CONFIRMATION
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun DialogDeleteConfirmation(
+	onConfirm: () -> Unit,
+	onCancel: () -> Unit,
+) {
+	AlertDialog(
+		title = {
+			Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_title))
+		},
+		text = {
+			Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_text))
+		},
+		onDismissRequest = onCancel,
+		confirmButton = {
+			TextButton(
+				onClick = onConfirm,
+				content = {
+					Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_submit))
+				}
+			)
+		},
+		dismissButton = {
+			TextButton(
+				onClick = onCancel,
+				content = {
+					Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_cancel))
+				}
+			)
+		}
+	)
+}

@@ -24,6 +24,8 @@ abstract class BaseViewModel : ViewModel() {
 	
 	var defaultEventSkipIfBusy = false
 	
+	var defaultEventPostDelay = false
+	
 	// Default post delay applied as 750 millis
 	// to prevent actions during default fadeIn\fadeOut animation
 	var defaultEventPostDelayValue = 750L
@@ -44,7 +46,7 @@ abstract class BaseViewModel : ViewModel() {
 		skipIfBusy: Boolean = defaultEventSkipIfBusy,
 		cancelPrevious: Boolean = false,
 		context: CoroutineContext = Dispatchers.IO,
-		postDelay: Boolean = false,
+		postDelay: Boolean = defaultEventPostDelay,
 		postDelayValue: Long = defaultEventPostDelayValue,
 		block: suspend CoroutineScope.() -> Unit,
 	) {

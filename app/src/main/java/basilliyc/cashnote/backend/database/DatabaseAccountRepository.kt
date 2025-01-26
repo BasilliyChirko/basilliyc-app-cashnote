@@ -27,15 +27,18 @@ abstract class DatabaseAccountRepository {
 	abstract suspend fun save(financialAccounts: List<FinancialAccount>): List<Long>
 	
 	@Query("DELETE FROM FinancialAccount WHERE id=:id")
-	abstract suspend fun delete(id: Long): Int
+	abstract suspend fun delete(id: Long)
 	
 	@Delete
-	abstract suspend fun delete(financialAccount: FinancialAccount): Int
+	abstract suspend fun delete(financialAccount: FinancialAccount)
 	
 	@Delete
-	abstract suspend fun delete(financialAccounts: List<FinancialAccount>): Int
+	abstract suspend fun delete(financialAccounts: List<FinancialAccount>)
 	
 	@Query("SELECT * FROM FinancialAccount")
 	abstract fun getListAsFlow(): Flow<List<FinancialAccount>>
+	
+	@Query("SELECT * FROM FinancialAccount WHERE id=:id")
+	abstract fun getByIdAsFlow(id: Long): Flow<FinancialAccount?>
 	
 }

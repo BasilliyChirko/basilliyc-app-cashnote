@@ -74,10 +74,6 @@ class TransactionCategoryFormViewModel(
 		}
 	}
 	
-	fun onCancelClicked() {
-		mState = mState.copy(action = TransactionCategoryFormState.Action.Cancel)
-	}
-	
 	fun onSaveClicked() {
 		val data = mState.content as? TransactionCategoryFormState.Content.Data ?: return
 		

@@ -9,6 +9,7 @@ object AccountTransactionState {
 	data class Page(
 		val content: Content = Content.Loading,
 		val action: Action? = null,
+		val dialog: Dialog? = null,
 	)
 	
 	sealed interface Content {
@@ -24,9 +25,16 @@ object AccountTransactionState {
 		) : Content
 	}
 	
+	sealed interface Dialog {
+		data object AccountDeleteConfirmation : Dialog
+	}
+	
 	sealed interface Action {
 		data object SaveSuccess : Action
 		data object Cancel : Action
 		data object SaveError : Action
+		data class AccountEdit(val accountId: Long) : Action
+		data object AccountDeleted : Action
+		data class AccountHistory(val accountId: Long) : Action
 	}
 }

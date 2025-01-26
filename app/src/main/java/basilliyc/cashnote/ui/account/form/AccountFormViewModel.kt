@@ -119,10 +119,6 @@ class AccountFormViewModel(
 		}
 	}
 	
-	fun onCancelClicked() {
-		mState = mState.copy(action = AccountFormState.Action.Cancel)
-	}
-	
 	fun onSaveClicked() {
 		val content = state.value.content as? AccountFormState.Content.Data ?: return
 		

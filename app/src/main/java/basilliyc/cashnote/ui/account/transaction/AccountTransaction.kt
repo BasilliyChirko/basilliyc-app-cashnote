@@ -17,7 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -30,6 +34,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,14 +50,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.PopupMenu
+import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
@@ -63,6 +70,7 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.asPriceWithCoins
 import basilliyc.cashnote.utils.toast
+import androidx.compose.runtime.setValue
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -82,17 +90,22 @@ fun AccountTransaction() {
 		onSaveClicked = viewModel::onSaveClicked,
 		onCancelClicked = viewModel::onCancelClicked,
 		onCategoryChanged = viewModel::onCategoryChanged,
+		onAccountEditClicked = viewModel::onAccountEditClicked,
+		onAccountDeleteClicked = viewModel::onAccountDeleteClicked,
+		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
 	)
 	
-	val action = state.action
-	LaunchedEffect(action) {
+	var mAction by remember { viewModel.action }
+	LaunchedEffect(mAction) {
+		val action = mAction
 		when (action) {
+			null -> Unit
+			
 			AccountTransactionState.Action.Cancel -> {
 				navController.popBackStack()
 			}
 			
 			AccountTransactionState.Action.SaveSuccess -> {
-//				context.toast(R.string.account_balance_toast_save)
 				navController.popBackStack()
 			}
 			
@@ -100,8 +113,20 @@ fun AccountTransaction() {
 				context.toast(R.string.account_transaction_toast_save_error)
 			}
 			
-			null -> Unit
+			AccountTransactionState.Action.AccountDeleted -> {
+				navController.popBackStack()
+			}
+			
+			is AccountTransactionState.Action.AccountEdit -> {
+				navController.navigate(AppNavigation.AccountForm(action.accountId))
+			}
+			
+			is AccountTransactionState.Action.AccountHistory -> {
+				//TODO implement
+//				navController.navigate(AppNavigation.AccountHistory(action.accountId))
+			}
 		}
+		mAction = null
 	}
 }
 
@@ -150,6 +175,9 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		onSaveClicked = {},
 		onCancelClicked = {},
 		onCategoryChanged = {},
+		onAccountEditClicked = {},
+		onAccountDeleteClicked = {},
+		onAccountHistoryClicked = {},
 	)
 }
 
@@ -166,12 +194,18 @@ private fun Content(
 	onCategoryChanged: (Long?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onCancelClicked: () -> Unit,
+	onAccountEditClicked: () -> Unit,
+	onAccountDeleteClicked: () -> Unit,
+	onAccountHistoryClicked: () -> Unit,
 ) {
 	Scaffold(
 		topBar = {
 			ActionBar(
 				state = state,
 				onSaveClicked = onSaveClicked,
+				onAccountEditClicked = onAccountEditClicked,
+				onAccountDeleteClicked = onAccountDeleteClicked,
+				onAccountHistoryClicked = onAccountHistoryClicked,
 			)
 		},
 		content = {
@@ -189,7 +223,6 @@ private fun Content(
 					onBalanceNewChanged = onBalanceNewChanged,
 					onCommentChanged = onCommentChanged,
 					onSaveClicked = onSaveClicked,
-					onCancelClicked = onCancelClicked,
 					onCategoryChanged = onCategoryChanged,
 				)
 			}
@@ -205,6 +238,9 @@ private fun Content(
 private fun ActionBar(
 	state: AccountTransactionState.Page,
 	onSaveClicked: () -> Unit,
+	onAccountEditClicked: () -> Unit,
+	onAccountDeleteClicked: () -> Unit,
+	onAccountHistoryClicked: () -> Unit,
 ) {
 	val content = state.content
 	
@@ -222,6 +258,47 @@ private fun ActionBar(
 			it.color?.color
 		} ?: Color.Unspecified,
 		actions = {
+			
+			var isOptionsExpanded = remember { mutableStateOf(false) }
+			PopupMenu(
+				expanded = isOptionsExpanded,
+				anchor = {
+					IconButton(
+						onClick = { isOptionsExpanded.value = !isOptionsExpanded.value },
+						imageVector = Icons.Filled.MoreVert,
+						contentDescription = stringResource(R.string.account_transaction_action_options)
+					)
+				},
+				items = {
+					PopupMenuItem(
+						text = stringResource(R.string.account_transaction_action_edit_accout),
+						onClick = {
+							isOptionsExpanded.value = false
+							onAccountEditClicked()
+						},
+						leadingIcon = Icons.Filled.Edit,
+					)
+					PopupMenuItem(
+						text = stringResource(R.string.account_transaction_action_history),
+						onClick = {
+							isOptionsExpanded.value = false
+							onAccountHistoryClicked()
+						},
+						leadingIcon = Icons.Filled.History,
+					)
+					PopupMenuItem(
+						text = stringResource(R.string.account_transaction_action_delete_accout),
+						onClick = {
+							isOptionsExpanded.value = false
+							onAccountDeleteClicked()
+						},
+						leadingIcon = Icons.Filled.DeleteForever,
+					)
+				}
+			)
+			
+			
+			
 			IconButton(
 				onClick = onSaveClicked,
 				imageVector = Icons.Filled.Done,
@@ -230,6 +307,7 @@ private fun ActionBar(
 		}
 	)
 }
+
 
 //--------------------------------------------------------------------------------------------------
 //  CONTENT.DATA
@@ -244,7 +322,6 @@ private fun ContentData(
 	onCategoryChanged: (Long?) -> Unit,
 	onCommentChanged: (String) -> Unit,
 	onSaveClicked: () -> Unit,
-	onCancelClicked: () -> Unit,
 ) {
 	val focusRequester = remember { FocusRequester() }
 	LaunchedEffect(Unit) {

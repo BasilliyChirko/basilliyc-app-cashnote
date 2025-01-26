@@ -24,6 +24,24 @@ class AccountTransactionViewModel(
 	
 	val state = mutableStateOf(AccountTransactionState.Page())
 	private var mState by state
+	private var mStateData
+		get() = mState.content as? AccountTransactionState.Content.Data
+		set(value) {
+			if (value != null) {
+				mState = mState.copy(content = value)
+			}
+		}
+	private var mDialog
+		get() = mState.dialog
+		set(value) {
+			if (value != null) {
+				mState = mState.copy(dialog = value)
+			}
+		}
+	
+	
+	val action = mutableStateOf<AccountTransactionState.Action?>(null)
+	private var mAction by action
 	
 	//Initialization of the state
 	init {
@@ -67,7 +85,8 @@ class AccountTransactionViewModel(
 	}
 	
 	fun onBalanceDifferenceChanged(balanceDifferenceString: String) {
-		val account = (mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
+		val account =
+			(mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
 		
 		val balanceDifferenceString = balanceDifferenceString.replace(",", ".")
 		
@@ -85,7 +104,8 @@ class AccountTransactionViewModel(
 	}
 	
 	fun onBalanceNewChanged(balanceNewString: String) {
-		val account = (mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
+		val account =
+			(mState.content as? AccountTransactionState.Content.Data)?.financialAccount ?: return
 		
 		val balanceNewString = balanceNewString.replace(",", ".")
 		
@@ -119,7 +139,7 @@ class AccountTransactionViewModel(
 		}
 	}
 	
-	fun onSaveClicked()  {
+	fun onSaveClicked() {
 		val data = (mState.content as? AccountTransactionState.Content.Data) ?: return
 		val account = data.financialAccount
 		
@@ -158,6 +178,28 @@ class AccountTransactionViewModel(
 	
 	fun onCancelClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
 		mState = mState.copy(action = AccountTransactionState.Action.Cancel)
+	}
+	
+	fun onAccountEditClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
+		val data = mStateData ?: return@handleEvent
+		mAction = AccountTransactionState.Action.AccountEdit(data.financialAccount.id)
+	}
+	
+	fun onAccountDeleteClicked() {
+		mDialog = AccountTransactionState.Dialog.AccountDeleteConfirmation
+	}
+	
+	fun onAccountHistoryClicked() = handleEvent(skipIfBusy = true, postDelay = true) {
+		val data = mStateData ?: return@handleEvent
+		mAction = AccountTransactionState.Action.AccountHistory(data.financialAccount.id)
+	}
+	
+	fun onAccountDeleteDialogCanceled() {
+		//TODO implement
+	}
+	
+	fun onAccountDeleteDialogConfirmed() {
+		//TODO implement
 	}
 	
 	

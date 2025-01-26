@@ -8,11 +8,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.dialog
-import androidx.navigation.toRoute
-import basilliyc.cashnote.ui.account.transaction.AccountTransaction
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.account.statistic.AccountStatistic
+import basilliyc.cashnote.ui.account.transaction.AccountTransaction
 import basilliyc.cashnote.ui.app_settings.AppSettings
 import basilliyc.cashnote.ui.transaction.category.form.TransactionCategoryForm
 import basilliyc.cashnote.ui.transaction.category.list.TransactionCategoryList

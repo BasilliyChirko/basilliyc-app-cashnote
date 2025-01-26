@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class FinancialManager {
 	
+	@Suppress("unused")
 	private val logcat = Logcat(this)
 	
 	private val appDatabase: AppDatabase by inject()

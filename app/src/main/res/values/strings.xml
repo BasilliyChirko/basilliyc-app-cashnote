@@ -41,4 +41,8 @@
     <string name="transaction_category_form_delete_success">Category deleted</string>
     <string name="transaction_category_form_save_error">Error while saving category</string>
     <string name="transaction_category_form_save_success">Category createad</string>
+    <string name="account_transaction_action_options">Options</string>
+    <string name="account_transaction_action_edit_accout">Edit account</string>
+    <string name="account_transaction_action_delete_accout">Delete account</string>
+    <string name="account_transaction_action_history">Account history</string>
 </resources>

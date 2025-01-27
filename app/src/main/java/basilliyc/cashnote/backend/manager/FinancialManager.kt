@@ -10,9 +10,12 @@ import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.min
 
 class FinancialManager {
 	
@@ -34,7 +37,8 @@ class FinancialManager {
 	
 	fun getAccountByIdAsFlow(id: Long) = accountRepository.getByIdAsFlow(id)
 	
-	suspend fun saveAccount(financialAccount: FinancialAccount) = accountRepository.save(financialAccount)
+	suspend fun saveAccount(financialAccount: FinancialAccount) =
+		accountRepository.save(financialAccount)
 	
 	suspend fun deleteAccount(accountId: Long) = accountRepository.delete(accountId)
 	
@@ -84,16 +88,45 @@ class FinancialManager {
 	
 	suspend fun getTransactionCategoryById(id: Long) = transactionCategoryRepository.getById(id)
 	
-	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) = transactionCategoryRepository.save(category)
+	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) {
+		
+		val category = category.let {
+			if (category.id == 0L) {
+				var maxPosition = transactionCategoryRepository.getMaxPosition()
+				
+				if (maxPosition == 0) {
+					if (transactionCategoryRepository.getItemsCount() == 0) {
+						maxPosition = -1
+					}
+				}
+				
+				it.copy(position = maxPosition + 1)
+			} else it
+		}
+		
+		transactionCategoryRepository.save(category)
+	}
 	
-	suspend fun deleteTransactionCategory(categoryId: Long) = transactionCategoryRepository.delete(categoryId)
+	suspend fun deleteTransactionCategory(categoryId: Long) =
+		transactionCategoryRepository.delete(categoryId)
+	
+	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) {
+		val categories = transactionCategoryRepository.getList()
+			.reordered(from, to)
+			.mapIndexed { index, category ->
+				category.copy(
+					position = index
+				)
+			}
+		transactionCategoryRepository.save(categories)
+	}
 	
 	//----------------------------------------------------------------------------------------------
 	//  Other
 	//----------------------------------------------------------------------------------------------
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-		
+
 //		val account = accountRepository.getList().firstOrNull() ?: let {
 //			accountRepository.insert(
 //				FinancialAccount(
@@ -134,7 +167,7 @@ class FinancialManager {
 //			}
 //		}
 //
-		
+
 //		accountRepository.insertAccount(
 //			Account(
 //				name = "Test",

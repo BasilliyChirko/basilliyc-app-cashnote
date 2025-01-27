@@ -14,10 +14,10 @@ abstract class DatabaseTransactionCategoryRepository {
 	//  BASIC CRUD METHODS
 	//----------------------------------------------------------------------------------------------
 	
-	@Query("SELECT * FROM FinancialTransactionCategory")
+	@Query("SELECT * FROM FinancialTransactionCategory ORDER BY position")
 	abstract fun getListAsFlow(): Flow<List<FinancialTransactionCategory>>
 	
-	@Query("SELECT * FROM FinancialTransactionCategory")
+	@Query("SELECT * FROM FinancialTransactionCategory ORDER BY position")
 	abstract suspend fun getList(): List<FinancialTransactionCategory>
 	
 	@Query("SELECT * FROM FinancialTransactionCategory WHERE id=:id")
@@ -37,5 +37,15 @@ abstract class DatabaseTransactionCategoryRepository {
 	
 	@Delete
 	abstract suspend fun delete(transactions: List<FinancialTransactionCategory>): Int
+	
+	//----------------------------------------------------------------------------------------------
+	//  OTHER
+	//----------------------------------------------------------------------------------------------
+	
+	@Query("SELECT COUNT(position) FROM FinancialTransactionCategory")
+	abstract fun getItemsCount(): Int
+	
+	@Query("SELECT MAX(position) FROM FinancialTransactionCategory")
+	abstract fun getMaxPosition(): Int
 	
 }

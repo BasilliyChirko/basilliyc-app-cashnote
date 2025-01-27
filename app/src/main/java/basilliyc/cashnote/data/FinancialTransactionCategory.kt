@@ -20,6 +20,7 @@ data class FinancialTransactionCategory(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0L,
 	val name: String,
 	val icon: FinancialTransactionCategoryIcon?,
+	val position: Int = id.toInt(),
 )
 
 
@@ -34,4 +35,5 @@ enum class FinancialTransactionCategoryIcon(val imageVector: ImageVector) {
 	Food(Icons.Filled.Fastfood),
 	Alcohol(Icons.Filled.WineBar),
 	Gift(Icons.Filled.CardGiftcard),
+	Gift_4(Icons.Filled.CardGiftcard),
 }

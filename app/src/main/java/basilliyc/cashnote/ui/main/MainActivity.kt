@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import basilliyc.cashnote.R
+import basilliyc.cashnote.ui.test.DragTest
 import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalLogcat
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
 				LocalLogcat provides Logcat(this),
 			) {
 				val logcat = LocalLogcat.current
-				
+
 				val navBackStack by LocalNavController.current.currentBackStackEntryAsState()
 				LaunchedEffect(navBackStack) {
 					val backStackArguments = navBackStack?.arguments
@@ -62,9 +63,10 @@ class MainActivity : ComponentActivity() {
 							?.joinToString() ?: ""
 					)
 				}
-				
+
 				CashNoteTheme {
 					Main()
+//					DragTest()
 				}
 				
 			}

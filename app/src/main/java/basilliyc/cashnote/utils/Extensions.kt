@@ -43,3 +43,11 @@ fun Double.asPriceString(showPlus: Boolean): String {
 }
 
 fun Double.asPriceWithCoins() = String.format(locale, "%.2f", this)
+
+fun <T> List<T>.reordered(from: Int, to: Int): MutableList<T> {
+	val mutable = if (this is MutableList) this else toMutableList()
+	if (from == to) return mutable
+	val element = mutable.removeAt(from)
+	mutable.add(to, element)
+	return mutable
+}

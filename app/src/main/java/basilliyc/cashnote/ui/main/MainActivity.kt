@@ -65,8 +65,8 @@ class MainActivity : ComponentActivity() {
 				}
 
 				CashNoteTheme {
-					Main()
-//					DragTest()
+//					Main()
+					DragTest()
 				}
 				
 			}

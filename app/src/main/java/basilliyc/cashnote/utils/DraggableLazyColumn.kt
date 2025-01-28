@@ -34,8 +34,8 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-val LocalDraggableLazyListState = compositionLocalOf<DraggableLazyListState> {
-	throw IllegalStateException("There is no default DraggableLazyListState provided.")
+val LocalDraggableLazyColumnState = compositionLocalOf<DraggableLazyColumnState> {
+	throw IllegalStateException("There is no default DraggableLazyColumnState provided.")
 }
 
 @Composable
@@ -60,7 +60,7 @@ fun DraggableLazyColumn(
 	var totalDraggedTo by remember { mutableIntStateOf(-1) }
 	
 	val lazyListState = rememberLazyListState()
-	val draggableListState = rememberDragAndDropListState(
+	val draggableListState = rememberDraggableLazyColumnState(
 		lazyListState = lazyListState,
 		onMove = { from, to ->
 			if (totalDraggedFrom == -1) {
@@ -77,7 +77,7 @@ fun DraggableLazyColumn(
 
 	
 	CompositionLocalProvider(
-		LocalDraggableLazyListState provides draggableListState,
+		LocalDraggableLazyColumnState provides draggableListState,
 	) {
 		
 		LazyColumn(
@@ -145,7 +145,7 @@ fun LazyItemScope.DraggableLazyColumnItem(
 	content: @Composable () -> Unit,
 	animateItem: Boolean = true,
 ) {
-	val draggableListState = LocalDraggableLazyListState.current
+	val draggableListState = LocalDraggableLazyColumnState.current
 	Box(
 		modifier = modifier
 			.composed {
@@ -189,11 +189,11 @@ class DraggableLazyColumnScope(var lazyListScope: LazyListScope?) {
 
 
 @Composable
-private fun rememberDragAndDropListState(
+private fun rememberDraggableLazyColumnState(
 	lazyListState: LazyListState,
 	onMove: (Int, Int) -> Unit,
-): DraggableLazyListState {
-	return remember { DraggableLazyListState(lazyListState, onMove) }
+): DraggableLazyColumnState {
+	return remember { DraggableLazyColumnState(lazyListState, onMove) }
 }
 
 private val LazyListItemInfo.offsetEnd: Int
@@ -203,7 +203,7 @@ private fun LazyListState.getVisibleItemInfo(itemPosition: Int): LazyListItemInf
 	return this.layoutInfo.visibleItemsInfo.getOrNull(itemPosition - this.firstVisibleItemIndex)
 }
 
-class DraggableLazyListState(
+class DraggableLazyColumnState(
 	val lazyListState: LazyListState,
 	private val onMove: (Int, Int) -> Unit,
 ) {

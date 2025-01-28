@@ -1,278 +1,188 @@
 package basilliyc.cashnote.ui.test
 
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import basilliyc.cashnote.data.FinancialTransactionCategory
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.data.color
+import basilliyc.cashnote.data.symbol
+import basilliyc.cashnote.ui.transaction.category.list.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalLogcat
+import basilliyc.cashnote.utils.applyIf
+import basilliyc.cashnote.utils.asPriceString
 import basilliyc.cashnote.utils.reordered
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 @Composable
 fun DragTest() {
-	val padding = PaddingValues(
-		top = 24.dp,
-		bottom = 32.dp,
-		start = 16.dp,
-		end = 16.dp,
-	)
-	var transactionCategories by remember {
+	
+	var accountList by remember {
 		mutableStateOf(
-			FinancialTransactionCategoryIcon.entries.mapIndexed { index, icon ->
-				FinancialTransactionCategory(
-					id = index.toLong(),
-					name = icon.name,
-					icon = icon,
-				)
-			}
+			listOf(
+				FinancialAccount(
+					id = 1,
+					name = "1 Cash",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 100.0,
+				),
+				FinancialAccount(
+					id = 2,
+					name = "2 Card",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 1000.0,
+				),
+				FinancialAccount(
+					id = 3,
+					name = "3 Savings",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 10000.0,
+				),
+				FinancialAccount(
+					id = 4,
+					name = "4 Credit",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 100000.0,
+				),
+				FinancialAccount(
+					id = 5,
+					name = "5 Crypto",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 1000000.0,
+				),
+				FinancialAccount(
+					id = 6,
+					name = "6 Other",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 10000000.0,
+				),
+				FinancialAccount(
+					id = 7,
+					name = "7 Other",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 10000000.0,
+				),
+				FinancialAccount(
+					id = 8,
+					name = "8 Other",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 10000000.0,
+				),
+				FinancialAccount(
+					id = 9,
+					name = "9 Other",
+					currency = AccountCurrency.USD,
+					color = null,
+					balance = 10000000.0,
+				),
+			)
 		)
 	}
 	
 	val logcat = LocalLogcat.current
 	
-	val lazyListState = rememberLazyListState()
-	val dragAndDropListState = rememberDragAndDropListState(
-		lazyListState = lazyListState,
-		onMove = { from, to ->
-			logcat.debug("On move from $from to $to")
-			transactionCategories = ArrayList(transactionCategories).apply {
-				reordered(from, to)
-			}
+	DraggableVerticalGrid(
+		modifier = Modifier.padding(
+			top = 24.dp,
+			bottom = 24.dp
+		),
+		columns = GridCells.Adaptive(128.dp),
+		horizontalArrangement = Arrangement.spacedBy(8.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+		contentPadding = PaddingValues(8.dp),
+		onDragStarted = {
+			logcat.debug("onDragStarted")
+		},
+		onDragCompleted = { from, to ->
+			logcat.debug("onDragCompleted: $from -> $to")
+		},
+		onDragReverted = {
+			logcat.debug("onDragReverted")
+		},
+		onDragMoved = { from, to ->
+			accountList = accountList.let { ArrayList(it) }.reordered(from, to)
 		}
-	)
 	
-	val coroutineScope = rememberCoroutineScope()
-	var overscrollJob by remember { mutableStateOf<Job?>(null) }
-	
-	LazyColumn(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(padding)
-			.pointerInput(Unit) {
-				detectDragGesturesAfterLongPress(
-					onDragStart = { offset ->
-						dragAndDropListState.onDragStart(offset)
-					},
-					onDragEnd = {
-						dragAndDropListState.onDragInterrupted()
-					},
-					onDragCancel = {
-						dragAndDropListState.onDragInterrupted()
-					},
-					onDrag = { change, dragAmount ->
-						change.consume()
-						dragAndDropListState.onDrag(dragAmount)
-						
-						if (overscrollJob?.isActive == true) return@detectDragGesturesAfterLongPress
-						
-						dragAndDropListState
-							.checkOverscroll()
-							.takeIf { it != 0f }
-							?.let {
-								overscrollJob = coroutineScope.launch {
-									dragAndDropListState.lazyListState.scrollBy(it)
-								}
-							} ?: kotlin.run { overscrollJob?.cancel() }
-					}
-				)
-			},
-		state = lazyListState,
-//		verticalArrangement = Arrangement.spacedBy(8.dp),
 	) {
 		items(
-			count = transactionCategories.size,
-			key = { transactionCategories[it].id },
-			itemContent = { index ->
-				val category = transactionCategories[index]
-				CategoryItem(
-					category = category,
-					onClick = { logcat.debug("On click $it") },
-					isDragging = index == dragAndDropListState.currentIndexOfDraggedItem,
+			count = accountList.size,
+			key = { accountList[it].id },
+			itemContent = { index, isDragged ->
+				ContentDataItem(
 					modifier = Modifier
-						.composed {
-							val offsetOrNull =
-								dragAndDropListState.elementDisplacement.takeIf {
-									index == dragAndDropListState.currentIndexOfDraggedItem
-								}
-							Modifier.graphicsLayer {
-								translationY = offsetOrNull ?: 0f
-							}
-						}
-						.zIndex(if (index == dragAndDropListState.currentIndexOfDraggedItem) 1F else 0F)
+						.padding()
+						.applyIf({ isDragged }) {
+							this.shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
+						},
+					financialAccount = accountList[index],
+					onClickAccount = {},
 				)
 			}
 		)
 	}
-}
-
-
-class DraggableLazyListState(
-	val lazyListState: LazyListState,
-	private val onMove: (Int, Int) -> Unit,
-) {
 	
-	private var initialDraggingElement by mutableStateOf<LazyListItemInfo?>(null)
-	var currentIndexOfDraggedItem by mutableStateOf<Int?>(null)
-	
-	fun onDragStart(offset: Offset) {
-		lazyListState.layoutInfo.visibleItemsInfo
-			.firstOrNull { item -> offset.y.toInt() in item.offset..item.offsetEnd }
-			?.also {
-				initialDraggingElement = it
-				currentIndexOfDraggedItem = it.index
-			}
-	}
-	
-	private var draggingDistance by mutableFloatStateOf(0f)
-	private val initialOffsets: Pair<Int, Int>?
-		get() = initialDraggingElement?.let { Pair(it.offset, it.offsetEnd) }
-	
-	fun onDrag(offset: Offset) {
-		draggingDistance += offset.y
-		
-		initialOffsets?.let { (top, bottom) ->
-			val startOffset = top.toFloat() + draggingDistance
-			val endOffset = bottom.toFloat() + draggingDistance
-			val threshold = (bottom - top) * 0.4F
-			
-			currentElement?.let { current ->
-				lazyListState.layoutInfo.visibleItemsInfo
-					.filterNot { item ->
-						item.offsetEnd < startOffset || item.offset > endOffset || current.index == item.index
-					}
-					.firstOrNull { item ->
-						val delta = startOffset - current.offset
-						when {
-							delta < 0F -> (item.offset + threshold) > startOffset
-							delta == 0F -> false
-							else -> (item.offsetEnd - threshold) < endOffset
-						}
-					}
-			}?.let { item ->
-				currentIndexOfDraggedItem?.let { currentIndex ->
-					onMove.invoke(currentIndex, item.index)
-				}
-				currentIndexOfDraggedItem = item.index
-			}
-		}
-	}
-	
-	private val currentElement: LazyListItemInfo?
-		get() = currentIndexOfDraggedItem?.let {
-			lazyListState.getVisibleItemInfo(it)
-		}
-	
-	fun checkOverscroll(): Float {
-		return initialDraggingElement?.let {
-			val startOffset = it.offset + draggingDistance
-			val endOffset = it.offsetEnd + draggingDistance
-			
-			return@let when {
-				draggingDistance > 0 -> {
-					(endOffset - lazyListState.layoutInfo.viewportEndOffset).takeIf { diff -> diff > 0 }
-				}
-				
-				draggingDistance < 0 -> {
-					(startOffset - lazyListState.layoutInfo.viewportStartOffset).takeIf { diff -> diff < 0 }
-				}
-				
-				else -> null
-			}
-		} ?: 0f
-	}
-	
-	fun onDragInterrupted() {
-		initialDraggingElement = null
-		currentIndexOfDraggedItem = null
-		draggingDistance = 0f
-	}
-	
-	val elementDisplacement: Float?
-		get() = currentIndexOfDraggedItem?.let {
-			lazyListState.getVisibleItemInfo(it)
-		}?.let { itemInfo ->
-			(initialDraggingElement?.offset ?: 0f).toFloat() + draggingDistance - itemInfo.offset
-		}
-	
-}
-
-@Composable
-fun rememberDragAndDropListState(
-	lazyListState: LazyListState,
-	onMove: (Int, Int) -> Unit,
-): DraggableLazyListState {
-	return remember { DraggableLazyListState(lazyListState, onMove) }
-}
-
-
-
-private val LazyListItemInfo.offsetEnd: Int
-	get() = this.offset + this.size
-
-private fun LazyListState.getVisibleItemInfo(itemPosition: Int): LazyListItemInfo? {
-	return this.layoutInfo.visibleItemsInfo.getOrNull(itemPosition - this.firstVisibleItemIndex)
 }
 
 
 @Composable
-private fun LazyItemScope.CategoryItem(
-	modifier: Modifier = Modifier,
-	category: FinancialTransactionCategory,
-	onClick: (Long) -> Unit,
-	isDragging: Boolean,
+private fun ContentDataItem(
+	modifier: Modifier,
+	financialAccount: FinancialAccount,
+	onClickAccount: (id: Long) -> Unit,
 ) {
 	Card(
-		modifier = modifier
-			.let {
-				if (isDragging) it
-				else it.animateItem()
-			}
-			.fillMaxWidth(),
-		onClick = { onClick(category.id) },
+		modifier = modifier,
+		onClick = { onClickAccount(financialAccount.id) },
+		colors = CardDefaults.cardColors(
+			containerColor = financialAccount.color?.color ?: Color.Unspecified
+		)
 	) {
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
-		) {
-			category.icon?.imageVector?.let { icon ->
-				Icon(
-					imageVector = icon,
-					contentDescription = category.name,
-					modifier = Modifier.padding(start = 8.dp)
+		Column {
+			Text(text = financialAccount.name, modifier = Modifier.padding(8.dp))
+			Row {
+				Text(
+					text = financialAccount.currency.symbol,
+					modifier = Modifier.padding(horizontal = 8.dp)
+				)
+				Spacer(modifier = Modifier.weight(1F))
+				Text(
+					text = financialAccount.balance.asPriceString(showPlus = false),
+					modifier = Modifier.padding(horizontal = 8.dp)
 				)
 			}
+			//TODO set real day difference
 			Text(
-				modifier = Modifier.padding(8.dp),
-				text = category.name,
-				maxLines = 1,
+				modifier = Modifier
+					.padding(8.dp)
+					.fillMaxWidth(),
+				text = (-50.7).asPriceString(showPlus = true),
+				textAlign = TextAlign.End
 			)
 		}
 	}

@@ -16,6 +16,7 @@ inline fun <T> T.applyIf(condition: T.() -> Boolean, block: T.() -> T): T {
 	return if (condition(this)) block(this) else this
 }
 
+
 inline fun <reified T> Any?.castOrNull(): T? {
 	if (this == null) return null
 	if (this is T) return this as T

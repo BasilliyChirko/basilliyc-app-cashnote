@@ -9,13 +9,12 @@ import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.utils.Logcat
+import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.max
-import kotlin.math.min
 
 class FinancialManager {
 	
@@ -27,6 +26,11 @@ class FinancialManager {
 	private val transactionRepository: DatabaseTransactionRepository by inject()
 	private val transactionCategoryRepository: DatabaseTransactionCategoryRepository by inject()
 	
+	
+	private suspend inline fun <T> databaseTransaction(crossinline block: suspend () -> T) {
+		appDatabase.withTransaction { block() }
+	}
+	
 	//----------------------------------------------------------------------------------------------
 	//  Account
 	//----------------------------------------------------------------------------------------------
@@ -37,10 +41,51 @@ class FinancialManager {
 	
 	fun getAccountByIdAsFlow(id: Long) = accountRepository.getByIdAsFlow(id)
 	
-	suspend fun saveAccount(financialAccount: FinancialAccount) =
+	suspend fun saveAccount(financialAccount: FinancialAccount) = databaseTransaction {
+		val financialAccount = financialAccount
+			.applyIf({ id == 0L }) {
+				copy(
+					position = accountRepository.getNextPosition()
+				)
+			}
+		
 		accountRepository.save(financialAccount)
+	}
 	
-	suspend fun deleteAccount(accountId: Long) = accountRepository.delete(accountId)
+	suspend fun deleteAccount(accountId: Long) = databaseTransaction {
+		accountRepository.delete(accountId)
+		
+		val accounts = accountRepository.getList()
+			.mapIndexed { index, category ->
+				category.copy(
+					position = index
+				)
+			}
+		accountRepository.save(accounts)
+	}
+	
+	suspend fun changeAccountPosition(from: Int, to: Int) = databaseTransaction {
+		val accounts = accountRepository.getList()
+			.reordered(from, to)
+			.mapIndexed { index, category ->
+				category.copy(
+					position = index
+				)
+			}
+		accountRepository.save(accounts)
+	}
+	
+	private suspend fun DatabaseAccountRepository.getNextPosition(): Int {
+		var currentMaxPosition = this.getMaxPosition()
+		
+		if (currentMaxPosition == 0) {
+			if (this.getItemsCount() == 0) {
+				currentMaxPosition = -1
+			}
+		}
+		
+		return currentMaxPosition + 1
+	}
 	
 	//----------------------------------------------------------------------------------------------
 	//  Transaction
@@ -72,7 +117,7 @@ class FinancialManager {
 			categoryId = categoryId,
 		)
 		
-		appDatabase.withTransaction {
+		databaseTransaction {
 			transactionRepository.save(transaction)
 			accountRepository.save(account.copy(balance = account.balance + value))
 		}
@@ -88,29 +133,45 @@ class FinancialManager {
 	
 	suspend fun getTransactionCategoryById(id: Long) = transactionCategoryRepository.getById(id)
 	
-	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) {
+	private suspend fun DatabaseTransactionCategoryRepository.getNextPosition(): Int {
+		var currentMaxPosition = this.getMaxPosition()
 		
-		val category = category.let {
-			if (category.id == 0L) {
-				var maxPosition = transactionCategoryRepository.getMaxPosition()
-				
-				if (maxPosition == 0) {
-					if (transactionCategoryRepository.getItemsCount() == 0) {
-						maxPosition = -1
-					}
-				}
-				
-				it.copy(position = maxPosition + 1)
-			} else it
+		if (currentMaxPosition == 0) {
+			if (this.getItemsCount() == 0) {
+				currentMaxPosition = -1
+			}
 		}
 		
-		transactionCategoryRepository.save(category)
+		return currentMaxPosition + 1
 	}
 	
-	suspend fun deleteTransactionCategory(categoryId: Long) =
-		transactionCategoryRepository.delete(categoryId)
+	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) =
+		databaseTransaction {
+			
+			val category = category
+				.applyIf({ id == 0L }) {
+					copy(
+						position = transactionCategoryRepository.getNextPosition()
+					)
+				}
+			
+			transactionCategoryRepository.save(category)
+			
+		}
 	
-	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) {
+	suspend fun deleteTransactionCategory(categoryId: Long) = databaseTransaction {
+		transactionCategoryRepository.delete(categoryId)
+		val categories = transactionCategoryRepository.getList()
+			.mapIndexed { index, category ->
+				category.copy(
+					position = index
+				)
+			}
+		transactionCategoryRepository.save(categories)
+		
+	}
+	
+	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) = databaseTransaction {
 		val categories = transactionCategoryRepository.getList()
 			.reordered(from, to)
 			.mapIndexed { index, category ->

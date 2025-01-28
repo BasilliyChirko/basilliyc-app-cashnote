@@ -17,6 +17,7 @@ data class FinancialAccount(
 	val currency: AccountCurrency,
 	val color: AccountColor?,
 	val balance: Double,
+	val position: Int = id.toInt(),
 )
 
 enum class AccountCurrency {

@@ -41,4 +41,14 @@ abstract class DatabaseAccountRepository {
 	@Query("SELECT * FROM FinancialAccount WHERE id=:id")
 	abstract fun getByIdAsFlow(id: Long): Flow<FinancialAccount?>
 	
+	//----------------------------------------------------------------------------------------------
+	//  OTHER
+	//----------------------------------------------------------------------------------------------
+	
+	@Query("SELECT COUNT(position) FROM FinancialAccount")
+	abstract suspend fun getItemsCount(): Int
+	
+	@Query("SELECT MAX(position) FROM FinancialAccount")
+	abstract suspend fun getMaxPosition(): Int
+	
 }

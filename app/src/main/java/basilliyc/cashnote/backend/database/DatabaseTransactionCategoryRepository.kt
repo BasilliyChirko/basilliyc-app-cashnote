@@ -43,9 +43,9 @@ abstract class DatabaseTransactionCategoryRepository {
 	//----------------------------------------------------------------------------------------------
 	
 	@Query("SELECT COUNT(position) FROM FinancialTransactionCategory")
-	abstract fun getItemsCount(): Int
+	abstract suspend fun getItemsCount(): Int
 	
 	@Query("SELECT MAX(position) FROM FinancialTransactionCategory")
-	abstract fun getMaxPosition(): Int
+	abstract suspend fun getMaxPosition(): Int
 	
 }

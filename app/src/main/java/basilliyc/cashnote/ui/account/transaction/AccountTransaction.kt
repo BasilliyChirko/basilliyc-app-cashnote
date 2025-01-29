@@ -1,10 +1,12 @@
-@file:OptIn(ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 
 package basilliyc.cashnote.ui.account.transaction
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -27,12 +30,18 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -69,8 +78,12 @@ import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
+import basilliyc.cashnote.utils.OutlinedButton
+import basilliyc.cashnote.utils.TimestampStyle
 import basilliyc.cashnote.utils.asPriceWithCoins
+import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.toast
+import java.util.Calendar
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -93,6 +106,8 @@ fun AccountTransaction() {
 		onAccountEditClicked = viewModel::onAccountEditClicked,
 		onAccountDeleteClicked = viewModel::onAccountDeleteClicked,
 		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
+		onDateClicked = viewModel::onDateClicked,
+		onTimeClicked = viewModel::onTimeClicked,
 	)
 	
 	val action = state.action
@@ -133,11 +148,22 @@ fun AccountTransaction() {
 		viewModel.onActionConsumed()
 	}
 	
-	when (state.dialog) {
+	when (val dialogState = state.dialog) {
 		null -> Unit
 		AccountTransactionState.Dialog.AccountDeleteConfirmation -> DialogDeleteConfirmation(
 			onConfirm = viewModel::onAccountDeleteDialogConfirmed,
 			onCancel = viewModel::onAccountDeleteDialogCanceled,
+		)
+		
+		is AccountTransactionState.Dialog.DatePicker -> TransactionDatePickerDialog(
+			timestamp = dialogState.timestamp,
+			onDateSelected = viewModel::onDialogDateSelected,
+			onDismiss = viewModel::onDialogDateDismiss,
+		)
+		is AccountTransactionState.Dialog.TimePicker -> TransactionTimePickerDialog(
+			timestamp = dialogState.timestamp,
+			onTimeSelected = viewModel::onDialogTimeSelected,
+			onDismiss = viewModel::onDialogTimeDismiss,
 		)
 	}
 }
@@ -180,6 +206,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 				comment = TextFieldState(""),
 				availableCategories = availableCategories,
 				selectedCategoryId = availableCategories.getOrNull(0)?.id,
+				timestamp = System.currentTimeMillis(),
 			),
 		),
 		onBalanceDifferenceChanged = {},
@@ -191,6 +218,8 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		onAccountEditClicked = {},
 		onAccountDeleteClicked = {},
 		onAccountHistoryClicked = {},
+		onDateClicked = {},
+		onTimeClicked = {},
 	)
 }
 
@@ -210,6 +239,8 @@ private fun Content(
 	onAccountEditClicked: () -> Unit,
 	onAccountDeleteClicked: () -> Unit,
 	onAccountHistoryClicked: () -> Unit,
+	onDateClicked: () -> Unit,
+	onTimeClicked: () -> Unit,
 ) {
 	Scaffold(
 		topBar = {
@@ -237,6 +268,8 @@ private fun Content(
 					onCommentChanged = onCommentChanged,
 					onSaveClicked = onSaveClicked,
 					onCategoryChanged = onCategoryChanged,
+					onDateClicked = onDateClicked,
+					onTimeClicked = onTimeClicked,
 				)
 			}
 		}
@@ -335,6 +368,8 @@ private fun ContentData(
 	onCategoryChanged: (Long?) -> Unit,
 	onCommentChanged: (String) -> Unit,
 	onSaveClicked: () -> Unit,
+	onDateClicked: () -> Unit,
+	onTimeClicked: () -> Unit,
 ) {
 	val focusRequester = remember { FocusRequester() }
 	LaunchedEffect(Unit) {
@@ -375,6 +410,11 @@ private fun ContentData(
 			availableCategories = content.availableCategories,
 			selectedCategoryId = content.selectedCategoryId,
 			onCategoryChanged = onCategoryChanged,
+		)
+		TransactionTimestamp(
+			timestamp = content.timestamp,
+			onDateClicked = onDateClicked,
+			onTimeClicked = onTimeClicked,
 		)
 		TransactionComment(
 			state = content.comment,
@@ -515,6 +555,106 @@ private fun TransactionCategory(
 	if (availableCategories.isNotEmpty()) {
 		Spacer(modifier = Modifier.height(8.dp))
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+// CONTENT.TIMESTAMP
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun ColumnScope.TransactionTimestamp(
+	timestamp: Long,
+	onDateClicked: () -> Unit,
+	onTimeClicked: () -> Unit,
+) {
+	Column(
+		modifier = Modifier
+			.padding(horizontal = 16.dp)
+	) {
+		Text(text = stringResource(R.string.account_transaction_label_timestamp))
+		Row {
+			OutlinedButton(
+				modifier = Modifier.weight(1F),
+				onClick = onDateClicked,
+				text = timestamp.format(TimestampStyle.YearMonthDay),
+			)
+			Spacer(modifier = Modifier.width(16.dp))
+			OutlinedButton(
+				modifier = Modifier.weight(1F),
+				onClick = onTimeClicked,
+				text = timestamp.format(TimestampStyle.HourMinute),
+			)
+		}
+	}
+}
+
+@Composable
+private fun TransactionDatePickerDialog(
+	timestamp: Long,
+	onDateSelected: (Long) -> Unit,
+	onDismiss: () -> Unit,
+) {
+	val datePickerState = rememberDatePickerState(
+		initialSelectedDateMillis = timestamp
+	)
+	
+	DatePickerDialog(
+		onDismissRequest = onDismiss,
+		confirmButton = {
+			TextButton(onClick = {
+				onDateSelected(datePickerState.selectedDateMillis!!)
+				onDismiss()
+			}) {
+				Text(text = stringResource(R.string.account_transaction_date_picker_confirm))
+			}
+		},
+		dismissButton = {
+			TextButton(onClick = onDismiss) {
+				Text(text = stringResource(R.string.account_transaction_date_picker_cancel))
+			}
+		}
+	) {
+		DatePicker(state = datePickerState)
+	}
+}
+
+@Composable
+private fun TransactionTimePickerDialog(
+	timestamp: Long,
+	onTimeSelected: (hour: Int, minute: Int) -> Unit,
+	onDismiss: () -> Unit,
+) {
+	val initials = remember {
+		Calendar.getInstance().apply {
+			timeInMillis = timestamp
+		}
+	}
+	val timePickerState = rememberTimePickerState(
+		initialHour = initials.get(Calendar.HOUR_OF_DAY),
+		initialMinute = initials.get(Calendar.MINUTE),
+		is24Hour = true,
+	)
+
+	AlertDialog(
+		onDismissRequest = onDismiss,
+		confirmButton = {
+			TextButton(onClick = {
+				onTimeSelected(timePickerState.hour, timePickerState.minute)
+				onDismiss()
+			}) {
+				Text(text = stringResource(R.string.account_transaction_date_picker_confirm))
+			}
+		},
+		dismissButton = {
+			TextButton(onClick = onDismiss) {
+				Text(text = stringResource(R.string.account_transaction_date_picker_cancel))
+			}
+		},
+		text = {
+			TimePicker(state = timePickerState)
+		}
+	)
+
 }
 
 //--------------------------------------------------------------------------------------------------

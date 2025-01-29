@@ -67,16 +67,13 @@ class FinancialManager {
 	suspend fun changeAccountPosition(from: Int, to: Int) = databaseTransaction {
 		if (from == to) return@databaseTransaction
 		if (from == -1 || to == -1) return@databaseTransaction
-		logcat.debug(from, to)
 		val accounts = accountRepository.getList()
-			.onEach { logcat.debug("BEFORE", it) }
 			.reordered(from, to)
 			.mapIndexed { index, category ->
 				category.copy(
 					position = index
 				)
 			}
-			.onEach { logcat.debug("AFTER ", it) }
 		
 		accountRepository.save(accounts)
 	}
@@ -102,6 +99,7 @@ class FinancialManager {
 		value: Double,
 		comment: String,
 		categoryId: Long?,
+		timestamp: Long,
 	) {
 		
 		if (value == 0.0) return
@@ -117,7 +115,7 @@ class FinancialManager {
 		val transaction = FinancialTransaction(
 			id = 0,
 			value = value,
-			date = System.currentTimeMillis(),
+			date = timestamp,
 			comment = comment,
 			accountId = account.id,
 			categoryId = categoryId,
@@ -178,6 +176,8 @@ class FinancialManager {
 	}
 	
 	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) = databaseTransaction {
+		if (from == to) return@databaseTransaction
+		if (from == -1 || to == -1) return@databaseTransaction
 		val categories = transactionCategoryRepository.getList()
 			.reordered(from, to)
 			.mapIndexed { index, category ->

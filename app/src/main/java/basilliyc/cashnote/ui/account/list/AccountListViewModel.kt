@@ -28,9 +28,6 @@ class AccountListViewModel : BaseViewModel() {
 		state = state.copy(content = AccountListState.Content.Loading)
 		viewModelScope.launch {
 			financialManager.getAccountsListAsFlow().collectLatest {
-				logcat.debug(it.joinToString(separator = "-") {
-					it.name
-				})
 				state = state.copy(
 					content = if (it.isNotEmpty()) AccountListState.Content.Data(it)
 					else AccountListState.Content.DataEmpty

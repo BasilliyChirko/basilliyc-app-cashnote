@@ -32,7 +32,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import basilliyc.cashnote.R
-import basilliyc.cashnote.ui.test.DragTest
 import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalLogcat
@@ -66,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
 				CashNoteTheme {
 					Main()
-//					DragTest()
 				}
 				
 			}

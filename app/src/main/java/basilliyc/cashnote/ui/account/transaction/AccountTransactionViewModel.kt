@@ -1,5 +1,6 @@
 package basilliyc.cashnote.ui.account.transaction
 
+import android.icu.util.Calendar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -79,6 +80,7 @@ class AccountTransactionViewModel(
 					comment = TextFieldState(""),
 					availableCategories = availableCategories,
 					selectedCategoryId = null,
+					timestamp = System.currentTimeMillis(),
 				)
 			)
 		}
@@ -181,6 +183,7 @@ class AccountTransactionViewModel(
 					value = transactionValue,
 					comment = data.comment.value,
 					categoryId = data.selectedCategoryId,
+					timestamp = data.timestamp,
 				)
 				stateAction = AccountTransactionState.Action.SaveSuccess
 			} catch (t: Throwable) {
@@ -230,5 +233,54 @@ class AccountTransactionViewModel(
 		}
 	}
 	
+	fun onDateClicked() {
+		val data = stateContentData ?: return
+		stateDialog = AccountTransactionState.Dialog.DatePicker(data.timestamp)
+	}
+	
+	fun onDialogDateSelected(timestamp: Long) {
+		val data = stateContentData ?: return
+		
+		val previousCalendar = Calendar.getInstance().apply { timeInMillis = data.timestamp }
+		val newCalendar = Calendar.getInstance().apply {
+			timeInMillis = timestamp
+			set(Calendar.HOUR_OF_DAY, previousCalendar.get(Calendar.HOUR_OF_DAY))
+			set(Calendar.MINUTE, previousCalendar.get(Calendar.MINUTE))
+			set(Calendar.SECOND, previousCalendar.get(Calendar.SECOND))
+		}
+		
+		stateContentData = stateContentData?.copy(
+			timestamp = newCalendar.timeInMillis,
+		)
+		stateDialog = null
+	}
+	
+	fun onDialogDateDismiss() {
+		stateDialog = null
+	}
+	
+	fun onTimeClicked() {
+		val data = stateContentData ?: return
+		stateDialog = AccountTransactionState.Dialog.TimePicker(data.timestamp)
+	}
+	
+	fun onDialogTimeSelected(hour: Int, minute: Int) {
+		val data = stateContentData ?: return
+		
+		val newCalendar = Calendar.getInstance().apply {
+			timeInMillis = data.timestamp
+			set(Calendar.HOUR_OF_DAY, hour)
+			set(Calendar.MINUTE, minute)
+		}
+		
+		stateContentData = stateContentData?.copy(
+			timestamp = newCalendar.timeInMillis
+		)
+		stateDialog = null
+	}
+	
+	fun onDialogTimeDismiss() {
+		stateDialog = null
+	}
 	
 }

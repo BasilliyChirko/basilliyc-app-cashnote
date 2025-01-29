@@ -20,11 +20,14 @@ data class AccountTransactionState(
 			val comment: TextFieldState,
 			val availableCategories: List<FinancialTransactionCategory>,
 			val selectedCategoryId: Long?,
+			val timestamp: Long,
 		) : Content
 	}
 	
 	sealed interface Dialog {
 		data object AccountDeleteConfirmation : Dialog
+		data class DatePicker(val timestamp: Long) : Dialog
+		data class TimePicker(val timestamp: Long) : Dialog
 	}
 	
 	sealed interface Action {

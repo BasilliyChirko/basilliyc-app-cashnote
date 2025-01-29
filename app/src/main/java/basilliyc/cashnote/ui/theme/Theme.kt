@@ -1,6 +1,5 @@
 package basilliyc.cashnote.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,6 +8,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -33,26 +34,50 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+
+enum class ThemeMode {
+	Night, Day, System
+}
+
+val LocalThemeMode = staticCompositionLocalOf { ThemeMode.System }
+
+@Composable
+fun isDarkTheme(): Boolean {
+	return when (LocalThemeMode.current) {
+		ThemeMode.Night -> true
+		ThemeMode.Day -> false
+		ThemeMode.System -> isSystemInDarkTheme()
+	}
+}
+
 @Composable
 fun CashNoteTheme(
-	darkTheme: Boolean = isSystemInDarkTheme(),
+	themeMode: ThemeMode = ThemeMode.System, // TODO replace with LocalNightMode
 	// Dynamic color is available on Android 12+
 	dynamicColor: Boolean = true,
-	content: @Composable () -> Unit
+	content: @Composable () -> Unit,
 ) {
-	val colorScheme = when {
-		dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-			val context = LocalContext.current
-			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+	CompositionLocalProvider(
+		LocalThemeMode provides themeMode,
+	) {
+		
+		val darkTheme = isDarkTheme()
+		
+		val colorScheme = when {
+			dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+				val context = LocalContext.current
+				if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+			}
+			
+			darkTheme -> DarkColorScheme
+			else -> LightColorScheme
 		}
 		
-		darkTheme -> DarkColorScheme
-		else -> LightColorScheme
+		MaterialTheme(
+			colorScheme = colorScheme,
+			typography = Typography,
+			content = content
+		)
 	}
 	
-	MaterialTheme(
-		colorScheme = colorScheme,
-		typography = Typography,
-		content = content
-	)
 }

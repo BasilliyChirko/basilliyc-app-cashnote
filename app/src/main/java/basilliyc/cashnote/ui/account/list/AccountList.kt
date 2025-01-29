@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Kayaking
@@ -28,8 +27,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
@@ -45,9 +47,16 @@ import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
+import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.asPriceString
+import basilliyc.cashnote.utils.reordered
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 
 
 //--------------------------------------------------------------------------------------------------
@@ -60,12 +69,17 @@ fun AccountList() {
 	val navController = LocalNavController.current
 	Content(
 		state = viewModel.state,
+		draggedList = viewModel.draggedList,
 		onClickAddNewAccount = {
 			navController.navigate(AppNavigation.AccountForm(accountId = null))
 		},
 		onClickAccount = {
 			navController.navigate(AppNavigation.AccountTransaction(accountId = it))
 		},
+		onDragStarted = viewModel::onDragStarted,
+		onDragCompleted = viewModel::onDragCompleted,
+		onDragReverted = viewModel::onDragReverted,
+		onDragMoved = viewModel::onDragMoved,
 	)
 }
 
@@ -81,27 +95,37 @@ private fun AccountListPreview() = DefaultPreview {
 						name = "Account 1",
 						balance = 100.0,
 						currency = AccountCurrency.UAH,
-						color = null
+						color = null,
+						position = 0,
 					),
 					FinancialAccount(
 						id = 2,
 						name = "Account 2",
 						balance = 200.0,
 						currency = AccountCurrency.UAH,
-						color = null
+						color = null,
+						position = 1,
 					),
 					FinancialAccount(
 						id = 3,
 						name = "Account 3",
 						balance = 300.0,
 						currency = AccountCurrency.UAH,
-						color = null
+						color = null,
+						position = 2,
 					),
 				)
 			),
 //			content = AccountListState.Content.Loading,
 //			content = AccountListState.Content.DataEmpty,
-		)
+		),
+		draggedList = null,
+		onClickAddNewAccount = {},
+		onClickAccount = {},
+		onDragStarted = {},
+		onDragCompleted = { _, _ -> },
+		onDragReverted = {},
+		onDragMoved = { _, _ -> },
 	)
 }
 
@@ -112,8 +136,13 @@ private fun AccountListPreview() = DefaultPreview {
 @Composable
 private fun Content(
 	state: AccountListState,
-	onClickAddNewAccount: () -> Unit = {},
-	onClickAccount: (id: Long) -> Unit = {},
+	draggedList: List<FinancialAccount>?,
+	onClickAddNewAccount: () -> Unit,
+	onClickAccount: (id: Long) -> Unit,
+	onDragStarted: () -> Unit,
+	onDragCompleted: (from: Int, to: Int) -> Unit,
+	onDragReverted: () -> Unit,
+	onDragMoved: (from: Int, to: Int) -> Unit,
 ) {
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
@@ -133,7 +162,12 @@ private fun Content(
 				is AccountListState.Content.Data -> ContentData(
 					modifier = modifier,
 					content = content,
+					draggedList = draggedList,
 					onClickAccount = onClickAccount,
+					onDragStarted = onDragStarted,
+					onDragCompleted = onDragCompleted,
+					onDragReverted = onDragReverted,
+					onDragMoved = onDragMoved,
 				)
 				
 				is AccountListState.Content.DataEmpty -> ContentDataEmpty(
@@ -192,25 +226,40 @@ private fun ContentDataEmpty(
 private fun ContentData(
 	modifier: Modifier = Modifier,
 	content: AccountListState.Content.Data,
+	draggedList: List<FinancialAccount>? = null,
 	onClickAccount: (id: Long) -> Unit,
+	onDragStarted: () -> Unit,
+	onDragCompleted: (from: Int, to: Int) -> Unit,
+	onDragReverted: () -> Unit,
+	onDragMoved: (from: Int, to: Int) -> Unit,
 ) {
-	LazyVerticalGrid(
-		modifier = modifier,
+	val accounts = draggedList ?: content.financialAccounts
+	DraggableVerticalGrid(
+		modifier = modifier.fillMaxSize(),
 		columns = GridCells.Adaptive(128.dp),
 		horizontalArrangement = Arrangement.spacedBy(8.dp),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 		contentPadding = PaddingValues(8.dp),
+		onDragStarted = onDragStarted,
+		onDragCompleted = onDragCompleted,
+		onDragReverted = onDragReverted,
+		onDragMoved = onDragMoved,
+		
 	) {
 		items(
-			count = content.financialAccounts.size,
-			key = { content.financialAccounts[it].id },
-		) {
-			ContentDataItem(
-				modifier = Modifier.animateItem(),
-				financialAccount = content.financialAccounts[it],
-				onClickAccount = onClickAccount,
-			)
-		}
+			count = accounts.size,
+			key = { accounts[it].id },
+			itemContent = { index, isDragged ->
+				ContentDataItem(
+					modifier = Modifier
+						.applyIf({ isDragged }) {
+							this.shadow(elevation = 4.dp, shape = MaterialTheme.shapes.medium)
+						},
+					financialAccount = accounts[index],
+					onClickAccount = onClickAccount,
+				)
+			}
+		)
 	}
 }
 

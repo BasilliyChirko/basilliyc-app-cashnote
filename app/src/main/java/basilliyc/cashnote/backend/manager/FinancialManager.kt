@@ -65,13 +65,19 @@ class FinancialManager {
 	}
 	
 	suspend fun changeAccountPosition(from: Int, to: Int) = databaseTransaction {
+		if (from == to) return@databaseTransaction
+		if (from == -1 || to == -1) return@databaseTransaction
+		logcat.debug(from, to)
 		val accounts = accountRepository.getList()
+			.onEach { logcat.debug("BEFORE", it) }
 			.reordered(from, to)
 			.mapIndexed { index, category ->
 				category.copy(
 					position = index
 				)
 			}
+			.onEach { logcat.debug("AFTER ", it) }
+		
 		accountRepository.save(accounts)
 	}
 	

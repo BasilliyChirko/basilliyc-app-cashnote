@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.transaction.category.list
+package basilliyc.cashnote.utils
 
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults

@@ -1,14 +1,22 @@
 package basilliyc.cashnote.data
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import basilliyc.cashnote.ui.theme.AccountColorBlue
-import basilliyc.cashnote.ui.theme.AccountColorGreen
-import basilliyc.cashnote.ui.theme.AccountColorOrange
-import basilliyc.cashnote.ui.theme.AccountColorPurple
-import basilliyc.cashnote.ui.theme.AccountColorTurquoise
-import basilliyc.cashnote.ui.theme.AccountColorYellow
+import basilliyc.cashnote.ui.theme.AccountColorDayBlue
+import basilliyc.cashnote.ui.theme.AccountColorDayGreen
+import basilliyc.cashnote.ui.theme.AccountColorDayOrange
+import basilliyc.cashnote.ui.theme.AccountColorDayPurple
+import basilliyc.cashnote.ui.theme.AccountColorDayTurquoise
+import basilliyc.cashnote.ui.theme.AccountColorDayYellow
+import basilliyc.cashnote.ui.theme.AccountColorNightBlue
+import basilliyc.cashnote.ui.theme.AccountColorNightGreen
+import basilliyc.cashnote.ui.theme.AccountColorNightOrange
+import basilliyc.cashnote.ui.theme.AccountColorNightPurple
+import basilliyc.cashnote.ui.theme.AccountColorNightTurquoise
+import basilliyc.cashnote.ui.theme.AccountColorNightYellow
+import basilliyc.cashnote.ui.theme.isDarkTheme
 
 @Entity
 data class FinancialAccount(
@@ -17,7 +25,7 @@ data class FinancialAccount(
 	val currency: AccountCurrency,
 	val color: AccountColor?,
 	val balance: Double,
-	val position: Int = id.toInt(),
+	val position: Int,
 )
 
 enum class AccountCurrency {
@@ -36,11 +44,12 @@ val AccountCurrency.symbol: String
 	}
 
 val AccountColor.color: Color
+	@Composable
 	get() = when (this) {
-		AccountColor.Orange -> AccountColorOrange
-		AccountColor.Green -> AccountColorGreen
-		AccountColor.Blue -> AccountColorBlue
-		AccountColor.Yellow -> AccountColorYellow
-		AccountColor.Purple -> AccountColorPurple
-		AccountColor.Turquoise -> AccountColorTurquoise
+		AccountColor.Orange -> if (isDarkTheme()) AccountColorNightOrange else AccountColorDayOrange
+		AccountColor.Green -> if (isDarkTheme()) AccountColorNightGreen else AccountColorDayGreen
+		AccountColor.Blue -> if (isDarkTheme()) AccountColorNightBlue else AccountColorDayBlue
+		AccountColor.Yellow -> if (isDarkTheme()) AccountColorNightYellow else AccountColorDayYellow
+		AccountColor.Purple -> if (isDarkTheme()) AccountColorNightPurple else AccountColorDayPurple
+		AccountColor.Turquoise -> if (isDarkTheme()) AccountColorNightTurquoise else AccountColorDayTurquoise
 	}

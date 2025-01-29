@@ -151,6 +151,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		balance = 100.0,
 		currency = AccountCurrency.UAH,
 		color = null,
+		position = 0,
 	)
 	val availableCategories = listOf(
 		FinancialTransactionCategory(

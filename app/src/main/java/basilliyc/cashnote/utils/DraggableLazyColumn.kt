@@ -142,30 +142,29 @@ fun DraggableLazyColumn(
 fun LazyItemScope.DraggableLazyColumnItem(
 	modifier: Modifier = Modifier,
 	index: Int,
-	content: @Composable () -> Unit,
+	content: @Composable (isDragged: Boolean) -> Unit,
 	animateItem: Boolean = true,
 ) {
 	val draggableListState = LocalDraggableLazyColumnState.current
+	val isDragged = draggableListState.currentIndexOfDraggedItem == index
+	
 	Box(
 		modifier = modifier
 			.composed {
-				val offsetOrNull =
-					draggableListState.elementDisplacement.takeIf {
-						index == draggableListState.currentIndexOfDraggedItem
-					}
+				val offsetOrNull = draggableListState.elementDisplacement.takeIf { isDragged }
 				Modifier.graphicsLayer {
 					translationY = offsetOrNull ?: 0f
 				}
 			}
-			.zIndex(if (index == draggableListState.currentIndexOfDraggedItem) 1F else 0F)
+			.zIndex(if (isDragged) 1F else 0F)
 			.let {
 				if (animateItem) {
-					if (index == draggableListState.currentIndexOfDraggedItem) it
+					if (isDragged) it
 					else it.animateItem()
 				} else it
 			}
 	) {
-		content()
+		content(isDragged)
 	}
 }
 
@@ -174,13 +173,15 @@ class DraggableLazyColumnScope(var lazyListScope: LazyListScope?) {
 		count: Int,
 		key: ((index: Int) -> Any)? = null,
 		contentType: (index: Int) -> Any? = { null },
-		itemContent: @Composable LazyItemScope.(index: Int) -> Unit,
+		itemContent: @Composable LazyItemScope.(index: Int, isDragged: Boolean) -> Unit,
 		animateItem: Boolean = true,
 	) {
 		lazyListScope!!.items(count, key, contentType) { index ->
 			DraggableLazyColumnItem(
 				index = index,
-				content = { itemContent(index) },
+				content = { isDragged ->
+					itemContent(index, isDragged)
+				},
 				animateItem = animateItem
 			)
 		}

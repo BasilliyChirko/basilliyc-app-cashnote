@@ -14,7 +14,7 @@ abstract class DatabaseAccountRepository {
 	//  BASIC CRUD METHODS
 	//----------------------------------------------------------------------------------------------
 	
-	@Query("SELECT * FROM FinancialAccount")
+	@Query("SELECT * FROM FinancialAccount ORDER BY position ASC")
 	abstract suspend fun getList(): List<FinancialAccount>
 	
 	@Query("SELECT * FROM FinancialAccount WHERE id=:id")
@@ -35,7 +35,7 @@ abstract class DatabaseAccountRepository {
 	@Delete
 	abstract suspend fun delete(financialAccounts: List<FinancialAccount>)
 	
-	@Query("SELECT * FROM FinancialAccount")
+	@Query("SELECT * FROM FinancialAccount ORDER BY position ASC")
 	abstract fun getListAsFlow(): Flow<List<FinancialAccount>>
 	
 	@Query("SELECT * FROM FinancialAccount WHERE id=:id")

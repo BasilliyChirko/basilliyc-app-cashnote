@@ -26,7 +26,7 @@ import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
-import basilliyc.cashnote.ui.transaction.category.list.DraggableVerticalGrid
+import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalLogcat
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.asPriceString
@@ -44,6 +44,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 100.0,
+					position = 0,
 				),
 				FinancialAccount(
 					id = 2,
@@ -51,6 +52,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 1000.0,
+					position = 1,
 				),
 				FinancialAccount(
 					id = 3,
@@ -58,6 +60,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 10000.0,
+					position = 2,
 				),
 				FinancialAccount(
 					id = 4,
@@ -65,6 +68,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 100000.0,
+					position = 3,
 				),
 				FinancialAccount(
 					id = 5,
@@ -72,6 +76,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 1000000.0,
+					position = 4,
 				),
 				FinancialAccount(
 					id = 6,
@@ -79,6 +84,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 10000000.0,
+					position = 5,
 				),
 				FinancialAccount(
 					id = 7,
@@ -86,6 +92,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 10000000.0,
+					position = 6,
 				),
 				FinancialAccount(
 					id = 8,
@@ -93,6 +100,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 10000000.0,
+					position = 7,
 				),
 				FinancialAccount(
 					id = 9,
@@ -100,6 +108,7 @@ fun DragTest() {
 					currency = AccountCurrency.USD,
 					color = null,
 					balance = 10000000.0,
+					position = 8,
 				),
 			)
 		)

@@ -110,6 +110,7 @@ private fun AccountFormPreview() = DefaultPreview {
 					balance = 100.0,
 					currency = AccountCurrency.UAH,
 					color = null,
+					position = 0,
 				)
 			),
 		),

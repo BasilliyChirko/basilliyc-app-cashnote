@@ -9,19 +9,22 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,12 +32,14 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.color
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableLazyColumn
 import basilliyc.cashnote.utils.LocalNavController
+import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.launch
@@ -46,6 +51,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionCategoryList() {
 	val financialManager by remember { inject<FinancialManager>() }
+	
 	
 	val transactionCategories by financialManager.getAvailableTransactionCategoriesAsFlow()
 		.collectAsState(emptyList())
@@ -76,7 +82,7 @@ fun TransactionCategoryList() {
 			
 			coroutineScope.launch {
 				financialManager.changeTransactionCategoryPosition(from, to)
-				transactionCategoriesDragged = null
+//				transactionCategoriesDragged = null
 			}
 		},
 		onDragReverted = {
@@ -165,10 +171,16 @@ private fun Content(
 					count = transactionCategories.size,
 					key = { transactionCategories[it].id },
 					animateItem = true,
-					itemContent = { index ->
-						val category = transactionCategories[index]
+					itemContent = { index, isDragged ->
 						CategoryItem(
-							category = category,
+							modifier = Modifier
+								.applyIf({ isDragged }) {
+									this.shadow(
+										elevation = 4.dp,
+										shape = MaterialTheme.shapes.medium
+									)
+								},
+							category = transactionCategories[index],
 							onClick = onCategoryClicked,
 						)
 					}
@@ -181,14 +193,17 @@ private fun Content(
 
 @Composable
 private fun LazyItemScope.CategoryItem(
+	modifier: Modifier = Modifier,
 	category: FinancialTransactionCategory,
 	onClick: (Long) -> Unit,
 ) {
 	Card(
-		modifier = Modifier
-			.fillMaxWidth()
-			.animateItem(),
+		modifier = modifier
+			.fillMaxWidth(),
 		onClick = { onClick(category.id) },
+		colors = CardDefaults.cardColors(
+			containerColor = Color.Unspecified
+		)
 	) {
 		Row(
 			verticalAlignment = Alignment.CenterVertically,

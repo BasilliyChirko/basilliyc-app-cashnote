@@ -39,8 +39,8 @@ class AccountFormViewModel(
 		}
 	}
 	
-	
 	private val route: AppNavigation.AccountForm = savedStateHandle.toRoute()
+	private var editedAccount: FinancialAccount? = null
 	
 	//Initialization of the state
 	init {
@@ -49,6 +49,7 @@ class AccountFormViewModel(
 			viewModelScope.launch {
 				val account = (financialManager.getAccountById(route.accountId)
 					?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
+				editedAccount = account
 				state = state.copy(content = AccountFormState.Content.Data(account))
 			}
 		} else {
@@ -56,7 +57,8 @@ class AccountFormViewModel(
 				name = "",
 				currency = AccountCurrency.UAH,
 				color = null,
-				balance = 0.0
+				balance = 0.0,
+				position = 0,
 			)
 			state = state.copy(content = AccountFormState.Content.Data(financialAccount))
 		}
@@ -130,9 +132,10 @@ class AccountFormViewModel(
 	}
 	
 	fun onSaveClicked() {
-		val content = stateContentData ?: return
+		val data = stateContentData ?: return
 		
-		val nameString = content.name.value
+		
+		val nameString = data.name.value
 		val nameTextError = getNameTextError(nameString)
 		if (nameTextError != null) {
 			updateStateContentData {
@@ -141,7 +144,7 @@ class AccountFormViewModel(
 			return
 		}
 		
-		val balanceString = balanceStringCorrection(content.balance.value)
+		val balanceString = balanceStringCorrection(data.balance.value)
 		val balanceTextError = getBalanceTextError(balanceString)
 		if (balanceTextError != null) {
 			updateStateContentData {
@@ -153,9 +156,10 @@ class AccountFormViewModel(
 		val financialAccount = FinancialAccount(
 			id = route.accountId ?: 0L,
 			name = nameString,
-			currency = content.currency,
-			color = content.color,
-			balance = balanceString.toDouble()
+			currency = data.currency,
+			color = data.color,
+			balance = balanceString.toDouble(),
+			position = editedAccount?.position ?: 0,
 		)
 		
 		scheduleEvent(skipIfBusy = true, postDelay = true) {

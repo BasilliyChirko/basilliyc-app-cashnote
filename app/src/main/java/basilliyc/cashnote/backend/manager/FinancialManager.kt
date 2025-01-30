@@ -135,6 +135,14 @@ class FinancialManager {
 	fun getTransactionListPagingSource(accountId: Long) =
 		transactionRepository.getListPagingSource(accountId)
 	
+	suspend fun deleteTransaction(transactionId: Long) = databaseTransaction {
+		val transaction = transactionRepository.getById(transactionId)!!
+		val account = accountRepository.getById(transaction.accountId)!!
+		
+		accountRepository.save(account.copy(balance = account.balance - transaction.value))
+		transactionRepository.delete(transactionId)
+	}
+	
 	//----------------------------------------------------------------------------------------------
 	//  Transaction Category
 	//----------------------------------------------------------------------------------------------
@@ -180,7 +188,6 @@ class FinancialManager {
 				)
 			}
 		transactionCategoryRepository.save(categories)
-		
 	}
 	
 	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) = databaseTransaction {

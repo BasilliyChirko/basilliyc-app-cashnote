@@ -14,6 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -21,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -32,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
@@ -40,6 +45,9 @@ import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.toPriceWithCoins
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import basilliyc.cashnote.ui.components.PopupMenuItem
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -55,7 +63,8 @@ fun AccountHistory() {
 		onInitialLoadingErrorSubmitted = viewModel::onInitialLoadingErrorSubmitted,
 		onLoadingMoreErrorSubmitted = viewModel::onTransactionsLoadingMoreErrorSubmitted,
 		onLoadingMore = viewModel::onTransactionsLoadingMore,
-		onTransactionClicked = viewModel::onTransactionClicked,
+		onTransactionEditClicked = viewModel::onTransactionEditClicked,
+		onTransactionDeleteClicked = viewModel::onTransactionDeleteClicked,
 	)
 }
 
@@ -70,7 +79,8 @@ private fun AccountHistoryPreview() = DefaultPreview {
 		onInitialLoadingErrorSubmitted = {},
 		onLoadingMoreErrorSubmitted = {},
 		onLoadingMore = {},
-		onTransactionClicked = {},
+		onTransactionEditClicked = {},
+		onTransactionDeleteClicked = {},
 	)
 }
 
@@ -84,7 +94,8 @@ private fun Content(
 	onInitialLoadingErrorSubmitted: () -> Unit,
 	onLoadingMoreErrorSubmitted: () -> Unit,
 	onLoadingMore: () -> Unit,
-	onTransactionClicked: (id: Long) -> Unit,
+	onTransactionEditClicked: (id: Long) -> Unit,
+	onTransactionDeleteClicked: (id: Long) -> Unit,
 ) {
 	
 	val listState = rememberLazyListState()
@@ -122,7 +133,8 @@ private fun Content(
 					listState = listState,
 					onLoadingMoreErrorSubmitted = onLoadingMoreErrorSubmitted,
 					onLoadingMore = onLoadingMore,
-					onTransactionClicked = onTransactionClicked,
+					onTransactionEditClicked = onTransactionEditClicked,
+					onTransactionDeleteClicked = onTransactionDeleteClicked,
 				)
 				
 			}
@@ -184,7 +196,8 @@ private fun TransactionsList(
 	listState: LazyListState,
 	onLoadingMoreErrorSubmitted: () -> Unit,
 	onLoadingMore: () -> Unit,
-	onTransactionClicked: (id: Long) -> Unit,
+	onTransactionEditClicked: (id: Long) -> Unit,
+	onTransactionDeleteClicked: (id: Long) -> Unit,
 ) {
 	val transactions = state.transactions
 	
@@ -231,11 +244,40 @@ private fun TransactionsList(
 			key = { transactions[it].id },
 			contentType = { transactions[it].javaClass },
 			itemContent = { index ->
-				TransactionListItem(
+				
+				val isOptionsExpandedState = remember { mutableStateOf(false) }
+				var isOptionsExpanded by isOptionsExpandedState
+				
+				PopupMenu(
 					modifier = Modifier.animateItem(),
-					transaction = transactions[index],
-					onClick = onTransactionClicked,
+					expanded = isOptionsExpandedState,
+					anchor = {
+						TransactionListItem(
+							transaction = transactions[index],
+							onClick = { isOptionsExpanded = !isOptionsExpanded },
+						)
+					},
+					items = {
+						PopupMenuItem(
+							text = stringResource(R.string.account_history_action_edit_transaction),
+							onClick = {
+								isOptionsExpanded = false
+								onTransactionEditClicked(transactions[index].id)
+							},
+							leadingIcon = Icons.Filled.Edit,
+						)
+						PopupMenuItem(
+							text = stringResource(R.string.account_history_action_delete_transaction),
+							onClick = {
+								isOptionsExpanded = false
+								onTransactionDeleteClicked(transactions[index].id)
+							},
+							leadingIcon = Icons.Filled.DeleteForever,
+						)
+					}
 				)
+				
+				
 			}
 		)
 		

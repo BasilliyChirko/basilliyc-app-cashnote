@@ -60,4 +60,6 @@
     <string name="account_history_loading_error">Error while loading history was occurred</string>
     <string name="account_history_loading_error_retry">Load again</string>
     <string name="account_history_empty_label">There are no any transaction yet</string>
+    <string name="account_history_action_edit_transaction">Edit</string>
+    <string name="account_history_action_delete_transaction">Delete</string>
 </resources>

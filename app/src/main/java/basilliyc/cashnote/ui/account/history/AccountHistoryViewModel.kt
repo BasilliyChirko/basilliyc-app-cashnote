@@ -12,6 +12,7 @@ import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.main.AppNavigation
 import basilliyc.cashnote.utils.inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AccountHistoryViewModel(
@@ -39,18 +40,18 @@ class AccountHistoryViewModel(
 			val account = (financialManager.getAccountById(route.accountId)
 				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
 			state = state.copy(account = account)
-			initialLoading(PAGE_SIZE_INITIAL)
+			refreshTransactions(requestedSize = PAGE_SIZE_INITIAL, isInitialLoading = true)
 		}
 	}
 	
-	private fun initialLoading(requestedSize: Int) {
+	private fun refreshTransactions(requestedSize: Int, isInitialLoading: Boolean) {
 		state = state.copy(
-			initialLoading = true,
-			transactions = emptyList(),
+			initialLoading = isInitialLoading,
+			transactions = if (isInitialLoading) emptyList() else state.transactions,
 			transactionsLoadingMoreError = null,
 		)
 		scheduleEvent {
-			val initialResult = pagingSource.load(
+			val refreshLoadResult = pagingSource.load(
 				params = PagingSource.LoadParams.Refresh<Int>(
 					key = null,
 					loadSize = requestedSize,
@@ -58,12 +59,12 @@ class AccountHistoryViewModel(
 				)
 			)
 			
-			if (initialResult is PagingSource.LoadResult.Error) {
+			if (refreshLoadResult is PagingSource.LoadResult.Error) {
 				state = state.copy(
-					initialLoadingError = initialResult.throwable
+					initialLoadingError = refreshLoadResult.throwable
 				)
 			} else {
-				applyLoadingResult(initialResult)
+				applyLoadingResult(refreshLoadResult, replaceTransactions = true)
 			}
 			
 			state = state.copy(
@@ -72,28 +73,40 @@ class AccountHistoryViewModel(
 		}
 	}
 	
-	private val onInvalidatedCallback = {
+	private val onInvalidatedCallback: () -> Unit = {
+		pagingSource.unregisterInvalidatedCallback(onInvalidatedCallback)
 		pagingSource = financialManager.getTransactionListPagingSource(route.accountId)
+		pagingSource.registerInvalidatedCallback(onInvalidatedCallback)
+		
 		val size = state.transactions.size.takeIf { it > 0 } ?: PAGE_SIZE_INITIAL
-		initialLoading(size)
+		refreshTransactions(requestedSize = size, isInitialLoading = false)
 	}
 	
 	init {
 		pagingSource.registerInvalidatedCallback(onInvalidatedCallback)
 	}
 	
-	private fun applyLoadingResult(result: PagingSource.LoadResult<Int, FinancialTransaction>) {
+	private fun applyLoadingResult(
+		result: PagingSource.LoadResult<Int, FinancialTransaction>,
+		replaceTransactions: Boolean = false,
+	) {
 		when (result) {
 			is PagingSource.LoadResult.Error -> {
 				state = state.copy(
 					transactionsLoadingMoreError = result.throwable
 				)
 			}
+			
 			is PagingSource.LoadResult.Invalid -> Unit //No needed because of invalidated callback is registered
 			is PagingSource.LoadResult.Page -> {
 				nextPageKey = result.nextKey
+				
 				state = state.copy(
-					transactions = state.transactions + result.data,
+					transactions = if (replaceTransactions) {
+						result.data
+					} else {
+						state.transactions + result.data
+					},
 				)
 			}
 		}
@@ -101,7 +114,7 @@ class AccountHistoryViewModel(
 	
 	fun onInitialLoadingErrorSubmitted() {
 		//do initial loading again
-		initialLoading(PAGE_SIZE_INITIAL)
+		refreshTransactions(requestedSize = PAGE_SIZE_INITIAL, isInitialLoading = true)
 	}
 	
 	fun onTransactionsLoadingMoreErrorSubmitted() {
@@ -112,7 +125,7 @@ class AccountHistoryViewModel(
 		if (state.initialLoading || state.transactionsLoadingMore) return
 		
 		val nextPageKey = nextPageKey ?: return
-
+		
 		state = state.copy(
 			transactionsLoadingMore = true,
 			transactionsLoadingMoreError = null,
@@ -134,8 +147,15 @@ class AccountHistoryViewModel(
 		}
 	}
 	
-	fun onTransactionClicked(id: Long) {
+	fun onTransactionEditClicked(id: Long) {
 		//TODO implement, show transaction edit screen
+	}
+	
+	fun onTransactionDeleteClicked(id: Long) = scheduleEvent(
+		skipIfBusy = true,
+		postDelay = true,
+	) {
+		financialManager.deleteTransaction(id)
 	}
 	
 	override fun onCleared() {

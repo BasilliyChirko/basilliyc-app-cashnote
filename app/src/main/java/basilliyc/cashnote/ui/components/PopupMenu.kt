@@ -9,15 +9,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun PopupMenu(
+	modifier: Modifier = Modifier,
 	expanded: MutableState<Boolean>,
 	anchor: @Composable BoxScope.() -> Unit,
 	items: @Composable ColumnScope.() -> Unit,
 ) {
-	Box {
+	Box(modifier = modifier) {
 		anchor()
 		DropdownMenu(
 			expanded = expanded.value,
@@ -31,7 +33,7 @@ fun PopupMenu(
 fun ColumnScope.PopupMenuItem(
 	text: String,
 	onClick: () -> Unit,
-	leadingIcon: ImageVector? = null
+	leadingIcon: ImageVector? = null,
 ) {
 	DropdownMenuItem(
 		text = { Text(text = text) },

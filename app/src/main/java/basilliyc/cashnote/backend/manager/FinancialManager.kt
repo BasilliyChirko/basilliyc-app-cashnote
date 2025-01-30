@@ -1,20 +1,25 @@
 package basilliyc.cashnote.backend.manager
 
+import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.DatabaseAccountRepository
 import basilliyc.cashnote.backend.database.DatabaseTransactionCategoryRepository
 import basilliyc.cashnote.backend.database.DatabaseTransactionRepository
+import basilliyc.cashnote.data.AccountColor
+import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class FinancialManager {
 	
@@ -97,7 +102,7 @@ class FinancialManager {
 	suspend fun createTransaction(
 		accountId: Long,
 		value: Double,
-		comment: String,
+		comment: String?,
 		categoryId: Long?,
 		timestamp: Long,
 	) {
@@ -116,7 +121,7 @@ class FinancialManager {
 			id = 0,
 			value = value,
 			date = timestamp,
-			comment = comment,
+			comment = comment?.takeIf { it.isNotBlank() },
 			accountId = account.id,
 			categoryId = categoryId,
 		)
@@ -126,6 +131,9 @@ class FinancialManager {
 			accountRepository.save(account.copy(balance = account.balance + value))
 		}
 	}
+	
+	fun getTransactionListPagingSource(accountId: Long) =
+		transactionRepository.getListPagingSource(accountId)
 	
 	//----------------------------------------------------------------------------------------------
 	//  Transaction Category
@@ -193,56 +201,29 @@ class FinancialManager {
 	//----------------------------------------------------------------------------------------------
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-
-//		val account = accountRepository.getList().firstOrNull() ?: let {
-//			accountRepository.insert(
-//				FinancialAccount(
-//					id = 0L,
-//					name = "Test",
-//					currency = AccountCurrency.UAH,
-//					color = null,
-//					balance = 100.500,
-//				)
+//		saveAccount(
+//			FinancialAccount(
+//				id = 0L,
+//				name = "Test Account",
+//				currency = AccountCurrency.EUR,
+//				color = AccountColor.Blue,
+//				balance = 0.0,
+//				position = 0,
 //			)
-//			accountRepository.getList().first()
-//		}
-//
-//		accountRepository.getList().forEach {
-//			logcat.debug(it)
-//			transactionRepository.getList(it.id).forEach {
-//				logcat.debug(it)
-//			}
-//		}
-//
-//		transactionRepository.insert(
-//			FinancialTransaction(
-//				id = 0,
-//				value = 100.0,
-//				date = System.currentTimeMillis(),
-//				comment = "Test",
-//				accountId = account.id,
+//		)
+
+//		val accountId = 1L
+//		val timestamp = System.currentTimeMillis()
+//		val random = Random(System.currentTimeMillis())
+//		repeat(1000) {
+//			createTransaction(
+//				accountId = accountId,
+//				value = random.nextDouble(-5.0, 40.0),
+//				comment = null,
 //				categoryId = null,
+//				timestamp = random.nextLong(timestamp - monthInMillis, timestamp + monthInMillis)
 //			)
-//		)
-//
-//		logcat.debug("--------------------------------------------------------------------------------")
-//
-//		accountRepository.getList().forEach {
-//			logcat.debug(it)
-//			transactionRepository.getList(it.id).forEach {
-//				logcat.debug(it)
-//			}
 //		}
-//
-
-//		accountRepository.insertAccount(
-//			Account(
-//				name = "Test",
-//				currency = AccountCurrency.UAH,
-//				color = AccountColor.Orange,
-//				balance = 100.50,
-//			)
-//		)
 	}
 	
 	

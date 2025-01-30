@@ -1,5 +1,6 @@
 package basilliyc.cashnote.backend.database
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
@@ -37,5 +38,8 @@ abstract class DatabaseTransactionRepository {
 	
 	@Delete
 	abstract suspend fun delete(transactions: List<FinancialTransaction>): Int
+	
+	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId ORDER BY date DESC")
+	abstract fun getListPagingSource(accountId: Long): PagingSource<Int, FinancialTransaction>
 	
 }

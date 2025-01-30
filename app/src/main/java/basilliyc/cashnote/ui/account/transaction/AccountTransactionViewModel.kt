@@ -12,7 +12,7 @@ import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.main.AppNavigation
-import basilliyc.cashnote.utils.asPriceWithCoins
+import basilliyc.cashnote.utils.toPriceWithCoins
 import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -76,7 +76,7 @@ class AccountTransactionViewModel(
 				content = AccountTransactionState.Content.Data(
 					financialAccount = account,
 					balanceDifference = TextFieldState(""),
-					balanceNew = TextFieldState(account.balance.asPriceWithCoins()),
+					balanceNew = TextFieldState(account.balance.toPriceWithCoins()),
 					comment = TextFieldState(""),
 					availableCategories = availableCategories,
 					selectedCategoryId = null,
@@ -125,7 +125,7 @@ class AccountTransactionViewModel(
 		
 		stateContentData = stateContentData?.copy(
 			balanceDifference = TextFieldState(balanceDifferenceString),
-			balanceNew = TextFieldState(balanceNewValue.asPriceWithCoins()),
+			balanceNew = TextFieldState(balanceNewValue.toPriceWithCoins()),
 			isBalanceReduce = (balanceDifferenceValue < 0).takeIf { balanceNewValue != account.balance },
 		)
 	}
@@ -138,7 +138,7 @@ class AccountTransactionViewModel(
 		val balanceDifference = balanceNewValue - account.balance
 		
 		stateContentData = stateContentData?.copy(
-			balanceDifference = TextFieldState(balanceDifference.asPriceWithCoins()),
+			balanceDifference = TextFieldState(balanceDifference.toPriceWithCoins()),
 			balanceNew = TextFieldState(balanceNewString),
 			isBalanceReduce = (balanceDifference < 0).takeIf { balanceNewValue != account.balance },
 		)

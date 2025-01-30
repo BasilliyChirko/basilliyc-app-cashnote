@@ -2,7 +2,6 @@
 
 package basilliyc.cashnote.ui.account.transaction
 
-import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -80,7 +79,7 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.TimestampStyle
-import basilliyc.cashnote.utils.asPriceWithCoins
+import basilliyc.cashnote.utils.toPriceWithCoins
 import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.toast
 import java.util.Calendar
@@ -141,8 +140,7 @@ fun AccountTransaction() {
 			}
 			
 			is AccountTransactionState.Action.AccountHistory -> {
-				//TODO implement
-//				navController.navigate(AppNavigation.AccountHistory(action.accountId))
+				navController.navigate(AppNavigation.AccountHistory(action.accountId))
 			}
 		}
 		viewModel.onActionConsumed()
@@ -160,6 +158,7 @@ fun AccountTransaction() {
 			onDateSelected = viewModel::onDialogDateSelected,
 			onDismiss = viewModel::onDialogDateDismiss,
 		)
+		
 		is AccountTransactionState.Dialog.TimePicker -> TransactionTimePickerDialog(
 			timestamp = dialogState.timestamp,
 			onTimeSelected = viewModel::onDialogTimeSelected,
@@ -202,7 +201,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 				financialAccount = financialAccount,
 				isBalanceReduce = false,
 				balanceDifference = TextFieldState(""),
-				balanceNew = TextFieldState(financialAccount.balance.asPriceWithCoins()),
+				balanceNew = TextFieldState(financialAccount.balance.toPriceWithCoins()),
 				comment = TextFieldState(""),
 				availableCategories = availableCategories,
 				selectedCategoryId = availableCategories.getOrNull(0)?.id,
@@ -634,7 +633,7 @@ private fun TransactionTimePickerDialog(
 		initialMinute = initials.get(Calendar.MINUTE),
 		is24Hour = true,
 	)
-
+	
 	AlertDialog(
 		onDismissRequest = onDismiss,
 		confirmButton = {
@@ -654,7 +653,7 @@ private fun TransactionTimePickerDialog(
 			TimePicker(state = timePickerState)
 		}
 	)
-
+	
 }
 
 //--------------------------------------------------------------------------------------------------

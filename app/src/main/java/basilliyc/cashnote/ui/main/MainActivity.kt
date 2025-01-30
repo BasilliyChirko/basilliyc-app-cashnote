@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 				LocalLogcat provides Logcat(this),
 			) {
 				val logcat = LocalLogcat.current
-
+				
 				val navBackStack by LocalNavController.current.currentBackStackEntryAsState()
 				LaunchedEffect(navBackStack) {
 					val backStackArguments = navBackStack?.arguments
@@ -62,9 +62,10 @@ class MainActivity : ComponentActivity() {
 							?.joinToString() ?: ""
 					)
 				}
-
+				
 				CashNoteTheme {
-					Main()
+//					Main()
+					Main(AppNavigation.AccountHistory(accountId = 1)) //todo remove after test
 				}
 				
 			}
@@ -75,7 +76,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun Main() {
+private fun Main(
+	startDestination: AppNavigation = AppNavigation.AccountList,
+) {
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
 		bottomBar = { MainBottomNavigationBar() }
@@ -85,7 +88,7 @@ private fun Main() {
 		)
 		NavHost(
 			navController = LocalNavController.current as NavHostController,
-			startDestination = AppNavigation.AccountList,
+			startDestination = startDestination,
 			modifier = Modifier
 				.padding(paddingValues)
 				.consumeWindowInsets(paddingValues),

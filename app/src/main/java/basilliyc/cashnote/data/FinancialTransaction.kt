@@ -29,7 +29,7 @@ data class FinancialTransaction(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0,
 	val value: Double,
 	val date: Long,
-	val comment: String,
+	val comment: String?,
 	val accountId: Long,
 	val categoryId: Long?,
 )

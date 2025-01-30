@@ -79,6 +79,8 @@ dependencies {
 	implementation(libs.androidx.material3)
 	
 	implementation(libs.androidx.navigation)
+	implementation(libs.androidx.paging.compose)
+	implementation(libs.androidx.paging.runtime)
 	
 	implementation(libs.di.koin)
 	implementation(libs.bundles.room)
@@ -89,6 +91,7 @@ dependencies {
 	implementation(libs.firebase.crashlytics)
 	
 	implementation(libs.kotlinx.serialization.json)
+	implementation(libs.kotlinx.collections.immutable)
 	
 	implementation(libs.compose.material.icons)
 	

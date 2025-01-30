@@ -27,8 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -51,12 +49,7 @@ import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.applyIf
-import basilliyc.cashnote.utils.asPriceString
-import basilliyc.cashnote.utils.reordered
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
+import basilliyc.cashnote.utils.toPriceString
 
 
 //--------------------------------------------------------------------------------------------------
@@ -283,7 +276,7 @@ private fun ContentDataItem(
 				Text(text = financialAccount.currency.symbol, modifier = Modifier.padding(horizontal = 8.dp))
 				Spacer(modifier = Modifier.weight(1F))
 				Text(
-					text = financialAccount.balance.asPriceString(showPlus = false),
+					text = financialAccount.balance.toPriceString(showPlus = false),
 					modifier = Modifier.padding(horizontal = 8.dp)
 				)
 			}
@@ -292,7 +285,7 @@ private fun ContentDataItem(
 				modifier = Modifier
 					.padding(8.dp)
 					.fillMaxWidth(),
-				text = (-50.7).asPriceString(showPlus = true),
+				text = (-50.7).toPriceString(showPlus = true),
 				textAlign = TextAlign.End
 			)
 		}

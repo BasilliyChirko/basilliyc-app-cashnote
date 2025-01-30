@@ -26,7 +26,7 @@ inline fun <reified T> Any?.castOrNull(): T? {
 private val locale = Locale("en", "US")
 
 @SuppressLint("DefaultLocale")
-fun Double.asPriceString(showPlus: Boolean): String {
+fun Double.toPriceString(showPlus: Boolean): String {
 	val splitDot = String.format(locale, "%.2f", this.absoluteValue).split('.')
 	
 	val coins = splitDot[1]
@@ -43,7 +43,7 @@ fun Double.asPriceString(showPlus: Boolean): String {
 	return "$symbol $decimal.$coins"
 }
 
-fun Double.asPriceWithCoins() = String.format(locale, "%.2f", this)
+fun Double.toPriceWithCoins() = String.format(locale, "%.2f", this)
 
 fun <T> List<T>.reordered(from: Int, to: Int): MutableList<T> {
 	val mutable = if (this is MutableList) this else toMutableList()

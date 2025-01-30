@@ -45,7 +45,7 @@
     <string name="account_transaction_action_options">Options</string>
     <string name="account_transaction_action_edit_accout">Edit account</string>
     <string name="account_transaction_action_delete_accout">Delete account</string>
-    <string name="account_transaction_action_history">Account history</string>
+    <string name="account_transaction_action_history">Show history</string>
     <string name="account_transaction_account_delete_confirmation_submit">Delete</string>
     <string name="account_transaction_account_delete_confirmation_cancel">Cancel</string>
     <string name="account_transaction_account_delete_confirmation_title">Account deletion</string>
@@ -55,4 +55,9 @@
     <string name="account_transaction_label_timestamp">Date and time</string>
     <string name="account_transaction_date_picker_confirm">Apply</string>
     <string name="account_transaction_date_picker_cancel">Cancel</string>
+    <string name="account_history_title">History</string>
+    <string name="account_history_title_s">History of %s</string>
+    <string name="account_history_loading_error">Error while loading history was occurred</string>
+    <string name="account_history_loading_error_retry">Load again</string>
+    <string name="account_history_empty_label">There are no any transaction yet</string>
 </resources>

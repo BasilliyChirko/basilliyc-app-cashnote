@@ -51,7 +51,8 @@ class MainActivity : ComponentActivity() {
 			) {
 				val logcat = LocalLogcat.current
 				
-				val navBackStack by LocalNavController.current.currentBackStackEntryAsState()
+				val navController = LocalNavController.current
+				val navBackStack by navController.currentBackStackEntryAsState()
 				LaunchedEffect(navBackStack) {
 					val backStackArguments = navBackStack?.arguments
 					val destinationArguments = navBackStack?.destination?.arguments
@@ -64,9 +65,13 @@ class MainActivity : ComponentActivity() {
 				}
 				
 				CashNoteTheme {
-//					Main()
-					Main(AppNavigation.AccountHistory(accountId = 1)) //todo remove after test
+					Main()
 				}
+				
+				//todo remove after test
+//				LaunchedEffect(navController) {
+//					navController.navigate(AppNavigation.AccountHistory(accountId = 1))
+//				}
 				
 			}
 			

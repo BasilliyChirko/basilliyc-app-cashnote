@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction
+package basilliyc.cashnote.ui.account.transaction.form
 
 import android.icu.util.Calendar
 import androidx.compose.runtime.getValue
@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.FinancialManager
+import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
@@ -17,7 +18,7 @@ import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AccountTransactionViewModel(
+class AccountTransactionFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
@@ -28,16 +29,16 @@ class AccountTransactionViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	private val route = savedStateHandle.toRoute<AppNavigation.AccountTransaction>()
+	private val route = savedStateHandle.toRoute<AppNavigation.AccountTransactionForm>()
 	
 	//----------------------------------------------------------------------------------------------
 	//  State declaration
 	//----------------------------------------------------------------------------------------------
 	
-	var state by mutableStateOf(AccountTransactionState())
+	var state by mutableStateOf(AccountTransactionFormState())
 		private set
 	private var stateContentData
-		get() = state.content as? AccountTransactionState.Content.Data
+		get() = state.content as? AccountTransactionFormState.Content.Data
 		set(value) {
 			if (value != null) state = state.copy(content = value)
 		}
@@ -52,9 +53,9 @@ class AccountTransactionViewModel(
 			state = state.copy(action = value)
 		}
 	
-	private fun updateContentData(call: AccountTransactionState.Content.Data.() -> AccountTransactionState.Content.Data) {
+	private fun updateContentData(call: AccountTransactionFormState.Content.Data.() -> AccountTransactionFormState.Content.Data) {
 		val content = stateContentData
-		if (content is AccountTransactionState.Content.Data) {
+		if (content is AccountTransactionFormState.Content.Data) {
 			stateContentData = stateContentData?.call()
 		}
 	}
@@ -64,7 +65,7 @@ class AccountTransactionViewModel(
 	//----------------------------------------------------------------------------------------------
 	
 	init {
-		state = state.copy(content = AccountTransactionState.Content.Loading)
+		state = state.copy(content = AccountTransactionFormState.Content.Loading)
 		viewModelScope.launch {
 			
 			val account = financialManager.getAccountById(route.accountId)
@@ -72,15 +73,26 @@ class AccountTransactionViewModel(
 			
 			val availableCategories = financialManager.getAvailableTransactionCategories()
 			
+			val transaction = route.transactionId?.let {
+				financialManager.getTransactionById(it)
+			}
+			
 			state = state.copy(
-				content = AccountTransactionState.Content.Data(
+				content = AccountTransactionFormState.Content.Data(
 					financialAccount = account,
-					balanceDifference = TextFieldState(""),
-					balanceNew = TextFieldState(account.balance.toPriceWithCoins()),
-					comment = TextFieldState(""),
+					balanceDifference = TextFieldState(
+						value = transaction?.value?.toPriceWithCoins() ?: ""
+					),
+					balanceNew = TextFieldState(
+						value = account.balance.toPriceWithCoins()
+					),
+					comment = TextFieldState(
+						value = transaction?.comment ?: ""
+					),
 					availableCategories = availableCategories,
-					selectedCategoryId = null,
-					timestamp = System.currentTimeMillis(),
+					selectedCategoryId = transaction?.categoryId,
+					timestamp = transaction?.date ?: System.currentTimeMillis(),
+					isNew = transaction == null
 				)
 			)
 		}
@@ -103,7 +115,6 @@ class AccountTransactionViewModel(
 				}
 			}
 		}
-		
 	}
 	
 	//----------------------------------------------------------------------------------------------
@@ -178,64 +189,32 @@ class AccountTransactionViewModel(
 			postDelay = true,
 		) {
 			try {
-				financialManager.createTransaction(
-					accountId = account.id,
-					value = transactionValue,
-					comment = data.comment.value,
-					categoryId = data.selectedCategoryId,
-					timestamp = data.timestamp,
+				financialManager.saveTransaction(
+					FinancialTransaction(
+						id = route.transactionId ?: 0L,
+						accountId = account.id,
+						value = transactionValue,
+						comment = data.comment.value.takeIf { it.isNotBlank() },
+						categoryId = data.selectedCategoryId,
+						date = data.timestamp,
+					)
 				)
-				stateAction = AccountTransactionState.Action.SaveSuccess
+				stateAction = AccountTransactionFormState.Action.SaveSuccess
 			} catch (t: Throwable) {
 				logcat.error(t)
-				stateAction = AccountTransactionState.Action.SaveError
+				stateAction = AccountTransactionFormState.Action.SaveError
 			}
 		}
 		
 	}
 	
 	fun onCancelClicked() = scheduleEvent {
-		stateAction = AccountTransactionState.Action.Cancel
-	}
-	
-	fun onAccountEditClicked() = scheduleEvent {
-		val data = stateContentData ?: return@scheduleEvent
-		stateAction = AccountTransactionState.Action.AccountEdit(data.financialAccount.id)
-	}
-	
-	fun onAccountDeleteClicked() {
-		stateDialog = AccountTransactionState.Dialog.AccountDeleteConfirmation
-	}
-	
-	fun onAccountHistoryClicked() = scheduleEvent {
-		val data = stateContentData ?: return@scheduleEvent
-		stateAction = AccountTransactionState.Action.AccountHistory(data.financialAccount.id)
-	}
-	
-	fun onAccountDeleteDialogCanceled() {
-		if (stateDialog != AccountTransactionState.Dialog.AccountDeleteConfirmation) return
-		stateDialog = null
-	}
-	
-	fun onAccountDeleteDialogConfirmed() {
-		if (stateDialog != AccountTransactionState.Dialog.AccountDeleteConfirmation) return
-		stateDialog = null
-		
-		
-		scheduleEvent {
-			try {
-				financialManager.deleteAccount(route.accountId)
-				stateAction = AccountTransactionState.Action.AccountDeletionSuccess
-			} catch (t: Throwable) {
-				logcat.error(t)
-				stateAction = AccountTransactionState.Action.AccountDeletionError
-			}
-		}
+		stateAction = AccountTransactionFormState.Action.Cancel
 	}
 	
 	fun onDateClicked() {
 		val data = stateContentData ?: return
-		stateDialog = AccountTransactionState.Dialog.DatePicker(data.timestamp)
+		stateDialog = AccountTransactionFormState.Dialog.DatePicker(data.timestamp)
 	}
 	
 	fun onDialogDateSelected(timestamp: Long) {
@@ -261,7 +240,7 @@ class AccountTransactionViewModel(
 	
 	fun onTimeClicked() {
 		val data = stateContentData ?: return
-		stateDialog = AccountTransactionState.Dialog.TimePicker(data.timestamp)
+		stateDialog = AccountTransactionFormState.Dialog.TimePicker(data.timestamp)
 	}
 	
 	fun onDialogTimeSelected(hour: Int, minute: Int) {

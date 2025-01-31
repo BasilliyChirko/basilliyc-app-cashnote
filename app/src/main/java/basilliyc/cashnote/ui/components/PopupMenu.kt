@@ -30,6 +30,24 @@ fun PopupMenu(
 }
 
 @Composable
+fun PopupMenu(
+	modifier: Modifier = Modifier,
+	expanded: Boolean,
+	onDismissRequest: () -> Unit,
+	anchor: @Composable BoxScope.() -> Unit,
+	items: @Composable ColumnScope.() -> Unit,
+) {
+	Box(modifier = modifier) {
+		anchor()
+		DropdownMenu(
+			expanded = expanded,
+			onDismissRequest = onDismissRequest,
+			content = items
+		)
+	}
+}
+
+@Composable
 fun ColumnScope.PopupMenuItem(
 	text: String,
 	onClick: () -> Unit,

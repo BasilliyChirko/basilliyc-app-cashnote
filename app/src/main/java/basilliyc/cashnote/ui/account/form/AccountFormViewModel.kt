@@ -135,7 +135,7 @@ class AccountFormViewModel(
 		val data = stateContentData ?: return
 		
 		
-		val nameString = data.name.value
+		val nameString = data.name.value.trim()
 		val nameTextError = getNameTextError(nameString)
 		if (nameTextError != null) {
 			updateStateContentData {

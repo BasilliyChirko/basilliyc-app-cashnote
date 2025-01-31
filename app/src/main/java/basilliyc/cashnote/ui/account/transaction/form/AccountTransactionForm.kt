@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 
-package basilliyc.cashnote.ui.account.transaction
+package basilliyc.cashnote.ui.account.transaction.form
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -89,8 +89,8 @@ import java.util.Calendar
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-fun AccountTransaction() {
-	val viewModel = viewModel<AccountTransactionViewModel>()
+fun AccountTransactionForm() {
+	val viewModel = viewModel<AccountTransactionFormViewModel>()
 	val state = viewModel.state
 	val navController = LocalNavController.current
 	val context = LocalContext.current
@@ -102,9 +102,6 @@ fun AccountTransaction() {
 		onSaveClicked = viewModel::onSaveClicked,
 		onCancelClicked = viewModel::onCancelClicked,
 		onCategoryChanged = viewModel::onCategoryChanged,
-		onAccountEditClicked = viewModel::onAccountEditClicked,
-		onAccountDeleteClicked = viewModel::onAccountDeleteClicked,
-		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
 		onDateClicked = viewModel::onDateClicked,
 		onTimeClicked = viewModel::onTimeClicked,
 	)
@@ -114,33 +111,16 @@ fun AccountTransaction() {
 		when (action) {
 			null -> Unit
 			
-			AccountTransactionState.Action.Cancel -> {
+			AccountTransactionFormState.Action.Cancel -> {
 				navController.popBackStack()
 			}
 			
-			AccountTransactionState.Action.SaveSuccess -> {
+			AccountTransactionFormState.Action.SaveSuccess -> {
 				navController.popBackStack()
 			}
 			
-			AccountTransactionState.Action.SaveError -> {
+			AccountTransactionFormState.Action.SaveError -> {
 				context.toast(R.string.account_transaction_toast_save_error)
-			}
-			
-			AccountTransactionState.Action.AccountDeletionSuccess -> {
-				navController.popBackStack()
-				context.toast(R.string.account_transaction_toast_account_deletion_success)
-			}
-			
-			AccountTransactionState.Action.AccountDeletionError -> {
-				context.toast(R.string.account_transaction_toast_account_deletion_error)
-			}
-			
-			is AccountTransactionState.Action.AccountEdit -> {
-				navController.navigate(AppNavigation.AccountForm(action.accountId))
-			}
-			
-			is AccountTransactionState.Action.AccountHistory -> {
-				navController.navigate(AppNavigation.AccountHistory(action.accountId))
 			}
 		}
 		viewModel.onActionConsumed()
@@ -148,18 +128,14 @@ fun AccountTransaction() {
 	
 	when (val dialogState = state.dialog) {
 		null -> Unit
-		AccountTransactionState.Dialog.AccountDeleteConfirmation -> DialogDeleteConfirmation(
-			onConfirm = viewModel::onAccountDeleteDialogConfirmed,
-			onCancel = viewModel::onAccountDeleteDialogCanceled,
-		)
 		
-		is AccountTransactionState.Dialog.DatePicker -> TransactionDatePickerDialog(
+		is AccountTransactionFormState.Dialog.DatePicker -> TransactionDatePickerDialog(
 			timestamp = dialogState.timestamp,
 			onDateSelected = viewModel::onDialogDateSelected,
 			onDismiss = viewModel::onDialogDateDismiss,
 		)
 		
-		is AccountTransactionState.Dialog.TimePicker -> TransactionTimePickerDialog(
+		is AccountTransactionFormState.Dialog.TimePicker -> TransactionTimePickerDialog(
 			timestamp = dialogState.timestamp,
 			onTimeSelected = viewModel::onDialogTimeSelected,
 			onDismiss = viewModel::onDialogTimeDismiss,
@@ -169,7 +145,7 @@ fun AccountTransaction() {
 
 @Composable
 @Preview(showBackground = true)
-private fun AccountTransactionPreview() = DefaultPreview {
+private fun AccountTransactionFormPreview() = DefaultPreview {
 	val financialAccount = FinancialAccount(
 		id = 1,
 		name = "Account 1",
@@ -196,8 +172,8 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		),
 	)
 	Content(
-		state = AccountTransactionState(
-			content = AccountTransactionState.Content.Data(
+		state = AccountTransactionFormState(
+			content = AccountTransactionFormState.Content.Data(
 				financialAccount = financialAccount,
 				isBalanceReduce = false,
 				balanceDifference = TextFieldState(""),
@@ -206,6 +182,7 @@ private fun AccountTransactionPreview() = DefaultPreview {
 				availableCategories = availableCategories,
 				selectedCategoryId = availableCategories.getOrNull(0)?.id,
 				timestamp = System.currentTimeMillis(),
+				isNew = true,
 			),
 		),
 		onBalanceDifferenceChanged = {},
@@ -214,9 +191,6 @@ private fun AccountTransactionPreview() = DefaultPreview {
 		onSaveClicked = {},
 		onCancelClicked = {},
 		onCategoryChanged = {},
-		onAccountEditClicked = {},
-		onAccountDeleteClicked = {},
-		onAccountHistoryClicked = {},
 		onDateClicked = {},
 		onTimeClicked = {},
 	)
@@ -228,16 +202,13 @@ private fun AccountTransactionPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: AccountTransactionState,
+	state: AccountTransactionFormState,
 	onBalanceDifferenceChanged: (String) -> Unit,
 	onBalanceNewChanged: (String) -> Unit,
 	onCommentChanged: (String) -> Unit,
 	onCategoryChanged: (Long?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onCancelClicked: () -> Unit,
-	onAccountEditClicked: () -> Unit,
-	onAccountDeleteClicked: () -> Unit,
-	onAccountHistoryClicked: () -> Unit,
 	onDateClicked: () -> Unit,
 	onTimeClicked: () -> Unit,
 ) {
@@ -246,9 +217,6 @@ private fun Content(
 			ActionBar(
 				state = state,
 				onSaveClicked = onSaveClicked,
-				onAccountEditClicked = onAccountEditClicked,
-				onAccountDeleteClicked = onAccountDeleteClicked,
-				onAccountHistoryClicked = onAccountHistoryClicked,
 			)
 		},
 		content = {
@@ -258,8 +226,8 @@ private fun Content(
 				.verticalScroll(rememberScrollState())
 			
 			when (content) {
-				is AccountTransactionState.Content.Loading -> BoxLoading(modifier = modifier)
-				is AccountTransactionState.Content.Data -> ContentData(
+				is AccountTransactionFormState.Content.Loading -> BoxLoading(modifier = modifier)
+				is AccountTransactionFormState.Content.Data -> ContentData(
 					modifier = modifier,
 					content = content,
 					onBalanceDifferenceChanged = onBalanceDifferenceChanged,
@@ -281,17 +249,15 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: AccountTransactionState,
+	state: AccountTransactionFormState,
 	onSaveClicked: () -> Unit,
-	onAccountEditClicked: () -> Unit,
-	onAccountDeleteClicked: () -> Unit,
-	onAccountHistoryClicked: () -> Unit,
 ) {
 	val content = state.content
+	val data = content as? AccountTransactionFormState.Content.Data
 	
 	SimpleActionBar(
 		title = {
-			if (content is AccountTransactionState.Content.Data) {
+			if (content is AccountTransactionFormState.Content.Data) {
 				val account = content.financialAccount
 				Text(
 					text = "${account.name} ${account.currency.symbol}",
@@ -299,51 +265,10 @@ private fun ActionBar(
 				)
 			}
 		},
-		containerColor = (content as? AccountTransactionState.Content.Data)?.financialAccount?.let {
+		containerColor = data?.financialAccount?.let {
 			it.color?.color
 		} ?: Color.Unspecified,
 		actions = {
-			
-			var isOptionsExpanded = remember { mutableStateOf(false) }
-			PopupMenu(
-				expanded = isOptionsExpanded,
-				anchor = {
-					IconButton(
-						onClick = { isOptionsExpanded.value = !isOptionsExpanded.value },
-						imageVector = Icons.Filled.MoreVert,
-						contentDescription = stringResource(R.string.account_transaction_action_options)
-					)
-				},
-				items = {
-					PopupMenuItem(
-						text = stringResource(R.string.account_transaction_action_edit_accout),
-						onClick = {
-							isOptionsExpanded.value = false
-							onAccountEditClicked()
-						},
-						leadingIcon = Icons.Filled.Edit,
-					)
-					PopupMenuItem(
-						text = stringResource(R.string.account_transaction_action_history),
-						onClick = {
-							isOptionsExpanded.value = false
-							onAccountHistoryClicked()
-						},
-						leadingIcon = Icons.Filled.History,
-					)
-					PopupMenuItem(
-						text = stringResource(R.string.account_transaction_action_delete_accout),
-						onClick = {
-							isOptionsExpanded.value = false
-							onAccountDeleteClicked()
-						},
-						leadingIcon = Icons.Filled.DeleteForever,
-					)
-				}
-			)
-			
-			
-			
 			IconButton(
 				onClick = onSaveClicked,
 				imageVector = Icons.Filled.Done,
@@ -361,7 +286,7 @@ private fun ActionBar(
 @Composable
 private fun ContentData(
 	modifier: Modifier = Modifier,
-	content: AccountTransactionState.Content.Data,
+	content: AccountTransactionFormState.Content.Data,
 	onBalanceDifferenceChanged: (String) -> Unit,
 	onBalanceNewChanged: (String) -> Unit,
 	onCategoryChanged: (Long?) -> Unit,
@@ -371,7 +296,7 @@ private fun ContentData(
 	onTimeClicked: () -> Unit,
 ) {
 	val focusRequester = remember { FocusRequester() }
-	LaunchedEffect(Unit) {
+	LaunchedEffect(focusRequester) {
 		focusRequester.requestFocus()
 	}
 	
@@ -676,41 +601,5 @@ private fun TransactionComment(
 			keyboardType = KeyboardType.Text,
 			capitalization = KeyboardCapitalization.Sentences,
 		),
-	)
-}
-
-//--------------------------------------------------------------------------------------------------
-// DIALOG.DELETE_CONFIRMATION
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun DialogDeleteConfirmation(
-	onConfirm: () -> Unit,
-	onCancel: () -> Unit,
-) {
-	AlertDialog(
-		title = {
-			Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_title))
-		},
-		text = {
-			Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_text))
-		},
-		onDismissRequest = onCancel,
-		confirmButton = {
-			TextButton(
-				onClick = onConfirm,
-				content = {
-					Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_submit))
-				}
-			)
-		},
-		dismissButton = {
-			TextButton(
-				onClick = onCancel,
-				content = {
-					Text(text = stringResource(R.string.account_transaction_account_delete_confirmation_cancel))
-				}
-			)
-		}
 	)
 }

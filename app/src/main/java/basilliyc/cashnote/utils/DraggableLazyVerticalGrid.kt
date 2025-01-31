@@ -1,5 +1,8 @@
 package basilliyc.cashnote.utils
 
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -29,11 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -46,10 +53,11 @@ val LocalDraggableLazyVerticalGridState = compositionLocalOf<DraggableLazyVertic
 fun DraggableVerticalGrid(
 	modifier: Modifier = Modifier,
 	columns: GridCells,
-	onDragStarted: () -> Unit,
+	onDragStarted: (index: Int) -> Unit,
 	onDragMoved: (from: Int, to: Int) -> Unit,
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
+	vibrate: Boolean = true,
 	isOverscrollEnabled: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	reverseLayout: Boolean = false,
@@ -86,6 +94,10 @@ fun DraggableVerticalGrid(
 		)
 	}
 	
+	val context = LocalContext.current
+	val vibrator = if (vibrate) {
+		remember { getSystemService(context, Vibrator::class.java) }
+	} else null
 	
 	CompositionLocalProvider(
 		LocalDraggableLazyVerticalGridState provides draggableListState,
@@ -99,7 +111,8 @@ fun DraggableVerticalGrid(
 							draggableListState.onDragStart(offset)
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
-							onDragStarted()
+							onDragStarted(draggableListState.currentIndexOfDraggedItem!!)
+							vibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
 						},
 						onDragEnd = {
 							draggableListState.onDragInterrupted()

@@ -24,8 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,17 +39,18 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.PopupMenu
+import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
+import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.main.AppNavigation.*
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.TimestampStyle
 import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.toPriceWithCoins
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import basilliyc.cashnote.ui.components.PopupMenuItem
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -57,6 +60,7 @@ import basilliyc.cashnote.ui.components.PopupMenuItem
 fun AccountHistory() {
 	
 	val viewModel = viewModel<AccountHistoryViewModel>()
+	val navController = LocalNavController.current
 	
 	Content(
 		state = viewModel.state,
@@ -66,6 +70,22 @@ fun AccountHistory() {
 		onTransactionEditClicked = viewModel::onTransactionEditClicked,
 		onTransactionDeleteClicked = viewModel::onTransactionDeleteClicked,
 	)
+	
+	val action = viewModel.state.action
+	LaunchedEffect(action) {
+		when (action) {
+			null -> Unit
+			is AccountHistoryState.Action.EditTransaction -> {
+				navController.navigate(
+					AppNavigation.AccountTransactionForm(
+						accountId = action.accountId,
+						transactionId = action.transactionId
+					)
+				)
+			}
+		}
+		viewModel.onActionConsumed()
+	}
 }
 
 @Composable
@@ -177,8 +197,9 @@ private fun TransactionsListEmpty(
 ) {
 	Column(
 		modifier = modifier
-			.fillMaxSize(),
-		verticalArrangement = Arrangement.Center,
+			.fillMaxSize()
+			.padding(top = 64.dp),
+		verticalArrangement = Arrangement.Top,
 		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
 		Text(text = stringResource(R.string.account_history_empty_label))

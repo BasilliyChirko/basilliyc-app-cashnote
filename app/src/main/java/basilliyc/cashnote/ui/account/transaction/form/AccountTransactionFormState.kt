@@ -1,10 +1,10 @@
-package basilliyc.cashnote.ui.account.transaction
+package basilliyc.cashnote.ui.account.transaction.form
 
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.ui.components.TextFieldState
 
-data class AccountTransactionState(
+data class AccountTransactionFormState(
 	val content: Content = Content.Loading,
 	val action: Action? = null,
 	val dialog: Dialog? = null,
@@ -13,6 +13,7 @@ data class AccountTransactionState(
 	sealed interface Content {
 		data object Loading : Content
 		data class Data(
+			val isNew: Boolean,
 			val financialAccount: FinancialAccount,
 			val isBalanceReduce: Boolean? = null,
 			val balanceDifference: TextFieldState,
@@ -25,7 +26,6 @@ data class AccountTransactionState(
 	}
 	
 	sealed interface Dialog {
-		data object AccountDeleteConfirmation : Dialog
 		data class DatePicker(val timestamp: Long) : Dialog
 		data class TimePicker(val timestamp: Long) : Dialog
 	}
@@ -34,9 +34,5 @@ data class AccountTransactionState(
 		data object SaveSuccess : Action
 		data object Cancel : Action
 		data object SaveError : Action
-		data class AccountEdit(val accountId: Long) : Action
-		data object AccountDeletionSuccess : Action
-		data object AccountDeletionError : Action
-		data class AccountHistory(val accountId: Long) : Action
 	}
 }

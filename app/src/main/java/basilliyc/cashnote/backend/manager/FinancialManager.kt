@@ -1,25 +1,20 @@
 package basilliyc.cashnote.backend.manager
 
-import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.DatabaseAccountRepository
 import basilliyc.cashnote.backend.database.DatabaseTransactionCategoryRepository
 import basilliyc.cashnote.backend.database.DatabaseTransactionRepository
-import basilliyc.cashnote.data.AccountColor
-import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.FinancialTransactionCategory
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
-import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 class FinancialManager {
 	
@@ -99,38 +94,30 @@ class FinancialManager {
 	//  Transaction
 	//----------------------------------------------------------------------------------------------
 	
-	suspend fun createTransaction(
-		accountId: Long,
-		value: Double,
-		comment: String?,
-		categoryId: Long?,
-		timestamp: Long,
-	) {
+	suspend fun saveTransaction(transaction: FinancialTransaction, ) {
 		
-		if (value == 0.0) return
+		if (transaction.value == 0.0) return
 		
-		val account = accountRepository.getById(accountId)
-			?: throw IllegalStateException("Can`t create transaction. Account with id $accountId is not present in database")
+		val account = accountRepository.getById(transaction.accountId)
+			?: throw IllegalStateException("Can`t create transaction. Account with id ${transaction.accountId} is not present in database")
 		
 		//Validate is category really exists
-		val categoryId = categoryId?.let {
+		val categoryId = transaction.categoryId?.let {
 			transactionCategoryRepository.getById(it)?.id
 		}
 		
-		val transaction = FinancialTransaction(
-			id = 0,
-			value = value,
-			date = timestamp,
-			comment = comment?.takeIf { it.isNotBlank() },
+		val transaction = transaction.copy(
 			accountId = account.id,
 			categoryId = categoryId,
 		)
 		
 		databaseTransaction {
 			transactionRepository.save(transaction)
-			accountRepository.save(account.copy(balance = account.balance + value))
+			accountRepository.save(account.copy(balance = account.balance + transaction.value))
 		}
 	}
+	
+	suspend fun getTransactionById(id: Long) = transactionRepository.getById(id)
 	
 	fun getTransactionListPagingSource(accountId: Long) =
 		transactionRepository.getListPagingSource(accountId)

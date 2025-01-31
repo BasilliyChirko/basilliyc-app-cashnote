@@ -10,6 +10,14 @@ data class AccountHistoryState(
 	val transactions: List<FinancialTransaction> = emptyList(),
 	val transactionsLoadingMore: Boolean = false,
 	val transactionsLoadingMoreError: Throwable? = null,
+	val action: Action? = null,
 ) {
+	
+	sealed interface Action {
+		data class EditTransaction(
+			val accountId: Long,
+			val transactionId: Long,
+		) : Action
+	}
 
 }

@@ -1,5 +1,7 @@
 package basilliyc.cashnote.utils
 
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -29,8 +31,10 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -45,6 +49,7 @@ fun DraggableLazyColumn(
 	onDragMoved: (from: Int, to: Int) -> Unit,
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
+	vibrate: Boolean = true,
 	isOverscrollEnabled: Boolean = true,
 	contentPadding: PaddingValues = PaddingValues(0.dp),
 	reverseLayout: Boolean = false,
@@ -74,7 +79,11 @@ fun DraggableLazyColumn(
 	val coroutineScope = rememberCoroutineScope()
 	var overscrollJob by remember { mutableStateOf<Job?>(null) }
 	val draggableLazyColumnScope by remember { mutableStateOf(DraggableLazyColumnScope(null)) }
-
+	
+	val context = LocalContext.current
+	val vibrator = if (vibrate) {
+		remember { getSystemService(context, Vibrator::class.java) }
+	} else null
 	
 	CompositionLocalProvider(
 		LocalDraggableLazyColumnState provides draggableListState,
@@ -89,6 +98,7 @@ fun DraggableLazyColumn(
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
 							onDragStarted()
+							vibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
 						},
 						onDragEnd = {
 							draggableListState.onDragInterrupted()

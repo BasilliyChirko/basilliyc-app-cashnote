@@ -86,6 +86,10 @@ class AccountHistoryViewModel(
 		pagingSource.registerInvalidatedCallback(onInvalidatedCallback)
 	}
 	
+	fun onActionConsumed() {
+		state = state.copy(action = null)
+	}
+	
 	private fun applyLoadingResult(
 		result: PagingSource.LoadResult<Int, FinancialTransaction>,
 		replaceTransactions: Boolean = false,
@@ -148,7 +152,12 @@ class AccountHistoryViewModel(
 	}
 	
 	fun onTransactionEditClicked(id: Long) {
-		//TODO implement, show transaction edit screen
+		state = state.copy(
+			action = AccountHistoryState.Action.EditTransaction(
+				accountId = route.accountId,
+				transactionId = id
+			)
+		)
 	}
 	
 	fun onTransactionDeleteClicked(id: Long) = scheduleEvent(

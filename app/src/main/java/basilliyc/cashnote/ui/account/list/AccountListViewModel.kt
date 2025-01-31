@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.ui.account.transaction.form.AccountTransactionFormState
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.utils.castOrNull
 import basilliyc.cashnote.utils.inject
@@ -21,6 +22,12 @@ class AccountListViewModel : BaseViewModel() {
 	var state: AccountListState by mutableStateOf(AccountListState())
 		private set
 	
+	private var stateContentData
+		get() = state.content as? AccountListState.Content.Data
+		set(value) {
+			if (value != null) state = state.copy(content = value)
+		}
+	
 	var draggedList by mutableStateOf<List<FinancialAccount>?>(null)
 		private set
 	
@@ -35,6 +42,10 @@ class AccountListViewModel : BaseViewModel() {
 				draggedList = null
 			}
 		}
+	}
+	
+	fun onActionConsumed() {
+		state = state.copy(action = null)
 	}
 	
 	fun onDragStarted() {
@@ -57,6 +68,52 @@ class AccountListViewModel : BaseViewModel() {
 	fun onDragMoved(from: Int, to: Int) {
 		draggedList = draggedList?.let { ArrayList(it) }?.reordered(from, to)
 	}
-
+	
+	
+	fun onAccountEditClicked(accountId: Long) = scheduleEvent {
+		state = state.copy(
+			action = AccountListState.Action.AccountEdit(accountId)
+		)
+	}
+	
+	fun onAccountDeleteClicked(accountId: Long) {
+		state = state.copy(
+			dialog = AccountListState.Dialog.AccountDeleteConfirmation(accountId)
+		)
+	}
+	
+	fun onAccountHistoryClicked(accountId: Long) = scheduleEvent {
+		state = state.copy(
+			action = AccountListState.Action.AccountHistory(accountId)
+		)
+	}
+	
+	fun onAccountDeleteDialogCanceled() {
+		if (state.dialog !is AccountListState.Dialog.AccountDeleteConfirmation) return
+		state = state.copy(
+			dialog = null
+		)
+	}
+	
+	fun onAccountDeleteDialogConfirmed(accountId: Long) {
+		if (state.dialog !is AccountListState.Dialog.AccountDeleteConfirmation) return
+		state = state.copy(
+			dialog = null
+		)
+		
+		scheduleEvent {
+			try {
+				financialManager.deleteAccount(accountId)
+				state = state.copy(
+					action = AccountListState.Action.AccountDeletionSuccess
+				)
+			} catch (t: Throwable) {
+				logcat.error(t)
+				state = state.copy(
+					action = AccountListState.Action.AccountDeletionError
+				)
+			}
+		}
+	}
 	
 }

@@ -17,9 +17,12 @@ fun DefaultPreview(content: @Composable () -> Unit) {
 	
 	if (!koinStarted) {
 		val androidContext = LocalContext.current
-		startKoin {
-			androidContext(androidContext)
-			modules(AppValues.koinModules())
+		try {
+			startKoin {
+				androidContext(androidContext)
+				modules(AppValues.koinModules())
+			}
+		} catch (ignore: Throwable) {
 		}
 		koinStarted = true
 	}

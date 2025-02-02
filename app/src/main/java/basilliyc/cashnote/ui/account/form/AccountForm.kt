@@ -42,6 +42,7 @@ import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
@@ -309,7 +310,7 @@ private fun ColumnScope.AccountName(
 	state: TextFieldState,
 	onChanged: (String) -> Unit,
 ) {
-	TextField(
+	OutlinedTextField(
 		state = state,
 		onValueChange = onChanged,
 		label = { Text(text = stringResource(R.string.account_form_label_name)) },
@@ -330,7 +331,7 @@ private fun ColumnScope.AccountBalance(
 	state: TextFieldState,
 	onChanged: (String) -> Unit,
 ) {
-	TextField(
+	OutlinedTextField(
 		state = state,
 		onValueChange = onChanged,
 		label = { Text(text = stringResource(R.string.account_form_label_balance)) },

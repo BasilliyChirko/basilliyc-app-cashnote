@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +30,15 @@ import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.toPriceString
 
+sealed interface CardBalanceLeadingIcon {
+	data class Vector(val imageVector: ImageVector?) : CardBalanceLeadingIcon
+	data class Currency(val currency: AccountCurrency) : CardBalanceLeadingIcon
+}
+
+fun CardBalanceLeadingIcon(currency: AccountCurrency) = CardBalanceLeadingIcon.Currency(currency)
+
+fun CardBalanceLeadingIcon(imageVector: ImageVector?) = CardBalanceLeadingIcon.Vector(imageVector)
+
 @Composable
 fun CardBalance(
 	modifier: Modifier = Modifier,
@@ -33,7 +46,7 @@ fun CardBalance(
 	title: String,
 	primaryValue: Double,
 	secondaryValue: Double?,
-	currency: AccountCurrency?,
+	leadingIcon: CardBalanceLeadingIcon?,
 	color: AccountColor?,
 ) {
 	Card(
@@ -55,15 +68,29 @@ fun CardBalance(
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
 			) {
-				if (currency != null) {
-					Text(
-						modifier = Modifier,
-						text = currency.symbol,
-						style = MaterialTheme.typography.displaySmall,
-					)
+				
+				when (val icon = leadingIcon) {
+					is CardBalanceLeadingIcon.Currency -> {
+						Text(
+							text = icon.currency.symbol,
+							style = MaterialTheme.typography.displaySmall,
+						)
+					}
+					is CardBalanceLeadingIcon.Vector -> {
+						if (icon.imageVector != null) {
+							Icon(
+								imageVector = icon.imageVector,
+								contentDescription = title,
+							)
+						}
+					}
+					null -> Unit
 				}
 				
-				Spacer(modifier = Modifier.weight(1F))
+				Spacer(
+					modifier = Modifier.weight(1F)
+						.height(48.dp)
+				)
 				
 				Column(
 					horizontalAlignment = Alignment.End,
@@ -103,7 +130,37 @@ private fun CardBalancePreview() = DefaultPreview {
 		title = "Card",
 		primaryValue = 100.0,
 		secondaryValue = 50.0,
-		currency = AccountCurrency.EUR,
+		leadingIcon = CardBalanceLeadingIcon(Icons.Default.Home),
+		color = AccountColor.Green,
+	)
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun CardBalancePreview2() = DefaultPreview {
+	CardBalance(
+		modifier = Modifier
+			.width(180.dp),
+		onClick = {},
+		title = "Card",
+		primaryValue = 100.0,
+		secondaryValue = 50.0,
+		leadingIcon = CardBalanceLeadingIcon(AccountCurrency.EUR),
+		color = AccountColor.Green,
+	)
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun CardBalancePreview3() = DefaultPreview {
+	CardBalance(
+		modifier = Modifier
+			.width(180.dp),
+		onClick = {},
+		title = "Card",
+		primaryValue = 100.0,
+		secondaryValue = 50.0,
+		leadingIcon = null,
 		color = AccountColor.Green,
 	)
 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import basilliyc.cashnote.utils.LocalLogcat
+import basilliyc.cashnote.utils.log
 
 sealed interface VerticalGridCells {
 	data class Fixed(val count: Int) : VerticalGridCells
@@ -37,8 +38,13 @@ fun VerticalGrid(
 ) {
 	val density = LocalDensity.current
 	
-	val horizontalSpacePx = remember { with(density) { horizontalSpace.toPx() } }
+	val horizontalSpacePx = remember {
+		if (horizontalSpace == Dp.Unspecified) {
+			0F
+		} else with(density) { horizontalSpace.toPx() }
+	}
 	var rootWidth by remember { mutableIntStateOf(0) }
+	
 	
 	Column(
 		modifier = modifier

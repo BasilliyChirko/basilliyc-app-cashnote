@@ -62,4 +62,8 @@
     <string name="account_history_empty_label">There are no any transaction yet</string>
     <string name="account_history_action_edit_transaction">Edit</string>
     <string name="account_history_action_delete_transaction">Delete</string>
+    <string name="account_balance">Balance</string>
+    <string name="account_balance_spend">Spend</string>
+    <string name="account_balance_receive">Receive</string>
+    <string name="account_balance_profit">Profit</string>
 </resources>

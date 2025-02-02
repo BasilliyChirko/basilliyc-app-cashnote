@@ -55,6 +55,7 @@ import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardBalance
+import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.main.AppNavigation
@@ -344,7 +345,7 @@ private fun ContentData(
 							title = account.name,
 							primaryValue = account.balance,
 							secondaryValue = 50.0,
-							currency = account.currency,
+							leadingIcon = CardBalanceLeadingIcon(account.currency),
 							color = account.color,
 						)
 					},

@@ -13,7 +13,7 @@ import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.letIf
 import kotlinx.coroutines.launch

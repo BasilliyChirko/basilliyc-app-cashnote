@@ -3,8 +3,8 @@ package basilliyc.cashnote.ui
 import basilliyc.cashnote.data.AccountColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransactionCategory
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialCategoryIcon
 
 object PreviewValues {
 	
@@ -24,8 +24,8 @@ object PreviewValues {
 	}
 	
 	val categories by lazy {
-		FinancialTransactionCategoryIcon.entries.mapIndexed { index, icon ->
-			FinancialTransactionCategory(
+		FinancialCategoryIcon.entries.mapIndexed { index, icon ->
+			FinancialCategory(
 				id = index.toLong(),
 				name = icon.name,
 				position = index,

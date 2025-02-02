@@ -10,9 +10,8 @@ import androidx.paging.PagingSource
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.BaseViewModel
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AccountHistoryViewModel(

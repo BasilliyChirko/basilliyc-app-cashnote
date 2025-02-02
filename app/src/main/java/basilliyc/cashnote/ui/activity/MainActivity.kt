@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.main
+package basilliyc.cashnote.ui.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -127,7 +127,7 @@ private fun MainBottomNavigationBar() {
 			}
 		),
 		NavigationBarEntity(
-			page = AppNavigation.AccountStatistic,
+			page = AppNavigation.Statistic,
 			label = { Text(stringResource(R.string.main_nav_account_statistic)) },
 			icon = {
 				Icon(
@@ -137,7 +137,7 @@ private fun MainBottomNavigationBar() {
 			}
 		),
 		NavigationBarEntity(
-			page = AppNavigation.AppSettings,
+			page = AppNavigation.Settings,
 			label = { Text(stringResource(R.string.main_nav_app_settings)) },
 			icon = {
 				Icon(

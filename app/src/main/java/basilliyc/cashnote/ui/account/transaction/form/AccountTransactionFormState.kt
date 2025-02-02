@@ -1,7 +1,7 @@
 package basilliyc.cashnote.ui.account.transaction.form
 
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransactionCategory
+import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.ui.components.TextFieldState
 
 data class AccountTransactionFormState(
@@ -19,7 +19,7 @@ data class AccountTransactionFormState(
 			val balanceDifference: TextFieldState,
 			val balanceNew: TextFieldState,
 			val comment: TextFieldState,
-			val availableCategories: List<FinancialTransactionCategory>,
+			val availableCategories: List<FinancialCategory>,
 			val selectedCategoryId: Long?,
 			val timestamp: Long,
 		) : Content

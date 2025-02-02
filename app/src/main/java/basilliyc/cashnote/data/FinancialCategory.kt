@@ -2,13 +2,11 @@ package basilliyc.cashnote.data
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Cases
 import androidx.compose.material.icons.filled.DriveEta
 import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Person2
 import androidx.compose.material.icons.filled.Person3
@@ -20,15 +18,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class FinancialTransactionCategory(
+data class FinancialCategory(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0L,
 	val name: String,
-	val icon: FinancialTransactionCategoryIcon?,
+	val icon: FinancialCategoryIcon?,
 	val position: Int = id.toInt(),
 )
 
 
-enum class FinancialTransactionCategoryIcon(val imageVector: ImageVector) {
+enum class FinancialCategoryIcon(val imageVector: ImageVector) {
 	Salary(Icons.Filled.Work),
 	Smile(Icons.Filled.EmojiEmotions),
 	Home(Icons.Filled.Home),

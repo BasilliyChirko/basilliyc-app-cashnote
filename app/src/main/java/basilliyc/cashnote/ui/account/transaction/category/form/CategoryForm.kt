@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.transaction.category.form
+package basilliyc.cashnote.ui.account.transaction.category.form
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -35,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.FinancialCategoryIcon
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
@@ -53,11 +52,11 @@ import basilliyc.cashnote.utils.toast
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-fun TransactionCategoryForm() {
+fun CategoryForm() {
 	
 	val navController = LocalNavController.current
 	val context = LocalContext.current
-	val viewModel = viewModel<TransactionCategoryFormViewModel>()
+	val viewModel = viewModel<CategoryFormViewModel>()
 	val state = viewModel.state
 	
 	Content(
@@ -71,22 +70,22 @@ fun TransactionCategoryForm() {
 	val action = state.action
 	LaunchedEffect(action) {
 		when (action) {
-			TransactionCategoryFormState.Action.Cancel -> navController.popBackStack()
-			TransactionCategoryFormState.Action.DeleteError -> {
+			CategoryFormState.Action.Cancel -> navController.popBackStack()
+			CategoryFormState.Action.DeleteError -> {
 				context.toast(R.string.transaction_category_form_delete_error)
 			}
 			
-			TransactionCategoryFormState.Action.DeleteSuccess -> {
+			CategoryFormState.Action.DeleteSuccess -> {
 				context.toast(R.string.transaction_category_form_delete_success)
 				navController.popBackStack()
 			}
 			
-			TransactionCategoryFormState.Action.SaveError -> {
+			CategoryFormState.Action.SaveError -> {
 				context.toast(R.string.transaction_category_form_save_error)
 			}
 			
-			TransactionCategoryFormState.Action.SaveSuccess -> {
-				val isNew = (state.content as? TransactionCategoryFormState.Content.Data)?.isNew
+			CategoryFormState.Action.SaveSuccess -> {
+				val isNew = (state.content as? CategoryFormState.Content.Data)?.isNew
 				when (isNew) {
 					true -> context.toast(R.string.transaction_category_form_save_success)
 					false -> Unit
@@ -105,8 +104,8 @@ fun TransactionCategoryForm() {
 @Preview(showBackground = true)
 private fun TransactionCategoryFormPreview() = DefaultPreview {
 	Content(
-		state = TransactionCategoryFormState(
-			content = TransactionCategoryFormState.Content.Data(
+		state = CategoryFormState(
+			content = CategoryFormState.Content.Data(
 				isNew = true,
 				name = TextFieldState(value = ""),
 				icon = null,
@@ -125,9 +124,9 @@ private fun TransactionCategoryFormPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	state: TransactionCategoryFormState,
+	state: CategoryFormState,
 	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialTransactionCategoryIcon?) -> Unit,
+	onIconChanged: (FinancialCategoryIcon?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onDeletedClicked: () -> Unit,
 ) {
@@ -142,7 +141,7 @@ private fun Content(
 			)
 			
 			when (val content = state.content) {
-				is TransactionCategoryFormState.Content.Data -> ContentData(
+				is CategoryFormState.Content.Data -> ContentData(
 					modifier = Modifier,
 					content = content,
 					onNameChanged = onNameChanged,
@@ -151,7 +150,7 @@ private fun Content(
 					onDeletedClicked = onDeletedClicked
 				)
 				
-				is TransactionCategoryFormState.Content.Loading -> BoxLoading()
+				is CategoryFormState.Content.Loading -> BoxLoading()
 			}
 		}
 	}
@@ -163,19 +162,19 @@ private fun Content(
 
 @Composable
 private fun ActionBar(
-	state: TransactionCategoryFormState,
+	state: CategoryFormState,
 	onSaveClicked: () -> Unit,
 ) {
 	SimpleActionBar(
 		title = {
 			Text(
 				text = when (state.content) {
-					is TransactionCategoryFormState.Content.Data -> {
+					is CategoryFormState.Content.Data -> {
 						if (state.content.isNew) stringResource(R.string.transaction_cagetory_form_new_category)
 						else stringResource(R.string.transaction_category_form_edit_category)
 					}
 					
-					is TransactionCategoryFormState.Content.Loading -> ""
+					is CategoryFormState.Content.Loading -> ""
 				}
 			)
 		},
@@ -199,9 +198,9 @@ private fun ActionBar(
 @Composable
 private fun ContentData(
 	modifier: Modifier,
-	content: TransactionCategoryFormState.Content.Data,
+	content: CategoryFormState.Content.Data,
 	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialTransactionCategoryIcon?) -> Unit,
+	onIconChanged: (FinancialCategoryIcon?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onDeletedClicked: () -> Unit,
 ) {
@@ -256,12 +255,12 @@ private fun ContentData(
 
 @Composable
 private fun TransactionCategoryIconPicker(
-	icon: FinancialTransactionCategoryIcon?,
-	onIconChanged: (FinancialTransactionCategoryIcon?) -> Unit,
+	icon: FinancialCategoryIcon?,
+	onIconChanged: (FinancialCategoryIcon?) -> Unit,
 ) {
 	
 	val selectedIcon = icon
-	val icons = FinancialTransactionCategoryIcon.entries
+	val icons = FinancialCategoryIcon.entries
 	
 	LazyVerticalGrid(
 		columns = GridCells.Adaptive(56.dp),

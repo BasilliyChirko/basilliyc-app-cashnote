@@ -7,7 +7,7 @@ import basilliyc.cashnote.backend.database.DatabaseTransactionCategoryRepository
 import basilliyc.cashnote.backend.database.DatabaseTransactionRepository
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransaction
-import basilliyc.cashnote.data.FinancialTransactionCategory
+import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
@@ -152,7 +152,7 @@ class FinancialManager {
 		return currentMaxPosition + 1
 	}
 	
-	suspend fun saveTransactionCategory(category: FinancialTransactionCategory) =
+	suspend fun saveTransactionCategory(category: FinancialCategory) =
 		databaseTransaction {
 			
 			val category = category

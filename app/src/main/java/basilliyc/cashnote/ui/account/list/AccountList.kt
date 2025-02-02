@@ -6,10 +6,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,8 +19,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Kayaking
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -51,20 +46,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.color
-import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.applyIf
-import basilliyc.cashnote.utils.toPriceString
 import basilliyc.cashnote.utils.toast
 
 
@@ -86,7 +78,7 @@ fun AccountList() {
 		},
 		onClickAccount = {
 			navController.navigate(
-				AppNavigation.AccountTransactionForm(
+				AppNavigation.TransactionForm(
 					accountId = it,
 					transactionId = null
 				)

@@ -5,13 +5,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialTransaction
-import basilliyc.cashnote.data.FinancialTransactionCategory
+import basilliyc.cashnote.data.FinancialCategory
 
 @Database(
 	entities = [
 		FinancialAccount::class,
 		FinancialTransaction::class,
-		FinancialTransactionCategory::class,
+		FinancialCategory::class,
 	],
 	exportSchema = true,
 	version = 3, //previous version: 1

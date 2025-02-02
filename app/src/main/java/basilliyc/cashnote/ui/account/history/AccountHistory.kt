@@ -41,8 +41,8 @@ import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.main.AppNavigation
-import basilliyc.cashnote.ui.main.AppNavigation.*
+import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation.*
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -77,7 +77,7 @@ fun AccountHistory() {
 			null -> Unit
 			is AccountHistoryState.Action.EditTransaction -> {
 				navController.navigate(
-					AppNavigation.AccountTransactionForm(
+					AppNavigation.TransactionForm(
 						accountId = action.accountId,
 						transactionId = action.transactionId
 					)

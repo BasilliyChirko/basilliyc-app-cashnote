@@ -12,7 +12,7 @@ import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.toPriceWithCoins
 import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.flow.collectLatest
@@ -29,7 +29,7 @@ class AccountTransactionFormViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	private val route = savedStateHandle.toRoute<AppNavigation.AccountTransactionForm>()
+	private val route = savedStateHandle.toRoute<AppNavigation.TransactionForm>()
 	
 	//----------------------------------------------------------------------------------------------
 	//  State declaration

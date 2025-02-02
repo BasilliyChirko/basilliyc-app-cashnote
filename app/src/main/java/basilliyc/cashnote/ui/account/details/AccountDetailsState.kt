@@ -1,7 +1,7 @@
 package basilliyc.cashnote.ui.account.details
 
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransactionCategory
+import basilliyc.cashnote.data.FinancialCategory
 
 data class AccountDetailsState(
 	val page: Page = Page.Loading
@@ -20,7 +20,7 @@ data class AccountDetailsState(
 	}
 	
 	data class CategoryWithBalance(
-		val category: FinancialTransactionCategory,
+		val category: FinancialCategory,
 		val balance: Double,
 		val deviation: Double?,
 	)

@@ -19,11 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -43,7 +39,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,19 +56,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransactionCategory
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialCategoryIcon
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
-import basilliyc.cashnote.ui.components.PopupMenu
-import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.modifier
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -155,17 +148,17 @@ private fun AccountTransactionFormPreview() = DefaultPreview {
 		position = 0,
 	)
 	val availableCategories = listOf(
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 1,
 			name = "Home",
-			icon = FinancialTransactionCategoryIcon.Home,
+			icon = FinancialCategoryIcon.Home,
 		),
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 2,
 			name = "Person",
-			icon = FinancialTransactionCategoryIcon.Person,
+			icon = FinancialCategoryIcon.Person,
 		),
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 3,
 			name = "Other",
 			icon = null,
@@ -408,7 +401,7 @@ private fun BalanceNew(
 
 @Composable
 private fun TransactionCategory(
-	availableCategories: List<FinancialTransactionCategory>,
+	availableCategories: List<FinancialCategory>,
 	selectedCategoryId: Long?,
 	onCategoryChanged: (Long?) -> Unit,
 ) {
@@ -425,7 +418,7 @@ private fun TransactionCategory(
 		Spacer(modifier = Modifier.weight(1f))
 		IconButton(
 			onClick = {
-				navController.navigate(AppNavigation.TransactionCategoryList)
+				navController.navigate(AppNavigation.CategoryList)
 			},
 			imageVector = Icons.Filled.Settings,
 			contentDescription = stringResource(R.string.account_transaction_category_settings),

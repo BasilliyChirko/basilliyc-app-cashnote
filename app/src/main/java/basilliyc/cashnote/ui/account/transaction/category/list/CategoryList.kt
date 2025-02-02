@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.transaction.category.list
+package basilliyc.cashnote.ui.account.transaction.category.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -30,12 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
-import basilliyc.cashnote.data.FinancialTransactionCategory
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
-import basilliyc.cashnote.data.color
+import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialCategoryIcon
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableLazyColumn
 import basilliyc.cashnote.utils.LocalNavController
@@ -49,7 +48,7 @@ import kotlinx.coroutines.launch
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-fun TransactionCategoryList() {
+fun CategoryList() {
 	val financialManager by remember { inject<FinancialManager>() }
 	
 	
@@ -57,7 +56,7 @@ fun TransactionCategoryList() {
 		.collectAsState(emptyList())
 	
 	var transactionCategoriesDragged by remember {
-		mutableStateOf<List<FinancialTransactionCategory>?>(null)
+		mutableStateOf<List<FinancialCategory>?>(null)
 	}
 	
 	val coroutineScope = rememberCoroutineScope()
@@ -67,10 +66,10 @@ fun TransactionCategoryList() {
 	Content(
 		transactionCategories = transactionCategoriesDragged ?: transactionCategories,
 		onCategoryClicked = {
-			navController.navigate(AppNavigation.TransactionCategoryForm(it))
+			navController.navigate(AppNavigation.CategoryForm(it))
 		},
 		onCategoryAddClicked = {
-			navController.navigate(AppNavigation.TransactionCategoryForm(null))
+			navController.navigate(AppNavigation.CategoryForm(null))
 		},
 		onDragStarted = {
 			transactionCategoriesDragged = transactionCategories
@@ -97,19 +96,19 @@ fun TransactionCategoryList() {
 
 @Composable
 @Preview(showBackground = true)
-private fun TransactionCategoryListPreview() = DefaultPreview {
+private fun CategoryListPreview() = DefaultPreview {
 	val availableCategories = listOf(
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 1,
 			name = "Home",
-			icon = FinancialTransactionCategoryIcon.Home,
+			icon = FinancialCategoryIcon.Home,
 		),
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 2,
 			name = "Person",
-			icon = FinancialTransactionCategoryIcon.Person,
+			icon = FinancialCategoryIcon.Person,
 		),
-		FinancialTransactionCategory(
+		FinancialCategory(
 			id = 3,
 			name = "Other",
 			icon = null,
@@ -132,7 +131,7 @@ private fun TransactionCategoryListPreview() = DefaultPreview {
 
 @Composable
 private fun Content(
-	transactionCategories: List<FinancialTransactionCategory>,
+	transactionCategories: List<FinancialCategory>,
 	onCategoryClicked: (Long) -> Unit,
 	onCategoryAddClicked: () -> Unit,
 	onDragStarted: () -> Unit,
@@ -194,7 +193,7 @@ private fun Content(
 @Composable
 private fun LazyItemScope.CategoryItem(
 	modifier: Modifier = Modifier,
-	category: FinancialTransactionCategory,
+	category: FinancialCategory,
 	onClick: (Long) -> Unit,
 ) {
 	Card(

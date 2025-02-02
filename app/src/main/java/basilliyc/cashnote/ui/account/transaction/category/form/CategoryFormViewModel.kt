@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.transaction.category.form
+package basilliyc.cashnote.ui.account.transaction.category.form
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,52 +7,52 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.FinancialManager
-import basilliyc.cashnote.data.FinancialTransactionCategory
-import basilliyc.cashnote.data.FinancialTransactionCategoryIcon
+import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialCategoryIcon
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.main.AppNavigation
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
-class TransactionCategoryFormViewModel(
+class CategoryFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
 	private val financialManager: FinancialManager by inject()
 	
-	var state by mutableStateOf(TransactionCategoryFormState())
+	var state by mutableStateOf(CategoryFormState())
 		private set
 	private var stateContentData
-		get() = state.content as? TransactionCategoryFormState.Content.Data
+		get() = state.content as? CategoryFormState.Content.Data
 		set(value) {
 			if (value != null) state = state.copy(content = value)
 		}
 	
-	private val route: AppNavigation.TransactionCategoryForm = savedStateHandle.toRoute()
+	private val route: AppNavigation.CategoryForm = savedStateHandle.toRoute()
 	
 	init {
-		state = state.copy(content = TransactionCategoryFormState.Content.Loading)
+		state = state.copy(content = CategoryFormState.Content.Loading)
 		if (route.categoryId != null) {
 			viewModelScope.launch {
 				val category = (financialManager.getTransactionCategoryById(route.categoryId)
 					?: throw IllegalStateException("TransactionCategory with id ${route.categoryId} is not present in database"))
-				state = state.copy(content = TransactionCategoryFormState.Content.Data(category))
+				state = state.copy(content = CategoryFormState.Content.Data(category))
 			}
 		} else {
-			val newCategory = FinancialTransactionCategory(
+			val newCategory = FinancialCategory(
 				name = "",
 				icon = null,
 			)
-			state = state.copy(content = TransactionCategoryFormState.Content.Data(newCategory))
+			state = state.copy(content = CategoryFormState.Content.Data(newCategory))
 		}
 	}
 	
-	private fun updateStateContentData(call: TransactionCategoryFormState.Content.Data.() -> TransactionCategoryFormState.Content.Data) {
+	private fun updateStateContentData(call: CategoryFormState.Content.Data.() -> CategoryFormState.Content.Data) {
 		val content = state.content
-		if (content is TransactionCategoryFormState.Content.Data) {
+		if (content is CategoryFormState.Content.Data) {
 			state = state.copy(content = content.call())
 		}
 	}
@@ -77,7 +77,7 @@ class TransactionCategoryFormViewModel(
 		return null
 	}
 	
-	fun onIconChanged(icon: FinancialTransactionCategoryIcon?) {
+	fun onIconChanged(icon: FinancialCategoryIcon?) {
 		updateStateContentData {
 			copy(icon = icon.takeIf { icon != this.icon })
 		}
@@ -95,7 +95,7 @@ class TransactionCategoryFormViewModel(
 			return
 		}
 		
-		val category = FinancialTransactionCategory(
+		val category = FinancialCategory(
 			id = route.categoryId ?: 0L,
 			name = nameString,
 			icon = data.icon,
@@ -104,10 +104,10 @@ class TransactionCategoryFormViewModel(
 		scheduleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.saveTransactionCategory(category)
-				state = state.copy(action = TransactionCategoryFormState.Action.SaveSuccess)
+				state = state.copy(action = CategoryFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				state = state.copy(action = TransactionCategoryFormState.Action.SaveError)
+				state = state.copy(action = CategoryFormState.Action.SaveError)
 			}
 		}
 	}
@@ -118,10 +118,10 @@ class TransactionCategoryFormViewModel(
 		scheduleEvent(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.deleteTransactionCategory(route.categoryId)
-				state = state.copy(action = TransactionCategoryFormState.Action.DeleteSuccess)
+				state = state.copy(action = CategoryFormState.Action.DeleteSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				state = state.copy(action = TransactionCategoryFormState.Action.DeleteError)
+				state = state.copy(action = CategoryFormState.Action.DeleteError)
 			}
 		}
 	}

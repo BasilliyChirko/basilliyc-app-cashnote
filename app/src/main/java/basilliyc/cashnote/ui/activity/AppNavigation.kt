@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.main
+package basilliyc.cashnote.ui.activity
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.NavigationBarItem
@@ -12,52 +12,53 @@ import basilliyc.cashnote.ui.account.details.AccountDetails
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
-import basilliyc.cashnote.ui.account.statistic.AccountStatistic
+import basilliyc.cashnote.ui.statistic.AccountStatistic
 import basilliyc.cashnote.ui.account.transaction.form.AccountTransactionForm
-import basilliyc.cashnote.ui.app_settings.AppSettings
-import basilliyc.cashnote.ui.transaction.category.form.TransactionCategoryForm
-import basilliyc.cashnote.ui.transaction.category.list.TransactionCategoryList
+import basilliyc.cashnote.ui.settings.AppSettings
+import basilliyc.cashnote.ui.account.transaction.category.form.CategoryForm
+import basilliyc.cashnote.ui.account.transaction.category.list.CategoryList
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
 sealed interface AppNavigation {
+	
 	@Serializable
 	data object AccountList : AppNavigation
 	
 	@Serializable
-	data object AccountStatistic : AppNavigation
-	
-	@Serializable
-	data object AppSettings : AppNavigation
+	data class AccountDetails(val accountId: Long) : AppNavigation
 	
 	@Serializable
 	data class AccountForm(val accountId: Long?) : AppNavigation
 	
 	@Serializable
-	data class AccountTransactionForm(val accountId: Long, val transactionId: Long?) : AppNavigation
-	
-	@Serializable
-	data object TransactionCategoryList : AppNavigation
-	
-	@Serializable
-	data class TransactionCategoryForm(val categoryId: Long?) : AppNavigation
-	
-	@Serializable
 	data class AccountHistory(val accountId: Long) : AppNavigation
-
+	
 	@Serializable
-	data class AccountDetails(val accountId: Long) : AppNavigation
+	data class TransactionForm(val accountId: Long, val transactionId: Long?) : AppNavigation
+	
+	@Serializable
+	data object CategoryList : AppNavigation
+	
+	@Serializable
+	data class CategoryForm(val categoryId: Long?) : AppNavigation
+	
+	@Serializable
+	data object Statistic : AppNavigation
+	
+	@Serializable
+	data object Settings : AppNavigation
 	
 }
 
 fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountList> { AccountList() }
-	composable<AppNavigation.AccountStatistic> { AccountStatistic() }
-	composable<AppNavigation.AppSettings> { AppSettings() }
+	composable<AppNavigation.Statistic> { AccountStatistic() }
+	composable<AppNavigation.Settings> { AppSettings() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
-	composable<AppNavigation.AccountTransactionForm> { AccountTransactionForm() }
-	composable<AppNavigation.TransactionCategoryList> { TransactionCategoryList() }
-	dialog<AppNavigation.TransactionCategoryForm> { TransactionCategoryForm() }
+	composable<AppNavigation.TransactionForm> { AccountTransactionForm() }
+	composable<AppNavigation.CategoryList> { CategoryList() }
+	dialog<AppNavigation.CategoryForm> { CategoryForm() }
 	composable<AppNavigation.AccountHistory> { AccountHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 }

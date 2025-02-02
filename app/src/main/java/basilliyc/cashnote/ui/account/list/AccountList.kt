@@ -54,6 +54,7 @@ import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.main.AppNavigation
@@ -331,7 +332,7 @@ private fun ContentData(
 					expanded = expandedId == account.id,
 					onDismissRequest = { expandedId = -1L },
 					anchor = {
-						ContentDataItem(
+						CardBalance(
 							modifier = Modifier
 								.applyIf({ isDragged }) {
 									this.shadow(
@@ -339,8 +340,12 @@ private fun ContentData(
 										shape = MaterialTheme.shapes.medium
 									)
 								},
-							financialAccount = account,
-							onClickAccount = onClickAccount,
+							onClick = { onClickAccount(account.id) },
+							title = account.name,
+							primaryValue = account.balance,
+							secondaryValue = 50.0,
+							currency = account.currency,
+							color = account.color,
 						)
 					},
 					items = {
@@ -376,46 +381,6 @@ private fun ContentData(
 		)
 	}
 }
-
-@Composable
-private fun ContentDataItem(
-	modifier: Modifier,
-	financialAccount: FinancialAccount,
-	onClickAccount: (id: Long) -> Unit,
-) {
-	//TODO replace mock data with real
-	Card(
-		modifier = modifier,
-		onClick = { onClickAccount(financialAccount.id) },
-		colors = CardDefaults.cardColors(
-			containerColor = financialAccount.color?.color ?: Color.Unspecified
-		)
-	) {
-		Column {
-			Text(text = financialAccount.name, modifier = Modifier.padding(8.dp))
-			Row {
-				Text(
-					text = financialAccount.currency.symbol,
-					modifier = Modifier.padding(horizontal = 8.dp)
-				)
-				Spacer(modifier = Modifier.weight(1F))
-				Text(
-					text = financialAccount.balance.toPriceString(showPlus = false),
-					modifier = Modifier.padding(horizontal = 8.dp)
-				)
-			}
-			//TODO set real day difference
-			Text(
-				modifier = Modifier
-					.padding(8.dp)
-					.fillMaxWidth(),
-				text = (-50.7).toPriceString(showPlus = true),
-				textAlign = TextAlign.End
-			)
-		}
-	}
-}
-
 
 //--------------------------------------------------------------------------------------------------
 //  ACTION BAR

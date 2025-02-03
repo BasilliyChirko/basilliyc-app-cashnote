@@ -134,11 +134,11 @@ class FinancialManager {
 	//  Transaction Category
 	//----------------------------------------------------------------------------------------------
 	
-	suspend fun getAvailableTransactionCategories() = transactionCategoryRepository.getList()
+	suspend fun getCategoryList() = transactionCategoryRepository.getList()
 	
-	fun getAvailableTransactionCategoriesAsFlow() = transactionCategoryRepository.getListAsFlow()
+	fun getCategoryListAsFlow() = transactionCategoryRepository.getListAsFlow()
 	
-	suspend fun getTransactionCategoryById(id: Long) = transactionCategoryRepository.getById(id)
+	suspend fun getCategoryById(id: Long) = transactionCategoryRepository.getById(id)
 	
 	private suspend fun DatabaseTransactionCategoryRepository.getNextPosition(): Int {
 		var currentMaxPosition = this.getMaxPosition()
@@ -152,7 +152,7 @@ class FinancialManager {
 		return currentMaxPosition + 1
 	}
 	
-	suspend fun saveTransactionCategory(category: FinancialCategory) =
+	suspend fun saveCategory(category: FinancialCategory) =
 		databaseTransaction {
 			
 			val category = category
@@ -166,7 +166,7 @@ class FinancialManager {
 			
 		}
 	
-	suspend fun deleteTransactionCategory(categoryId: Long) = databaseTransaction {
+	suspend fun deleteCategory(categoryId: Long) = databaseTransaction {
 		transactionCategoryRepository.delete(categoryId)
 		val categories = transactionCategoryRepository.getList()
 			.mapIndexed { index, category ->
@@ -177,7 +177,7 @@ class FinancialManager {
 		transactionCategoryRepository.save(categories)
 	}
 	
-	suspend fun changeTransactionCategoryPosition(from: Int, to: Int) = databaseTransaction {
+	suspend fun changeCategoryPosition(from: Int, to: Int) = databaseTransaction {
 		if (from == to) return@databaseTransaction
 		if (from == -1 || to == -1) return@databaseTransaction
 		val categories = transactionCategoryRepository.getList()

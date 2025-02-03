@@ -162,7 +162,7 @@ class AccountFormViewModel(
 			position = editedAccount?.position ?: 0,
 		)
 		
-		scheduleEvent(skipIfBusy = true, postDelay = true) {
+		schedule(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.saveAccount(financialAccount)
 				state = state.copy(action = AccountFormState.Action.SaveSuccess)

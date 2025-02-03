@@ -11,7 +11,6 @@ data class AccountDetailsState(
 		data object Loading : Page
 		data class Data(
 			val account: FinancialAccount,
-			val showBalanceValue: Boolean,
 			val showBalanceProfit: Boolean,
 			val balanceSpend: Double?,
 			val balanceReceive: Double?,

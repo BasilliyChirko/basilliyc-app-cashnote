@@ -52,7 +52,7 @@ fun CategoryList() {
 	val financialManager by remember { inject<FinancialManager>() }
 	
 	
-	val transactionCategories by financialManager.getAvailableTransactionCategoriesAsFlow()
+	val transactionCategories by financialManager.getCategoryListAsFlow()
 		.collectAsState(emptyList())
 	
 	var transactionCategoriesDragged by remember {
@@ -80,7 +80,7 @@ fun CategoryList() {
 				transactionCategories.let { ArrayList(it) }.reordered(from, to)
 			
 			coroutineScope.launch {
-				financialManager.changeTransactionCategoryPosition(from, to)
+				financialManager.changeCategoryPosition(from, to)
 //				transactionCategoriesDragged = null
 			}
 		},

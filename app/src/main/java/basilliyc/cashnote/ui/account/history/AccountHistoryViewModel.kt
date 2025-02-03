@@ -49,7 +49,7 @@ class AccountHistoryViewModel(
 			transactions = if (isInitialLoading) emptyList() else state.transactions,
 			transactionsLoadingMoreError = null,
 		)
-		scheduleEvent {
+		schedule {
 			val refreshLoadResult = pagingSource.load(
 				params = PagingSource.LoadParams.Refresh<Int>(
 					key = null,
@@ -134,7 +134,7 @@ class AccountHistoryViewModel(
 			transactionsLoadingMoreError = null,
 		)
 		
-		scheduleEvent {
+		schedule {
 			applyLoadingResult(
 				pagingSource.load(
 					PagingSource.LoadParams.Append<Int>(
@@ -159,7 +159,7 @@ class AccountHistoryViewModel(
 		)
 	}
 	
-	fun onTransactionDeleteClicked(id: Long) = scheduleEvent(
+	fun onTransactionDeleteClicked(id: Long) = schedule(
 		skipIfBusy = true,
 		postDelay = true,
 	) {

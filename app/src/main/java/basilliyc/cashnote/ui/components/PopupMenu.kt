@@ -9,6 +9,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -49,13 +51,71 @@ fun PopupMenu(
 
 @Composable
 fun ColumnScope.PopupMenuItem(
-	text: String,
 	onClick: () -> Unit,
+	text: String,
 	leadingIcon: ImageVector? = null,
 ) {
 	DropdownMenuItem(
 		text = { Text(text = text) },
 		onClick = onClick,
+		leadingIcon = {
+			if (leadingIcon != null) {
+				Icon(
+					imageVector = leadingIcon,
+					contentDescription = text
+				)
+			}
+		}
+	)
+}
+
+
+class PopupMenuState(expanded: Boolean = false) {
+	val expanded = mutableStateOf(expanded)
+	
+	fun expand() {
+		expanded.value = true
+	}
+}
+
+@Composable
+fun rememberPopupMenuState(expanded: Boolean = false): PopupMenuState {
+	return remember { PopupMenuState(expanded) }
+}
+
+@Composable
+fun PopupMenu(
+	modifier: Modifier = Modifier,
+	state: PopupMenuState = rememberPopupMenuState(),
+	anchor: @Composable PopupMenuState.() -> Unit,
+	items: @Composable PopupMenuState.() -> Unit,
+) {
+	Box(modifier = modifier) {
+		anchor(state)
+		DropdownMenu(
+			expanded = state.expanded.value,
+			onDismissRequest = {
+				state.expanded.value = false
+			},
+			content = {
+				items(state)
+			}
+		)
+	}
+}
+
+@Composable
+fun PopupMenuState.PopupMenuItem(
+	onClick: () -> Unit,
+	text: String,
+	leadingIcon: ImageVector? = null,
+) {
+	DropdownMenuItem(
+		text = { Text(text = text) },
+		onClick = {
+			this.expanded.value = false
+			onClick()
+		},
 		leadingIcon = {
 			if (leadingIcon != null) {
 				Icon(

@@ -24,3 +24,4 @@ inline fun <reified T> NavController.getResult(): T? {
 val LocalNavController = compositionLocalOf<NavController> {
 	throw IllegalStateException("There is no default NavController provided.")
 }
+

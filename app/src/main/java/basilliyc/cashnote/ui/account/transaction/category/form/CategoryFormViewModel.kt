@@ -37,7 +37,7 @@ class CategoryFormViewModel(
 		state = state.copy(content = CategoryFormState.Content.Loading)
 		if (route.categoryId != null) {
 			viewModelScope.launch {
-				val category = (financialManager.getTransactionCategoryById(route.categoryId)
+				val category = (financialManager.getCategoryById(route.categoryId)
 					?: throw IllegalStateException("TransactionCategory with id ${route.categoryId} is not present in database"))
 				state = state.copy(content = CategoryFormState.Content.Data(category))
 			}
@@ -101,9 +101,9 @@ class CategoryFormViewModel(
 			icon = data.icon,
 		)
 		
-		scheduleEvent(skipIfBusy = true, postDelay = true) {
+		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				financialManager.saveTransactionCategory(category)
+				financialManager.saveCategory(category)
 				state = state.copy(action = CategoryFormState.Action.SaveSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)
@@ -115,9 +115,9 @@ class CategoryFormViewModel(
 	fun onDeleteClicked() {
 		if (route.categoryId == null) return
 		
-		scheduleEvent(skipIfBusy = true, postDelay = true) {
+		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				financialManager.deleteTransactionCategory(route.categoryId)
+				financialManager.deleteCategory(route.categoryId)
 				state = state.copy(action = CategoryFormState.Action.DeleteSuccess)
 			} catch (t: Throwable) {
 				logcat.error(t)

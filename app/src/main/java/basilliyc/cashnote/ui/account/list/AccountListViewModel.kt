@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.ui.account.transaction.form.AccountTransactionFormState
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.utils.castOrNull
 import basilliyc.cashnote.utils.inject
@@ -70,7 +69,7 @@ class AccountListViewModel : BaseViewModel() {
 	}
 	
 	
-	fun onAccountEditClicked(accountId: Long) = scheduleEvent {
+	fun onAccountEditClicked(accountId: Long) = schedule {
 		state = state.copy(
 			action = AccountListState.Action.AccountEdit(accountId)
 		)
@@ -82,7 +81,7 @@ class AccountListViewModel : BaseViewModel() {
 		)
 	}
 	
-	fun onAccountHistoryClicked(accountId: Long) = scheduleEvent {
+	fun onAccountHistoryClicked(accountId: Long) = schedule {
 		state = state.copy(
 			action = AccountListState.Action.AccountHistory(accountId)
 		)
@@ -101,7 +100,7 @@ class AccountListViewModel : BaseViewModel() {
 			dialog = null
 		)
 		
-		scheduleEvent {
+		schedule {
 			try {
 				financialManager.deleteAccount(accountId)
 				state = state.copy(

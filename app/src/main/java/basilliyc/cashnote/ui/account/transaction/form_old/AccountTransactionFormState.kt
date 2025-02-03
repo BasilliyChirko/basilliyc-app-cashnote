@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.account.transaction.form_old
 
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory

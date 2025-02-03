@@ -13,10 +13,11 @@ import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.statistic.AccountStatistic
-import basilliyc.cashnote.ui.account.transaction.form.AccountTransactionForm
+import basilliyc.cashnote.ui.account.transaction.form_old.AccountTransactionForm
 import basilliyc.cashnote.ui.settings.AppSettings
 import basilliyc.cashnote.ui.account.transaction.category.form.CategoryForm
 import basilliyc.cashnote.ui.account.transaction.category.list.CategoryList
+import basilliyc.cashnote.ui.account.transaction.form.TransactionForm
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
@@ -35,7 +36,14 @@ sealed interface AppNavigation {
 	data class AccountHistory(val accountId: Long) : AppNavigation
 	
 	@Serializable
-	data class TransactionForm(val accountId: Long, val transactionId: Long?) : AppNavigation
+	data class TransactionFormOld(val accountId: Long, val transactionId: Long?) : AppNavigation
+	
+	@Serializable
+	data class TransactionForm(
+		val accountId: Long,
+		val categoryId: Long,
+		val transactionId: Long?,
+	) : AppNavigation
 	
 	@Serializable
 	data object CategoryList : AppNavigation
@@ -56,11 +64,12 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.Statistic> { AccountStatistic() }
 	composable<AppNavigation.Settings> { AppSettings() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
-	composable<AppNavigation.TransactionForm> { AccountTransactionForm() }
+	composable<AppNavigation.TransactionFormOld> { AccountTransactionForm() }
 	composable<AppNavigation.CategoryList> { CategoryList() }
 	dialog<AppNavigation.CategoryForm> { CategoryForm() }
 	composable<AppNavigation.AccountHistory> { AccountHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
+	composable<AppNavigation.TransactionForm> { TransactionForm() }
 }
 
 

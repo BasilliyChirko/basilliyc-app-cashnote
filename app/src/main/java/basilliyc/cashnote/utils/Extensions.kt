@@ -38,12 +38,22 @@ fun Double.toPriceString(showPlus: Boolean): String {
 		}
 	}.toString().trim()
 	
-	val symbol = if (this < 0) "-" else if (showPlus) "+" else ""
+	val symbol = when {
+		this < 0 -> "-"
+		showPlus && this > 0 -> "+"
+		else -> ""
+	}
 	
-	return "$symbol $decimal.$coins"
+	return "$symbol $decimal.$coins".trim()
 }
 
-fun Double.toPriceWithCoins() = String.format(locale, "%.2f", this)
+fun Double.toPriceWithCoins(withZeroCoins: Boolean = true): String {
+	val string = String.format(locale, "%.2f", this)
+	if (!withZeroCoins) {
+		return string.replace(".00", "")
+	}
+	return string
+}
 
 fun <T> List<T>.reordered(from: Int, to: Int): MutableList<T> {
 	val mutable = if (this is MutableList) this else toMutableList()

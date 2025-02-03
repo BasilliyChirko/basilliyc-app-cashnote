@@ -57,6 +57,7 @@ import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.applyIf
+import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.toast
 
 
@@ -70,19 +71,20 @@ fun AccountList() {
 	val navController = LocalNavController.current
 	val state = viewModel.state
 	val context = LocalContext.current
+	val singleRunner = rememberSingleRunner()
+	
 	Content(
 		state = state,
 		draggedList = viewModel.draggedList,
 		onClickAddNewAccount = {
-			navController.navigate(AppNavigation.AccountForm(accountId = null))
+			singleRunner.schedule {
+				navController.navigate(AppNavigation.AccountForm(accountId = null))
+			}
 		},
 		onClickAccount = {
-			navController.navigate(
-				AppNavigation.TransactionForm(
-					accountId = it,
-					transactionId = null
-				)
-			)
+			singleRunner.schedule {
+				navController.navigate(AppNavigation.AccountDetails(accountId = it))
+			}
 		},
 		onDragStarted = viewModel::onDragStarted,
 		onDragCompleted = viewModel::onDragCompleted,

@@ -20,7 +20,7 @@ object PreviewValues {
 	}
 	
 	val categoryHome by lazy {
-		categories[0]
+		categories.find { it.icon == FinancialCategoryIcon.Home }!!
 	}
 	
 	val categories by lazy {

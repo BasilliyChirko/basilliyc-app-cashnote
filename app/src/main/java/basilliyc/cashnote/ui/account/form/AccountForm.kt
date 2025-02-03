@@ -41,6 +41,7 @@ import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.components.CardSelectable
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -270,22 +271,12 @@ private fun ColumnScope.CurrencyPicker(
 			.padding(horizontal = 8.dp),
 	) {
 		AccountCurrency.entries.forEach { currency ->
-			Card(
+			CardSelectable(
 				modifier = Modifier
 					.padding(8.dp)
 					.weight(1F),
 				onClick = { onChanged(currency) },
-				colors = CardDefaults.cardColors(
-					containerColor = if (currency == value) {
-						MaterialTheme.colorScheme.primaryContainer
-					} else {
-						MaterialTheme.colorScheme.surface
-					}
-				),
-				border = BorderStroke(
-					width = 1.dp,
-					color = MaterialTheme.colorScheme.primaryContainer,
-				)
+				isSelected = currency == value,
 			) {
 				Column(
 					modifier = Modifier

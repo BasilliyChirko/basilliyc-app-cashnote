@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.account.transaction.form_old
 
 import android.icu.util.Calendar
 import androidx.compose.runtime.getValue
@@ -29,7 +29,7 @@ class AccountTransactionFormViewModel(
 	
 	private val financialManager: FinancialManager by inject()
 	
-	private val route = savedStateHandle.toRoute<AppNavigation.TransactionForm>()
+	private val route = savedStateHandle.toRoute<AppNavigation.TransactionFormOld>()
 	
 	//----------------------------------------------------------------------------------------------
 	//  State declaration
@@ -71,7 +71,7 @@ class AccountTransactionFormViewModel(
 			val account = financialManager.getAccountById(route.accountId)
 				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database")
 			
-			val availableCategories = financialManager.getAvailableTransactionCategories()
+			val availableCategories = financialManager.getCategoryList()
 			
 			val transaction = route.transactionId?.let {
 				financialManager.getTransactionById(it)
@@ -100,7 +100,7 @@ class AccountTransactionFormViewModel(
 	
 	init {
 		viewModelScope.launch {
-			financialManager.getAvailableTransactionCategoriesAsFlow().collectLatest { categories ->
+			financialManager.getCategoryListAsFlow().collectLatest { categories ->
 				stateContentData = stateContentData?.copy(
 					availableCategories = categories
 				)
@@ -184,7 +184,7 @@ class AccountTransactionFormViewModel(
 			return
 		}
 		
-		scheduleEvent(
+		schedule(
 			skipIfBusy = true,
 			postDelay = true,
 		) {
@@ -208,7 +208,7 @@ class AccountTransactionFormViewModel(
 		
 	}
 	
-	fun onCancelClicked() = scheduleEvent {
+	fun onCancelClicked() = schedule {
 		stateAction = AccountTransactionFormState.Action.Cancel
 	}
 	

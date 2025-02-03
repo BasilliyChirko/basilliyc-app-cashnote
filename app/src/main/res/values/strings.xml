@@ -66,4 +66,13 @@
     <string name="account_balance_spend">Spend</string>
     <string name="account_balance_receive">Receive</string>
     <string name="account_balance_profit">Profit</string>
+    <string name="account_details_categories_empty">To work with account you need to configure transaction categories</string>
+    <string name="account_details_categories_empty_submit">Configure categories</string>
+    <string name="account_details_menu">Account details options</string>
+    <string name="account_details_menu_categories">Configure categories</string>
+    <string name="transaction_form_label_type_balance">Balance</string>
+    <string name="transaction_form_label_type_no_changes">Without changes</string>
+    <string name="transaction_form_label_type_decrease">Decrease</string>
+    <string name="transaction_form_label_type_increase">Increase</string>
+    <string name="transaction_form_new_balance">New balance</string>
 </resources>

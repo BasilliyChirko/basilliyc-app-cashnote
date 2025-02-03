@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.account.transaction.form_old
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

@@ -23,3 +23,6 @@ val AccountColorNightBlue = Color(0xFF3F627A)
 val AccountColorNightYellow = Color(0xFF756E34)
 val AccountColorNightPurple = Color(0xFF52425E)
 val AccountColorNightTurquoise = Color(0xFF3F5C65)
+
+val onSurfaceVariantDay = Color(0xFF989898)
+val onSurfaceVariantNight = Color(0xFF989898)

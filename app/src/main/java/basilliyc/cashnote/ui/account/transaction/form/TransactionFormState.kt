@@ -17,11 +17,17 @@ data class TransactionFormState(
 			val isNew: Boolean,
 			val isInputDeviation: Boolean,
 			val timeInMillis: Long,
-			val input: TextFieldState,
+			val deviationTextState: TextFieldState,
+			val balanceTextState: TextFieldState,
 			val deviation: Double,
 			val balanceWithoutDeviation: Double,
 			val comment: TextFieldState,
+			val focusedField: Focus = Focus.Deviation,
 		) : Page
+	}
+	
+	enum class Focus {
+		Deviation, Balance, Comment,
 	}
 	
 	sealed interface Dialog {

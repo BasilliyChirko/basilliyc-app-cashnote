@@ -68,8 +68,12 @@ class TransactionFormViewModel(
 				balanceWithoutDeviation = account.balance - deviation,
 				comment = TextFieldState(transaction?.comment ?: ""),
 				deviation = deviation,
-				input = TextFieldState(
+				deviationTextState = TextFieldState(
 					value = transaction?.value?.toPriceWithCoins(false) ?: "",
+					error = null,
+				),
+				balanceTextState = TextFieldState(
+					value = account.balance.toPriceWithCoins(false),
 					error = null,
 				)
 			)
@@ -77,9 +81,7 @@ class TransactionFormViewModel(
 		}
 	}
 	
-	fun onInputChanged(string: String) {
-		val data = statePageData ?: return
-		
+	private fun stringPriceCorrection(string: String): String {
 		var string = string.replace(',', '.').trim()
 		
 		if (string.indexOfLast { it == '-' } > 0) {
@@ -98,15 +100,40 @@ class TransactionFormViewModel(
 			}
 		}
 		
-		val deviation = if (data.isInputDeviation) {
-			string.toDoubleOrNull() ?: 0.0
-		} else {
-			(string.toDoubleOrNull() ?: 0.0) - data.balanceWithoutDeviation
-		}
+		return string
+	}
+	
+	fun onDeviationChanged(string: String) {
+		val data = statePageData ?: return
+		
+		val deviationString = stringPriceCorrection(string)
+		val deviationDouble = deviationString.toDoubleOrNull() ?: 0.0
+		val balanceDouble = data.balanceWithoutDeviation + deviationDouble
 		
 		statePageData = data.copy(
-			deviation = deviation,
-			input = TextFieldState(string),
+			deviation = deviationDouble,
+			deviationTextState = TextFieldState(deviationString),
+			balanceTextState = TextFieldState(balanceDouble.toPriceWithCoins(false)),
+		)
+	}
+	
+	fun onBalanceChanged(string: String) {
+		val data = statePageData ?: return
+		
+		val balanceString = stringPriceCorrection(string)
+		val balanceDouble = balanceString.toDoubleOrNull() ?: 0.0
+		val deviationDouble = balanceDouble - data.balanceWithoutDeviation
+		
+		statePageData = data.copy(
+			deviation = deviationDouble,
+			deviationTextState = TextFieldState(deviationDouble.toPriceWithCoins(false)),
+			balanceTextState = TextFieldState(balanceString),
+		)
+	}
+	
+	fun onFocusChanged(focus: TransactionFormState.Focus) {
+		statePageData = statePageData?.copy(
+			focusedField = focus
 		)
 	}
 	
@@ -119,7 +146,7 @@ class TransactionFormViewModel(
 			
 			statePageData = data.copy(
 				isInputDeviation = newInputDeviation,
-				input = TextFieldState(
+				deviationTextState = TextFieldState(
 					data.deviation.takeIf { it != 0.0 }?.toPriceWithCoins(false) ?: ""
 				)
 			)
@@ -128,7 +155,11 @@ class TransactionFormViewModel(
 			
 			statePageData = data.copy(
 				isInputDeviation = newInputDeviation,
-				input = TextFieldState((data.balanceWithoutDeviation + data.deviation).toPriceWithCoins(false))
+				deviationTextState = TextFieldState(
+					(data.balanceWithoutDeviation + data.deviation).toPriceWithCoins(
+						false
+					)
+				)
 			)
 			
 		}

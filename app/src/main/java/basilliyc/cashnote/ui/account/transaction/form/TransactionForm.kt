@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -13,11 +14,16 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -32,15 +38,15 @@ import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.components.modifier
+import basilliyc.cashnote.ui.theme.onSurfaceVariantDay
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.toPriceString
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -55,8 +61,9 @@ fun TransactionForm() {
 	
 	Page(
 		state = state,
-		onInputTypeChanged = viewModel::onInputTypeChanged,
-		onInputChanged = viewModel::onInputChanged,
+		onDeviationChanged = viewModel::onDeviationChanged,
+		onBalanceChanged = viewModel::onBalanceChanged,
+		onFocusChanged = viewModel::onFocusChanged,
 	)
 }
 
@@ -73,10 +80,12 @@ fun TransactionFormPreview() = DefaultPreview {
 			balanceWithoutDeviation = 0.0,
 			comment = TextFieldState(""),
 			deviation = 0.0,
-			input = TextFieldState("500.00")
+			deviationTextState = TextFieldState("500.00"),
+			balanceTextState = TextFieldState("500.00"),
 		),
-		onInputTypeChanged = {},
-		onInputChanged = {},
+		onDeviationChanged = {},
+		onBalanceChanged = {},
+		onFocusChanged = {},
 	)
 }
 
@@ -88,14 +97,16 @@ fun TransactionFormPreview() = DefaultPreview {
 @Composable
 private fun Page(
 	state: TransactionFormState,
-	onInputTypeChanged: (Boolean) -> Unit,
-	onInputChanged: (String) -> Unit,
+	onBalanceChanged: (String) -> Unit,
+	onDeviationChanged: (String) -> Unit,
+	onFocusChanged: (TransactionFormState.Focus) -> Unit,
 ) {
 	when (val page = state.page) {
 		is TransactionFormState.Page.Data -> PageData(
 			page = page,
-			onInputTypeChanged = onInputTypeChanged,
-			onInputChanged = onInputChanged,
+			onBalanceChanged = onBalanceChanged,
+			onDeviationChanged = onDeviationChanged,
+			onFocusChanged = onFocusChanged,
 		)
 		
 		TransactionFormState.Page.Loading -> PageLoading()
@@ -105,8 +116,9 @@ private fun Page(
 @Composable
 private fun PageData(
 	page: TransactionFormState.Page.Data,
-	onInputTypeChanged: (Boolean) -> Unit,
-	onInputChanged: (String) -> Unit,
+	onBalanceChanged: (String) -> Unit,
+	onDeviationChanged: (String) -> Unit,
+	onFocusChanged: (TransactionFormState.Focus) -> Unit,
 ) {
 	ScaffoldBox(
 		topBar = { SimpleActionBar(title = page.category.name) },
@@ -119,15 +131,17 @@ private fun PageData(
 				Spacer(modifier = Modifier.height(32.dp))
 				
 				Spacer(modifier = Modifier.height(32.dp))
-				PageDataInput(
+				PageDataInputDeviation(
 					page = page,
-					onInputChanged = onInputChanged,
+					onDeviationChanged = onDeviationChanged,
+					onFocusChanged = onFocusChanged,
 				)
 				
 				Spacer(modifier = Modifier.height(32.dp))
-				PageDataSecondaryText(
+				PageDataInputBalance(
 					page = page,
-					onInputTypeChanged = onInputTypeChanged,
+					onBalanceChanged = onBalanceChanged,
+					onFocusChanged = onFocusChanged,
 				)
 			}
 		}
@@ -136,94 +150,15 @@ private fun PageData(
 
 
 @Composable
-private fun ColumnScope.PageDataInput(
+private fun ColumnScope.PageDataInputDeviation(
 	page: TransactionFormState.Page.Data,
-	onInputChanged: (String) -> Unit,
+	onDeviationChanged: (String) -> Unit,
+	onFocusChanged: (TransactionFormState.Focus) -> Unit,
 ) {
-	
-	val focusRequester = remember { FocusRequester() }
-	LaunchedEffect(focusRequester) {
-		focusRequester.requestFocus()
-	}
-	
-	var selectionRange by remember { mutableStateOf(TextRange(page.input.value.length)) }
-	
-	LaunchedEffect(page.isInputDeviation) {
-		selectionRange = TextRange(page.input.value.length)
-	}
-	
-	TextField(
-		modifier = TextFieldDefaults.modifier
-			.focusRequester(focusRequester),
-		value = TextFieldValue(
-			text = page.input.value,
-			selection = selectionRange
-		),
-		onValueChange = {
-			selectionRange = it.selection
-			onInputChanged(it.text)
-		},
-		singleLine = true,
-		keyboardOptions = KeyboardOptions(
-			keyboardType = KeyboardType.Number
-		),
-		textStyle = MaterialTheme.typography.displayMedium.copy(
-			textAlign = TextAlign.Center,
-		),
-		colors = TextFieldDefaults.colors(
-			errorContainerColor = Color.Transparent,
-			focusedContainerColor = Color.Transparent,
-			disabledContainerColor = Color.Transparent,
-			unfocusedContainerColor = Color.Transparent,
-			focusedIndicatorColor = Color.Transparent,
-			unfocusedIndicatorColor = Color.Transparent,
-			disabledIndicatorColor = Color.Transparent,
-			errorIndicatorColor = Color.Transparent,
-		),
-	)
-	
-//	TextField(
-//		modifier = TextFieldDefaults.modifier
-//			.focusRequester(focusRequester),
-//		state = page.input,
-//		onValueChange = onInputChanged,
-//		singleLine = true,
-//		keyboardOptions = KeyboardOptions(
-//			keyboardType = KeyboardType.Number
-//		),
-//		textStyle = MaterialTheme.typography.displayMedium.copy(
-//			textAlign = TextAlign.Center,
-//		),
-//		colors = TextFieldDefaults.colors(
-//			errorContainerColor = Color.Transparent,
-//			focusedContainerColor = Color.Transparent,
-//			disabledContainerColor = Color.Transparent,
-//			unfocusedContainerColor = Color.Transparent,
-//			focusedIndicatorColor = Color.Transparent,
-//			unfocusedIndicatorColor = Color.Transparent,
-//			disabledIndicatorColor = Color.Transparent,
-//			errorIndicatorColor = Color.Transparent,
-//		),
-//	)
-}
-
-@Composable
-private fun ColumnScope.PageDataSecondaryText(
-	page: TransactionFormState.Page.Data,
-	onInputTypeChanged: (isInputDeviation: Boolean) -> Unit,
-) {
-	
-	if (page.isInputDeviation) {
+	if (page.focusedField != TransactionFormState.Focus.Deviation) {
+		
 		Column(
-			modifier = Modifier.clickable(onClick = { onInputTypeChanged(false) }),
-			horizontalAlignment = Alignment.CenterHorizontally,
-		) {
-			Text(text = stringResource(R.string.transaction_form_new_balance))
-			Text(text = (page.balanceWithoutDeviation + page.deviation).toPriceString(false))
-		}
-	} else {
-		Column(
-			modifier = Modifier.clickable(onClick = { onInputTypeChanged(true) }),
+			modifier = Modifier.clickable(onClick = { onFocusChanged(TransactionFormState.Focus.Deviation) }),
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Text(
@@ -237,7 +172,113 @@ private fun ColumnScope.PageDataSecondaryText(
 			)
 			Text(text = (page.deviation).toPriceString(true))
 		}
+		
+	} else {
+		
+		ValueTextField(
+			state = page.deviationTextState,
+			focusedFieldCurrent = page.focusedField,
+			focusedFieldTarget = TransactionFormState.Focus.Deviation,
+			onValueChange = onDeviationChanged,
+			onFocusChanged = onFocusChanged,
+		)
+		
+	}
+}
+
+@Composable
+private fun ColumnScope.PageDataInputBalance(
+	page: TransactionFormState.Page.Data,
+	onBalanceChanged: (String) -> Unit,
+	onFocusChanged: (TransactionFormState.Focus) -> Unit,
+) {
+	if (page.focusedField != TransactionFormState.Focus.Balance) {
+		
+		Column(
+			modifier = Modifier.clickable(onClick = { onFocusChanged(TransactionFormState.Focus.Balance) }),
+			horizontalAlignment = Alignment.CenterHorizontally,
+		) {
+			Text(text = stringResource(R.string.transaction_form_new_balance))
+			Text(text = (page.balanceWithoutDeviation + page.deviation).toPriceString(false))
+		}
+		
+	} else {
+		
+		ValueTextField(
+			state = page.balanceTextState,
+			focusedFieldCurrent = page.focusedField,
+			focusedFieldTarget = TransactionFormState.Focus.Balance,
+			onValueChange = onBalanceChanged,
+			onFocusChanged = onFocusChanged,
+		)
+		
+	}
+}
+
+@Composable
+private fun ColumnScope.ValueTextField(
+	state: TextFieldState,
+	focusedFieldCurrent: TransactionFormState.Focus,
+	focusedFieldTarget: TransactionFormState.Focus,
+	onValueChange: (String) -> Unit,
+	onFocusChanged: (TransactionFormState.Focus) -> Unit,
+) {
+	var selectionRange by remember { mutableStateOf(TextRange(state.value.length)) }
+	
+	val focusRequester = remember { FocusRequester() }
+	val focusTrigger = remember { MutableStateFlow(focusedFieldCurrent) }
+	val scope = rememberCoroutineScope()
+	LaunchedEffect(scope) {
+		focusTrigger
+			.filter { it == focusedFieldTarget }
+			.collectLatest {
+				focusRequester.requestFocus()
+				selectionRange = TextRange(state.value.length)
+			}
 	}
 	
+	val textStyle = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center)
 	
+	TextField(
+		modifier = Modifier
+			.fillMaxWidth()
+			.focusRequester(focusRequester)
+			.onFocusChanged {
+				if (it.isFocused) onFocusChanged(focusedFieldTarget)
+			},
+		value = TextFieldValue(
+			text = state.value,
+			selection = selectionRange
+		),
+		onValueChange = {
+			selectionRange = it.selection
+			onValueChange(it.text)
+		},
+		placeholder = {
+			Text(
+				modifier = Modifier.fillMaxWidth(),
+				text = "0",
+				style = textStyle,
+				textAlign = TextAlign.Center,
+				color = MaterialTheme.colorScheme.onSurfaceVariant,
+			)
+		},
+		singleLine = true,
+		keyboardOptions = KeyboardOptions(
+			keyboardType = KeyboardType.Number
+		),
+		textStyle = textStyle,
+		colors = TextFieldDefaults.colors(
+			errorContainerColor = Color.Transparent,
+			focusedContainerColor = Color.Transparent,
+			disabledContainerColor = Color.Transparent,
+			unfocusedContainerColor = Color.Transparent,
+			focusedIndicatorColor = Color.Transparent,
+			unfocusedIndicatorColor = Color.Transparent,
+			disabledIndicatorColor = Color.Transparent,
+			errorIndicatorColor = Color.Transparent,
+			cursorColor = Color.Transparent,
+			errorCursorColor = Color.Transparent,
+		),
+	)
 }

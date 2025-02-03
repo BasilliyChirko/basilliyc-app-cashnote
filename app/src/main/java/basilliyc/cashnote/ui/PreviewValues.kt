@@ -8,7 +8,7 @@ import basilliyc.cashnote.data.FinancialCategoryIcon
 
 object PreviewValues {
 	
-	val accountFilled by lazy {
+	val accountTestUSD by lazy {
 		FinancialAccount(
 			id = 0L,
 			name = "Test Account",

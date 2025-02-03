@@ -27,7 +27,6 @@ import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.activity.AppNavigation
-import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.IconButton
@@ -81,7 +80,7 @@ fun AccountDetails() {
 private fun AccountDetailsPreview() = DefaultPreview {
 	PageData(
 		page = AccountDetailsState.Page.Data(
-			account = PreviewValues.accountFilled,
+			account = PreviewValues.accountTestUSD,
 			showBalanceProfit = true,
 			balanceSpend = 1234.56,
 			balanceReceive = 1238.56,

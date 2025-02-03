@@ -7,6 +7,7 @@ import basilliyc.cashnote.ui.components.TextFieldState
 data class TransactionFormState(
 	val page: Page = Page.Loading,
 	val dialog: Dialog? = null,
+	val action: Action? = null,
 ) {
 	
 	sealed interface Page {
@@ -17,6 +18,7 @@ data class TransactionFormState(
 			val isNew: Boolean,
 			val isInputDeviation: Boolean,
 			val timeInMillis: Long,
+			val timeInMillisOriginal: Long = timeInMillis,
 			val deviationTextState: TextFieldState,
 			val balanceTextState: TextFieldState,
 			val deviation: Double,
@@ -33,6 +35,12 @@ data class TransactionFormState(
 	sealed interface Dialog {
 		data class DatePicker(val timestamp: Long) : Dialog
 		data class TimePicker(val timestamp: Long) : Dialog
+	}
+	
+	sealed interface Action {
+		data object SaveSuccess : Action
+		data object SaveError : Action
+		data object DeviationCantBeZero : Action
 	}
 	
 }

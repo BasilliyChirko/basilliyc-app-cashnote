@@ -113,7 +113,7 @@ fun AccountTransactionForm() {
 			}
 			
 			AccountTransactionFormState.Action.SaveError -> {
-				context.toast(R.string.account_transaction_toast_save_error)
+				context.toast(R.string.transaction_form_toast_save_error)
 			}
 		}
 		viewModel.onActionConsumed()
@@ -265,7 +265,7 @@ private fun ActionBar(
 			IconButton(
 				onClick = onSaveClicked,
 				imageVector = Icons.Filled.Done,
-				contentDescription = stringResource(R.string.account_transaction_action_save)
+				contentDescription = stringResource(R.string.transaction_form_action_save)
 			)
 		}
 	)
@@ -347,7 +347,7 @@ private fun ContentData(
 					bottom = 16.dp
 				),
 			onClick = onSaveClicked,
-			text = stringResource(R.string.account_transaction_action_save),
+			text = stringResource(R.string.transaction_form_action_save),
 			icon = Icons.Filled.Save,
 		)
 	}

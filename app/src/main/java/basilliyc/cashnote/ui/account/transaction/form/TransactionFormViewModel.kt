@@ -10,9 +10,12 @@ import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialTransaction
+import basilliyc.cashnote.ui.account.transaction.form.TransactionFormState.Action
 import basilliyc.cashnote.ui.account.transaction.form.TransactionFormState.Page
 import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
+import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.toPriceWithCoins
@@ -20,11 +23,12 @@ import kotlinx.coroutines.launch
 
 class TransactionFormViewModel(
 	savedStateHandle: SavedStateHandle,
-) : BaseViewModel() {
+) : BaseViewModel(), TransactionFormListener {
 	
 	private val financialManager: FinancialManager by inject()
 	
 	val route: AppNavigation.TransactionForm = savedStateHandle.toRoute()
+	
 	var state by mutableStateOf(TransactionFormState())
 		private set
 	
@@ -33,11 +37,19 @@ class TransactionFormViewModel(
 		set(value) {
 			if (value != null) state = state.copy(page = value)
 		}
+	
 	private var stateDialog
 		get() = state.dialog
 		set(value) {
 			state = state.copy(dialog = value)
 		}
+	
+	private var stateAction
+		get() = state.action
+		set(value) {
+			state = state.copy(action = value)
+		}
+	
 	
 	lateinit var account: FinancialAccount
 	lateinit var category: FinancialCategory
@@ -59,12 +71,14 @@ class TransactionFormViewModel(
 			
 			val deviation = transaction?.value ?: 0.0
 			
+			val timeInMillis = transaction?.date ?: System.currentTimeMillis()
 			statePageData = Page.Data(
 				account = account,
 				category = category,
 				isNew = transaction == null,
 				isInputDeviation = true,
-				timeInMillis = transaction?.date ?: System.currentTimeMillis(),
+				timeInMillis = timeInMillis,
+				timeInMillisOriginal = timeInMillis,
 				balanceWithoutDeviation = account.balance - deviation,
 				comment = TextFieldState(transaction?.comment ?: ""),
 				deviation = deviation,
@@ -79,6 +93,38 @@ class TransactionFormViewModel(
 			)
 			
 		}
+	}
+	
+	override fun onActionConsumed() {
+		state = state.copy(action = null)
+	}
+	
+	override fun onDeviationChanged(string: String) {
+		val data = statePageData ?: return
+		
+		val deviationString = stringPriceCorrection(string)
+		val deviationDouble = deviationString.toDoubleOrNull() ?: 0.0
+		val balanceDouble = data.balanceWithoutDeviation + deviationDouble
+		
+		statePageData = data.copy(
+			deviation = deviationDouble,
+			deviationTextState = TextFieldState(deviationString),
+			balanceTextState = TextFieldState(balanceDouble.toPriceWithCoins(false)),
+		)
+	}
+	
+	override fun onBalanceChanged(string: String) {
+		val data = statePageData ?: return
+		
+		val balanceString = stringPriceCorrection(string)
+		val balanceDouble = balanceString.toDoubleOrNull() ?: 0.0
+		val deviationDouble = balanceDouble - data.balanceWithoutDeviation
+		
+		statePageData = data.copy(
+			deviation = deviationDouble,
+			deviationTextState = TextFieldState(deviationDouble.toPriceWithCoins(false)),
+			balanceTextState = TextFieldState(balanceString),
+		)
 	}
 	
 	private fun stringPriceCorrection(string: String): String {
@@ -103,107 +149,24 @@ class TransactionFormViewModel(
 		return string
 	}
 	
-	fun onDeviationChanged(string: String) {
-		val data = statePageData ?: return
-		
-		val deviationString = stringPriceCorrection(string)
-		val deviationDouble = deviationString.toDoubleOrNull() ?: 0.0
-		val balanceDouble = data.balanceWithoutDeviation + deviationDouble
-		
-		statePageData = data.copy(
-			deviation = deviationDouble,
-			deviationTextState = TextFieldState(deviationString),
-			balanceTextState = TextFieldState(balanceDouble.toPriceWithCoins(false)),
-		)
-	}
-	
-	fun onBalanceChanged(string: String) {
-		val data = statePageData ?: return
-		
-		val balanceString = stringPriceCorrection(string)
-		val balanceDouble = balanceString.toDoubleOrNull() ?: 0.0
-		val deviationDouble = balanceDouble - data.balanceWithoutDeviation
-		
-		statePageData = data.copy(
-			deviation = deviationDouble,
-			deviationTextState = TextFieldState(deviationDouble.toPriceWithCoins(false)),
-			balanceTextState = TextFieldState(balanceString),
-		)
-	}
-	
-	fun onFocusChanged(focus: TransactionFormState.Focus) {
+	override fun onFocusChanged(focus: TransactionFormState.Focus) {
 		statePageData = statePageData?.copy(
 			focusedField = focus
 		)
 	}
 	
-	fun onInputTypeChanged(newInputDeviation: Boolean) {
-		val data = statePageData ?: return
-		val previousInputType = data.isInputDeviation
-		if (newInputDeviation == previousInputType) return
-		
-		if (newInputDeviation) {
-			
-			statePageData = data.copy(
-				isInputDeviation = newInputDeviation,
-				deviationTextState = TextFieldState(
-					data.deviation.takeIf { it != 0.0 }?.toPriceWithCoins(false) ?: ""
-				)
-			)
-			
-		} else {
-			
-			statePageData = data.copy(
-				isInputDeviation = newInputDeviation,
-				deviationTextState = TextFieldState(
-					(data.balanceWithoutDeviation + data.deviation).toPriceWithCoins(
-						false
-					)
-				)
-			)
-			
-		}
-
-//		statePageData = data.copy(
-//			deviation = 0.0,
-//			isInputDeviation = newInputDeviation,
-//			input = TextFieldState("")
-//		)
-
-//		statePageData = when {
-//			previousInputType == TransactionType.Balance -> data.copy(
-//				type = type,
-//				deviation = 0.0,
-//				input = TextFieldState("")
-//			)
-//
-//			type == TransactionType.Balance -> data.copy(
-//				type = type,
-//				deviation = 0.0,
-//				input = TextFieldState(data.balanceWithoutDeviation.toPriceWithCoins())
-//			)
-//
-//			else -> data.copy(
-//				type = type,
-//				deviation = data.deviation * -1,
-//				input = TextFieldState(data.balanceWithoutDeviation.toPriceWithCoins())
-//			)
-//		}
-	}
-	
-	fun onCommentChanged(comment: String) {
+	override fun onCommentChanged(comment: String) {
 		statePageData = statePageData?.copy(
 			comment = TextFieldState(comment),
 		)
 	}
 	
-	
-	fun onDateClicked() {
+	override fun onDateClicked() {
 		val data = statePageData ?: return
 		stateDialog = TransactionFormState.Dialog.DatePicker(data.timeInMillis)
 	}
 	
-	fun onDialogDateSelected(timeInMillis: Long) {
+	override fun onDialogDateSelected(timeInMillis: Long) {
 		val data = statePageData ?: return
 		
 		val previousCalendar =
@@ -221,16 +184,16 @@ class TransactionFormViewModel(
 		stateDialog = null
 	}
 	
-	fun onDialogDateDismiss() {
+	override fun onDialogDateDismiss() {
 		stateDialog = null
 	}
 	
-	fun onTimeClicked() {
+	override fun onTimeClicked() {
 		val data = statePageData ?: return
 		stateDialog = TransactionFormState.Dialog.TimePicker(data.timeInMillis)
 	}
 	
-	fun onDialogTimeSelected(hour: Int, minute: Int) {
+	override fun onDialogTimeSelected(hour: Int, minute: Int) {
 		val data = statePageData ?: return
 		
 		val newCalendar = Calendar.getInstance().apply {
@@ -245,8 +208,59 @@ class TransactionFormViewModel(
 		stateDialog = null
 	}
 	
-	fun onDialogTimeDismiss() {
+	override fun onDialogTimeDismiss() {
 		stateDialog = null
+	}
+	
+	override fun onSaveClicked() {
+		val data = statePageData ?: return
+		val account = data.account
+		
+		if (data.deviation == 0.0) {
+			when (data.focusedField) {
+				TransactionFormState.Focus.Deviation -> {
+					statePageData = data.copy(
+						deviationTextState = data.deviationTextState.copy(
+							error = TextFieldError.DeviationCantBeZero
+						)
+					)
+				}
+				TransactionFormState.Focus.Balance -> {
+					statePageData = data.copy(
+						balanceTextState = data.balanceTextState.copy(
+							error = TextFieldError.DeviationCantBeZero
+						)
+					)
+				}
+				TransactionFormState.Focus.Comment -> {
+					stateAction = Action.DeviationCantBeZero
+				}
+			}
+			return
+		}
+		
+		schedule(
+			skipIfBusy = true,
+			postDelay = true,
+		) {
+			try {
+				financialManager.saveTransaction(
+					FinancialTransaction(
+						id = route.transactionId ?: 0L,
+						accountId = account.id,
+						value = data.deviation,
+						comment = data.comment.value.takeIf { it.isNotBlank() },
+						categoryId = category.id,
+						date = data.timeInMillis,
+					)
+				)
+				state = state.copy(action = Action.SaveSuccess)
+			} catch (t: Throwable) {
+				logcat.error(t)
+				state = state.copy(action = Action.SaveError)
+			}
+		}
+		
 	}
 	
 }

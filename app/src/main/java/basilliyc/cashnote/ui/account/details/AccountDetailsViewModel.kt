@@ -67,5 +67,17 @@ class AccountDetailsViewModel(
 				)
 			}
 		}
+		
+		viewModelScope.launch {
+			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
+				if (account == null) return@collectLatest
+				statePageData = statePageData?.copy(
+					account = account,
+					showBalanceProfit = true,
+					balanceSpend = 0.0,
+					balanceReceive = 0.0,
+				)
+			}
+		}
 	}
 }

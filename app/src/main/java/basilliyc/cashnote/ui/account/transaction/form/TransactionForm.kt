@@ -140,6 +140,8 @@ fun PagePreview() = DefaultPreview {
 			deviation = 500.0,
 			deviationTextState = TextFieldState("500.00",),
 			balanceTextState = TextFieldState("500.00"),
+			deviationTextPlaceholder = "0",
+			balanceTextPlaceholder = "0",
 		),
 		listener = object : TransactionFormListener {}
 	)
@@ -178,7 +180,7 @@ private fun PageData(
 				horizontalAlignment = Alignment.CenterHorizontally,
 			) {
 				
-				Spacer(modifier = Modifier.height(64.dp))
+				Spacer(modifier = Modifier.height(48.dp))
 				
 				PageDataInputDeviation(page = page, listener = listener)
 				PageDataInputBalance(page = page, listener = listener)
@@ -301,6 +303,7 @@ private fun ColumnScope.PageDataInputDeviation(
 			onValueChange = listener::onDeviationChanged,
 			onFocusChanged = listener::onFocusChanged,
 			onSaveClicked = listener::onSaveClicked,
+			placeholder = page.deviationTextPlaceholder
 		)
 		
 	}
@@ -338,6 +341,7 @@ private fun ColumnScope.PageDataInputBalance(
 			onValueChange = listener::onBalanceChanged,
 			onFocusChanged = listener::onFocusChanged,
 			onSaveClicked = listener::onSaveClicked,
+			placeholder = page.balanceTextPlaceholder
 		)
 		
 	}
@@ -424,6 +428,7 @@ private fun ColumnScope.ValueTextField(
 	state: TextFieldState,
 	focusedFieldCurrent: TransactionFormState.Focus,
 	focusedFieldTarget: TransactionFormState.Focus,
+	placeholder: String,
 	onValueChange: (String) -> Unit,
 	onFocusChanged: (TransactionFormState.Focus) -> Unit,
 	onSaveClicked: () -> Unit,
@@ -462,7 +467,7 @@ private fun ColumnScope.ValueTextField(
 		placeholder = {
 			Text(
 				modifier = Modifier.fillMaxWidth(),
-				text = "0",
+				text = placeholder,
 				style = textStyle,
 				textAlign = TextAlign.Center,
 				color = colorGrey99,

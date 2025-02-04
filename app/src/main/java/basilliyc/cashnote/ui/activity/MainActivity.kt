@@ -69,15 +69,15 @@ class MainActivity : ComponentActivity() {
 				}
 				
 				//todo remove after test
-				LaunchedEffect(navController) {
-					navController.navigate(
-						AppNavigation.TransactionForm(
-							accountId = 1L,
-							categoryId = 1L,
-							transactionId = null,
-						)
-					)
-				}
+//				LaunchedEffect(navController) {
+//					navController.navigate(
+//						AppNavigation.TransactionForm(
+//							accountId = 1L,
+//							categoryId = 1L,
+//							transactionId = null,
+//						)
+//					)
+//				}
 			
 			}
 			

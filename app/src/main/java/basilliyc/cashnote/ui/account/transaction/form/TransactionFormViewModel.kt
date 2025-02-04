@@ -86,10 +86,12 @@ class TransactionFormViewModel(
 					value = transaction?.value?.toPriceWithCoins(false) ?: "",
 					error = null,
 				),
+				deviationTextPlaceholder = transaction?.value?.toPriceWithCoins(false) ?: "0",
 				balanceTextState = TextFieldState(
 					value = account.balance.toPriceWithCoins(false),
 					error = null,
-				)
+				),
+				balanceTextPlaceholder = account.balance.toPriceWithCoins(false)
 			)
 			
 		}
@@ -150,9 +152,30 @@ class TransactionFormViewModel(
 	}
 	
 	override fun onFocusChanged(focus: TransactionFormState.Focus) {
-		statePageData = statePageData?.copy(
-			focusedField = focus
-		)
+		val data = statePageData ?: return
+		when (focus) {
+			TransactionFormState.Focus.Deviation -> {
+				statePageData = statePageData?.copy(
+					focusedField = focus,
+					deviationTextPlaceholder = data.deviation.toPriceWithCoins(false),
+					deviationTextState = TextFieldState(""),
+				)
+			}
+			
+			TransactionFormState.Focus.Balance -> {
+				statePageData = statePageData?.copy(
+					focusedField = focus,
+					balanceTextPlaceholder = data.balanceWithoutDeviation.plus(data.deviation).toPriceWithCoins(false),
+					balanceTextState = TextFieldState(""),
+				)
+			}
+			
+			TransactionFormState.Focus.Comment -> {
+				statePageData = statePageData?.copy(
+					focusedField = focus
+				)
+			}
+		}
 	}
 	
 	override fun onCommentChanged(comment: String) {
@@ -225,6 +248,7 @@ class TransactionFormViewModel(
 						)
 					)
 				}
+				
 				TransactionFormState.Focus.Balance -> {
 					statePageData = data.copy(
 						balanceTextState = data.balanceTextState.copy(
@@ -232,6 +256,7 @@ class TransactionFormViewModel(
 						)
 					)
 				}
+				
 				TransactionFormState.Focus.Comment -> {
 					stateAction = Action.DeviationCantBeZero
 				}

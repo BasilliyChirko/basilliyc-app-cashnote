@@ -1,13 +1,13 @@
 package basilliyc.cashnote.data
 
-data class FinancialDeviation(
+data class FinancialStatistic(
 	val accountId: Long,
 	val categoryId: Long,
 	val primaryValue: Double,
 	val secondaryValue: Double,
 )
 
-data class FinancialDeviationParams(
+data class FinancialStatisticParams(
 	val showAccountDeviation: Boolean,
 	val period: Period,
 	val primaryValueCalculation: Calculation,

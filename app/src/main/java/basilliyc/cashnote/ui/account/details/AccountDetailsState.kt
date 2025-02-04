@@ -11,17 +11,19 @@ data class AccountDetailsState(
 		data object Loading : Page
 		data class Data(
 			val account: FinancialAccount,
-			val showBalanceProfit: Boolean,
-			val balanceSpend: Double?,
-			val balanceReceive: Double?,
+			val showAccountStatistic: Boolean,
+			val balancePrimaryPositive: Double,
+			val balancePrimaryNegative: Double,
+			val balanceSecondaryPositive: Double?,
+			val balanceSecondaryNegative: Double?,
 			val categories: List<CategoryWithBalance>,
 		): Page
 	}
 	
 	data class CategoryWithBalance(
 		val category: FinancialCategory,
-		val balance: Double,
-		val deviation: Double?,
+		val primaryValue: Double,
+		val secondaryValue: Double?,
 	)
 	
 }

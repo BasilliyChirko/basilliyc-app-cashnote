@@ -5,6 +5,9 @@ import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.takeIf
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -23,6 +26,10 @@ class App : Application() {
 		startKoin {
 			androidContext(applicationContext)
 			modules(AppValues.koinModules())
+		}
+		
+		CoroutineScope(Dispatchers.IO).launch {
+			financialManager.getStatisticParams()
 		}
 		
 		financialManager.test()

@@ -165,7 +165,8 @@ class TransactionFormViewModel(
 			TransactionFormState.Focus.Balance -> {
 				statePageData = statePageData?.copy(
 					focusedField = focus,
-					balanceTextPlaceholder = data.balanceWithoutDeviation.plus(data.deviation).toPriceWithCoins(false),
+					balanceTextPlaceholder = data.balanceWithoutDeviation.plus(data.deviation)
+						.toPriceWithCoins(false),
 					balanceTextState = TextFieldState(""),
 				)
 			}
@@ -269,15 +270,17 @@ class TransactionFormViewModel(
 			postDelay = true,
 		) {
 			try {
+				
 				financialManager.saveTransaction(
-					FinancialTransaction(
+					transaction = FinancialTransaction(
 						id = route.transactionId ?: 0L,
 						accountId = account.id,
 						value = data.deviation,
 						comment = data.comment.value.takeIf { it.isNotBlank() },
 						categoryId = category.id,
 						date = data.timeInMillis,
-					)
+					),
+					isAppend = route.transactionId == null && data.timeInMillis == data.timeInMillisOriginal
 				)
 				state = state.copy(action = Action.SaveSuccess)
 			} catch (t: Throwable) {

@@ -151,10 +151,12 @@ class AccountHistoryViewModel(
 	}
 	
 	fun onTransactionEditClicked(id: Long) {
+		val transaction = state.transactions.find { it.id == id } ?: return
 		state = state.copy(
 			action = AccountHistoryState.Action.EditTransaction(
-				accountId = route.accountId,
-				transactionId = id
+				accountId = transaction.accountId,
+				categoryId = transaction.categoryId,
+				transactionId = transaction.id,
 			)
 		)
 	}

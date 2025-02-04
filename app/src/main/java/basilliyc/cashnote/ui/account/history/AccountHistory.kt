@@ -77,8 +77,9 @@ fun AccountHistory() {
 			null -> Unit
 			is AccountHistoryState.Action.EditTransaction -> {
 				navController.navigate(
-					AppNavigation.TransactionFormOld(
+					AppNavigation.TransactionForm(
 						accountId = action.accountId,
+						categoryId = action.categoryId,
 						transactionId = action.transactionId
 					)
 				)

@@ -16,6 +16,7 @@ data class AccountHistoryState(
 	sealed interface Action {
 		data class EditTransaction(
 			val accountId: Long,
+			val categoryId: Long,
 			val transactionId: Long,
 		) : Action
 	}

@@ -23,8 +23,11 @@ fun AppValues.koinModules() = module {
 			.build()
 	}
 	
-	single { get<AppDatabase>().accountRepository() }
-	single { get<AppDatabase>().transactionRepository() }
-	single { get<AppDatabase>().transactionCategoryRepository() }
+	single { get<AppDatabase>().accountDao() }
+	single { get<AppDatabase>().transactionDao() }
+	single { get<AppDatabase>().categoryDao() }
+	single { get<AppDatabase>().statisticDao() }
+	
+
 	
 }

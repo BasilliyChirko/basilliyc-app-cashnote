@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -81,14 +82,16 @@ private fun AccountDetailsPreview() = DefaultPreview {
 	PageData(
 		page = AccountDetailsState.Page.Data(
 			account = PreviewValues.accountTestUSD,
-			showBalanceProfit = true,
-			balanceSpend = 1234.56,
-			balanceReceive = 1238.56,
+			showAccountStatistic = true,
+			balancePrimaryPositive = 100.0,
+			balancePrimaryNegative = -100.0,
+			balanceSecondaryPositive = 200.0,
+			balanceSecondaryNegative = -200.0,
 			categories = PreviewValues.categories.map {
 				AccountDetailsState.CategoryWithBalance(
 					category = it,
-					balance = 500.0,
-					deviation = -40.0,
+					primaryValue = 500.0,
+					secondaryValue = -40.0,
 				)
 			},
 		),
@@ -181,33 +184,32 @@ private fun ColumnScope.PageDataBalance(
 			title = stringResource(R.string.account_balance),
 			value = page.account.balance,
 			currency = page.account.currency,
-			isLarge = true,
 		)
-		if (
-			page.showBalanceProfit &&
-			page.balanceSpend != null &&
-			page.balanceReceive != null
-		) {
+		
+		if (page.showAccountStatistic) {
 			HorizontalDivider()
-			
 			Column(
 				modifier = Modifier.padding(vertical = 8.dp)
 			) {
-				BalanceRow(
+				BalanceRow2(
 					title = stringResource(R.string.account_balance_receive),
-					value = page.balanceReceive,
+					primaryValue = page.balancePrimaryPositive,
+					secondaryValue = page.balanceSecondaryPositive,
+					showPlus = false,
 				)
-				BalanceRow(
+				BalanceRow2(
 					title = stringResource(R.string.account_balance_spend),
-					value = page.balanceSpend,
+					primaryValue = page.balancePrimaryNegative,
+					secondaryValue = page.balanceSecondaryNegative,
+					showPlus = false,
 				)
-				BalanceRow(
+				BalanceRow2(
 					title = stringResource(R.string.account_balance_profit),
-					value = page.balanceReceive - page.balanceSpend,
+					primaryValue = page.balancePrimaryPositive + page.balancePrimaryNegative,
+					secondaryValue = page.balanceSecondaryPositive?.plus(page.balanceSecondaryNegative ?: 0.0),
 					showPlus = true,
 				)
 			}
-			
 		}
 	}
 }
@@ -215,11 +217,9 @@ private fun ColumnScope.PageDataBalance(
 @Composable
 private fun BalanceRow(
 	modifier: Modifier = Modifier,
-	isLarge: Boolean = false,
 	title: String,
 	value: Double,
-	currency: AccountCurrency? = null,
-	showPlus: Boolean = false,
+	currency: AccountCurrency,
 ) {
 	Row(
 		modifier = modifier
@@ -231,29 +231,75 @@ private fun BalanceRow(
 			text = title,
 			modifier = Modifier.weight(1f),
 			maxLines = 1,
-			style = if (isLarge) {
-				MaterialTheme.typography.titleLarge
-			} else {
-				MaterialTheme.typography.titleMedium
-			},
+			style = MaterialTheme.typography.titleLarge,
 		)
 		Text(
 			text = buildString {
-				if (currency != null) {
-					append(currency.symbol)
-					append(" ")
-				}
-				append(value.toPriceString(showPlus))
+				append(currency.symbol)
+				append(" ")
+				append(value.toPriceString(false))
 			},
 			maxLines = 1,
-			style = if (isLarge) {
+			style = MaterialTheme.typography.titleLarge,
+		)
+	}
+}
+
+
+@Composable
+private fun BalanceRow2(
+	modifier: Modifier = Modifier,
+	title: String,
+	primaryValue: Double,
+	secondaryValue: Double?,
+	showPlus: Boolean = false,
+) {
+	val isHaveSecondary = secondaryValue != null
+	Row(
+		modifier = modifier
+			.fillMaxWidth()
+			.padding(horizontal = 16.dp),
+		verticalAlignment = Alignment.CenterVertically,
+	) {
+		Text(
+			text = title,
+			modifier = Modifier.weight(1f),
+			maxLines = 1,
+			style = if (isHaveSecondary) {
 				MaterialTheme.typography.titleLarge
 			} else {
 				MaterialTheme.typography.titleMedium
 			},
 		)
+		
+		Column(
+			horizontalAlignment = Alignment.End
+		) {
+			Text(
+				text = primaryValue.toPriceString(showPlus),
+				maxLines = 1,
+				style = if (isHaveSecondary) {
+					MaterialTheme.typography.titleLarge
+				} else {
+					MaterialTheme.typography.titleMedium
+				},
+				textAlign = TextAlign.End,
+				fontWeight = FontWeight.Bold,
+			)
+			if (isHaveSecondary) {
+				Text(
+					text = secondaryValue.toPriceString(showPlus),
+					maxLines = 1,
+					style = MaterialTheme.typography.titleSmall,
+					textAlign = TextAlign.End,
+				)
+			}
+		}
+		
+		
 	}
 }
+
 
 @Composable
 private fun ColumnScope.PageDataCategories(
@@ -281,8 +327,8 @@ private fun ColumnScope.PageDataCategories(
 			modifier = Modifier,
 			onClick = { onCategoryClicked(category.category.id) },
 			title = category.category.name,
-			primaryValue = category.balance,
-			secondaryValue = category.deviation,
+			primaryValue = category.primaryValue,
+			secondaryValue = category.secondaryValue,
 			leadingIcon = CardBalanceLeadingIcon(category.category.icon?.imageVector),
 			color = null,
 		)

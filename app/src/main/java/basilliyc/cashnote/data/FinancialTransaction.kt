@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
 			entity = FinancialCategory::class,
 			parentColumns = ["id"],
 			childColumns = ["categoryId"],
-			onDelete = ForeignKey.SET_NULL,
+			onDelete = ForeignKey.CASCADE,
 		),
 	],
 	indices = [
@@ -31,5 +31,5 @@ data class FinancialTransaction(
 	val date: Long,
 	val comment: String?,
 	val accountId: Long,
-	val categoryId: Long?,
+	val categoryId: Long,
 )

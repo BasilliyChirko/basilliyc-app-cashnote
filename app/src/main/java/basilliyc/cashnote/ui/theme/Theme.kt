@@ -57,6 +57,7 @@ fun CashNoteTheme(
 	dynamicColor: Boolean = true,
 	content: @Composable () -> Unit,
 ) {
+	
 	CompositionLocalProvider(
 		LocalThemeMode provides themeMode,
 	) {

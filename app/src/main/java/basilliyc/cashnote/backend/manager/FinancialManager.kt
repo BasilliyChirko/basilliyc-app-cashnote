@@ -6,6 +6,7 @@ import basilliyc.cashnote.backend.database.FinancialAccountDao
 import basilliyc.cashnote.backend.database.FinancialCategoryDao
 import basilliyc.cashnote.backend.database.FinancialStatisticDao
 import basilliyc.cashnote.backend.database.FinancialTransactionDao
+import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
@@ -37,6 +38,7 @@ class FinancialManager {
 	private val transactionDao: FinancialTransactionDao by inject()
 	private val categoryDao: FinancialCategoryDao by inject()
 	private val statisticDao: FinancialStatisticDao by inject()
+	private val preferences: AppPreferences by inject()
 	
 	
 	private suspend inline fun <T> databaseTransaction(crossinline block: suspend () -> T) {
@@ -78,6 +80,10 @@ class FinancialManager {
 		accountDao.save(accounts)
 		
 		refreshStatistics(force = true)
+		
+		if (preferences.accountIdOnNavigation == accountId) {
+			preferences.accountIdOnNavigation = null
+		}
 	}
 	
 	suspend fun changeAccountPosition(from: Int, to: Int) = databaseTransaction {
@@ -529,9 +535,9 @@ class FinancialManager {
 //		}
 
 //		initTestData()
-		measureTimeMillis {
-			refreshStatistics(true)
-		}.also { logcat.debug("Statistic built in $it millis") }
+//		measureTimeMillis {
+//			refreshStatistics(true)
+//		}.also { logcat.debug("Statistic built in $it millis") }
 
 //		val date = System.currentTimeMillis()
 //		val initialPeriod = PeriodValue(period = FinancialStatisticParams.Period.Day, date)

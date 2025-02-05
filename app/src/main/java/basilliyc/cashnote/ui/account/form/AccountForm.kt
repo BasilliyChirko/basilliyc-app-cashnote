@@ -2,9 +2,10 @@
 
 package basilliyc.cashnote.ui.account.form
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,46 +15,36 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
-import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
-import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.components.CardSelectable
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.OutlinedTextField
+import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.components.VerticalGrid
-import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.menu.MenuRowColor
-import basilliyc.cashnote.utils.Button
+import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
-import basilliyc.cashnote.utils.castOrNull
+import basilliyc.cashnote.utils.ScaffoldBox
+import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.toast
 
 //--------------------------------------------------------------------------------------------------
@@ -63,203 +54,154 @@ import basilliyc.cashnote.utils.toast
 @Composable
 fun AccountForm() {
 	val viewModel = viewModel<AccountFormViewModel>()
-	val state = viewModel.state
-	val navController = LocalNavController.current
-	val context = LocalContext.current
-	Content(
-		state = state,
-		onCurrencyChanged = viewModel::onCurrencyChanged,
-		onNameChanged = viewModel::onNameChanged,
-		onBalanceChanged = viewModel::onBalanceChanged,
-		onColorChanged = viewModel::onColorChanged,
-		onSaveClicked = viewModel::onSaveClicked,
-	)
+	Page(state = viewModel.state, listener = viewModel)
+	Action(action = viewModel.state.action, listener = viewModel)
+}
+
+//--------------------------------------------------------------------------------------------------
+//  ACTION
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun Action(
+	action: AccountFormState.Action?,
+	listener: AccountFormListener,
+) {
 	
-	val action = state.action
+	val context = LocalContext.current
+	val navController = LocalNavController.current
+	val singleRunner = rememberSingleRunner()
+	
+	val action = action
 	LaunchedEffect(action) {
 		when (action) {
 			AccountFormState.Action.Cancel -> {
-				navController.popBackStack()
+				singleRunner.schedule {
+					navController.popBackStack()
+				}
 			}
 			
-			AccountFormState.Action.SaveSuccess -> {
-				when (state.content.castOrNull<AccountFormState.Content.Data>()?.isNew) {
-					true -> context.toast(R.string.account_form_toast_save_new)
-					false -> context.toast(R.string.account_form_toast_save_update)
-					null -> Unit
+			is AccountFormState.Action.SaveSuccess -> {
+				singleRunner.schedule {
+					if (action.isNeedRebuildApp) {
+						//Do nothing
+						
+//						val packageManager: PackageManager = context.packageManager
+//						val intent: Intent =
+//							packageManager.getLaunchIntentForPackage(context.packageName)!!
+//						intent.flags += Intent.FLAG_ACTIVITY_CLEAR_TOP
+//						context.startActivity(intent)
+						
+					} else {
+						when (action.isNew) {
+							true -> context.toast(R.string.account_form_toast_save_new)
+							false -> context.toast(R.string.account_form_toast_save_update)
+						}
+						navController.popBackStack()
+					}
 				}
-				navController.popBackStack()
 			}
 			
 			AccountFormState.Action.SaveError -> {
-				context.toast(R.string.account_form_toast_save_error)
+				singleRunner.schedule {
+					context.toast(R.string.account_form_toast_save_error)
+				}
 			}
 			
 			null -> Unit
 		}
-		viewModel.onActionConsumed()
+		listener.onActionConsumed()
 	}
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun AccountFormPreview() = DefaultPreview {
-	Content(
-		state = AccountFormState(
-			content = AccountFormState.Content.Data(
-				FinancialAccount(
-					id = 1,
-					name = "Account 1",
-					balance = 100.0,
-					currency = AccountCurrency.UAH,
-					color = null,
-					position = 0,
-				)
-			),
-		),
-		onCurrencyChanged = {},
-		onNameChanged = {},
-		onBalanceChanged = {},
-		onColorChanged = {},
-		onSaveClicked = {},
-	)
-}
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun Content(
-	state: AccountFormState,
-	onCurrencyChanged: (AccountCurrency) -> Unit,
-	onNameChanged: (String) -> Unit,
-	onBalanceChanged: (String) -> Unit,
-	onColorChanged: (FinancialColor?) -> Unit,
-	onSaveClicked: () -> Unit,
-) {
-	Scaffold(
-		modifier = Modifier.fillMaxSize(),
-		topBar = {
-			ActionBar(
-				state = state,
-				onSaveClicked = onSaveClicked,
-			)
-		},
-		content = { innerPadding ->
-			val modifier = Modifier
-				.padding(innerPadding)
-				.verticalScroll(rememberScrollState())
-			
-			when (val content = state.content) {
-				is AccountFormState.Content.Loading -> BoxLoading(
-					modifier = modifier
-				)
-				
-				is AccountFormState.Content.Data -> ContentData(
-					modifier = modifier,
-					content = content,
-					onCurrencyChanged = onCurrencyChanged,
-					onNameChanged = onNameChanged,
-					onBalanceChanged = onBalanceChanged,
-					onColorChanged = onColorChanged,
-					onSaveClicked = onSaveClicked,
-				)
-			}
-		}
-	)
 	
 }
 
 //--------------------------------------------------------------------------------------------------
-//  ACTION BAR
+//  PAGE
 //--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun ActionBar(
-	state: AccountFormState,
-	onSaveClicked: () -> Unit,
-) {
-	SimpleActionBar(
-		title = {
-			val content = state.content
-			if (content is AccountFormState.Content.Data) {
-				Text(
-					text = stringResource(
-						if (content.isNew) R.string.account_form_title_create
-						else R.string.account_form_title_edit
-					),
-					style = MaterialTheme.typography.titleLarge
-				)
-			}
-		},
-		actions = {
-			IconButton(
-				onClick = onSaveClicked,
-				imageVector = Icons.Filled.Done,
-				contentDescription = stringResource(R.string.account_form_action_save)
-			)
-		}
+@Preview(showBackground = true)
+fun PagePreview() = DefaultPreview {
+	Page(
+		state = AccountFormState(
+			page = AccountFormState.Page.Data(
+				account = PreviewValues.accountTestUSD,
+				isShowOnNavigation = true
+			),
+		),
+		listener = object : AccountFormListener {},
 	)
 }
 
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA
-//--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun ContentData(
-	modifier: Modifier = Modifier,
-	content: AccountFormState.Content.Data,
-	onCurrencyChanged: (AccountCurrency) -> Unit,
-	onNameChanged: (String) -> Unit,
-	onBalanceChanged: (String) -> Unit,
-	onColorChanged: (FinancialColor?) -> Unit,
-	onSaveClicked: () -> Unit,
+private fun Page(
+	state: AccountFormState,
+	listener: AccountFormListener,
 ) {
-	Column(
-		modifier = modifier.fillMaxSize(),
-	) {
-		CurrencyPicker(
-			value = content.currency,
-			onChanged = onCurrencyChanged
-		)
-		AccountName(
-			state = content.name,
-			onChanged = onNameChanged,
-		)
-		AccountBalance(
-			state = content.balance,
-			onChanged = onBalanceChanged,
-		)
-		
-		MenuRowColor(
-			title = stringResource(R.string.account_form_label_color),
-			color = content.color,
-			onColorSelected = {
-				onColorChanged(it)
-			},
-			contentPadding = PaddingValues(horizontal = 16.dp)
-		)
-		
-		Button(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(
-					top = 32.dp,
-					start = 16.dp,
-					end = 16.dp,
-					bottom = 16.dp
-				),
-			onClick = onSaveClicked,
-			text = stringResource(R.string.account_form_action_save),
-			icon = Icons.Filled.Save,
-		)
+	when (val page = state.page) {
+		is AccountFormState.Page.Data -> PageData(page = page, listener = listener)
+		AccountFormState.Page.Loading -> PageLoading()
 	}
 }
 
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA.CURRENCY
+
+@Composable
+private fun PageData(
+	page: AccountFormState.Page.Data,
+	listener: AccountFormListener,
+) {
+	ScaffoldBox(
+		topBar = {
+			SimpleActionBar(
+				title = stringResource(
+					if (page.isNew) R.string.account_form_title_create
+					else R.string.account_form_title_edit
+				),
+				actions = {
+					IconButton(
+						onClick = listener::onSaveClicked,
+						imageVector = Icons.Filled.Done,
+						contentDescription = stringResource(R.string.account_form_action_save)
+					)
+				}
+			)
+		},
+		content = {
+			Column(
+				modifier = Modifier
+					.fillMaxSize()
+					.verticalScroll(rememberScrollState()),
+			) {
+				CurrencyPicker(
+					value = page.currency,
+					onChanged = listener::onCurrencyChanged
+				)
+				AccountName(
+					state = page.name,
+					onChanged = listener::onNameChanged,
+				)
+				AccountBalance(
+					state = page.balance,
+					onChanged = listener::onBalanceChanged,
+				)
+				MenuRowColor(
+					title = stringResource(R.string.account_form_label_color),
+					color = page.color,
+					onColorSelected = listener::onColorChanged,
+				)
+				MenuRowSwitch(
+					title = stringResource(R.string.account_form_show_on_navigation),
+					checked = page.isShowOnNavigation,
+					onCheckedChange = listener::onShowOnNavigationChanged,
+				)
+			}
+		},
+	)
+}
+
+//---------------------------x-----------------------------------------------------------------------
+//  ACCOUNT CURRENCY
 //--------------------------------------------------------------------------------------------------
 
 @Composable
@@ -295,7 +237,7 @@ private fun ColumnScope.CurrencyPicker(
 }
 
 //--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA.NAME
+//  ACCOUNT NAME
 //--------------------------------------------------------------------------------------------------
 
 @Composable
@@ -316,7 +258,7 @@ private fun ColumnScope.AccountName(
 }
 
 //--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA.BALANCE
+//  ACCOUNT BALANCE
 //--------------------------------------------------------------------------------------------------
 
 @Composable

@@ -3,6 +3,8 @@ package basilliyc.cashnote.ui.activity
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -12,11 +14,11 @@ import basilliyc.cashnote.ui.account.details.AccountDetails
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
-import basilliyc.cashnote.ui.statistic.AccountStatistic
-import basilliyc.cashnote.ui.settings.AppSettings
 import basilliyc.cashnote.ui.account.transaction.category.form.CategoryForm
 import basilliyc.cashnote.ui.account.transaction.category.list.CategoryList
 import basilliyc.cashnote.ui.account.transaction.form.TransactionForm
+import basilliyc.cashnote.ui.settings.AppSettings
+import basilliyc.cashnote.ui.statistic.AccountStatistic
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
@@ -26,7 +28,10 @@ sealed interface AppNavigation {
 	data object AccountList : AppNavigation
 	
 	@Serializable
-	data class AccountDetails(val accountId: Long) : AppNavigation
+	data class AccountDetails(
+		val isFromNavigation: Boolean,
+		val accountId: Long,
+	) : AppNavigation
 	
 	@Serializable
 	data class AccountForm(val accountId: Long?) : AppNavigation
@@ -79,11 +84,10 @@ data class NavigationBarEntity(
 @Composable
 fun RowScope.NavigationBarItem(entity: NavigationBarEntity) {
 	val navController = LocalNavController.current
-	val currentBackStackEntry = navController.currentBackStackEntryAsState()
-	val currentDestination = currentBackStackEntry.value?.destination
+	val currentBackStackEntry by navController.currentBackStackEntryAsState()
 	
 	NavigationBarItem(
-		selected = currentDestination?.route == entity.page::class.qualifiedName == true,
+		selected = entity.page.toString() == currentBackStackEntry?.toAppNavigationPath(),
 		onClick = {
 			navController.navigate(entity.page) {
 				popUpTo(navController.graph.findStartDestination().id) {
@@ -96,4 +100,27 @@ fun RowScope.NavigationBarItem(entity: NavigationBarEntity) {
 		icon = entity.icon,
 		label = entity.label
 	)
+}
+
+fun NavBackStackEntry.toAppNavigationPath(): String? {
+	
+	var path = this.destination.route?.let {
+		it.substring(it.lastIndexOf('.') + 1, it.length)
+	} ?: return null
+	
+	this.arguments?.let { arguments ->
+		arguments.keySet()?.filterNotNull()?.forEach { key ->
+			val objectValue = key + "=" + arguments.get(key).toString()
+			val routeValue = "{$key}"
+			path = path.replace(routeValue, objectValue)
+		}
+		
+		if (path.contains('/')) {
+			path = path.replaceFirst('/', '(').replace("/", ", ") + ')'
+		}
+		
+	}
+	
+	return path
+	
 }

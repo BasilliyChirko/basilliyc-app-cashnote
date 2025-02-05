@@ -4,9 +4,19 @@ import androidx.compose.runtime.Composable
 import basilliyc.cashnote.utils.ScaffoldBox
 
 @Composable
-fun PageLoading(){
+fun PageLoading(
+	showBackButton: Boolean = true,
+) {
 	ScaffoldBox(
-		topBar = { SimpleActionBar() },
+		topBar = {
+			SimpleActionBar(
+				navigationIcon = {
+					if (showBackButton) {
+						BackButton()
+					}
+				}
+			)
+		},
 		content = { BoxLoading() }
 	)
 }

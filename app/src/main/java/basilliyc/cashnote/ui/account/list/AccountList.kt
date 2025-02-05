@@ -46,12 +46,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
-import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.LocalNavController
@@ -83,7 +83,12 @@ fun AccountList() {
 		},
 		onClickAccount = {
 			singleRunner.schedule {
-				navController.navigate(AppNavigation.AccountDetails(accountId = it))
+				navController.navigate(
+					AppNavigation.AccountDetails(
+						accountId = it,
+						isFromNavigation = false
+					)
+				)
 			}
 		},
 		onDragStarted = viewModel::onDragStarted,

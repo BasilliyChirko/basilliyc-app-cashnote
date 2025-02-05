@@ -91,4 +91,7 @@
     <string name="account_color_turquoise">Turquoise</string>
     <string name="account_color_none">None</string>
     <string name="account_color_red">Red</string>
+    <string name="account_form_show_on_navigation">Show account on navigation panel</string>
+    <string name="main_restart_activity_dialog_title">App will be restarted</string>
+    <string name="main_restart_activity_dialog_text">This is required for appling navigation bar changes</string>
 </resources>

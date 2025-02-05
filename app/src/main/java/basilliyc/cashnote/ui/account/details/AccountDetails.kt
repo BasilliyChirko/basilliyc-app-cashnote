@@ -32,6 +32,7 @@ import basilliyc.cashnote.data.labelText
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.IconButton
@@ -120,9 +121,12 @@ private fun Page(
 			page = content,
 			onCategoryClicked = onCategoryClicked,
 			onEmptyCategoriesSubmitted = onEmptyCategoriesSubmitted,
+			showBackButton = !state.isFromNavigation
 		)
 		
-		AccountDetailsState.Page.Loading -> PageLoading()
+		AccountDetailsState.Page.Loading -> PageLoading(
+			showBackButton = !state.isFromNavigation
+		)
 	}
 }
 
@@ -136,6 +140,7 @@ private fun PageData(
 	page: AccountDetailsState.Page.Data,
 	onCategoryClicked: (Long) -> Unit,
 	onEmptyCategoriesSubmitted: () -> Unit,
+	showBackButton: Boolean = true,
 ) {
 	ScaffoldBox(
 		topBar = {
@@ -159,7 +164,12 @@ private fun PageData(
 						},
 					)
 				},
-				containerColor = page.account.color.color
+				containerColor = page.account.color.color,
+				navigationIcon = {
+					if (showBackButton) {
+						BackButton()
+					}
+				}
 			)
 		},
 		content = {

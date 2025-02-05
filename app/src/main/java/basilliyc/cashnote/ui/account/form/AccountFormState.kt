@@ -6,31 +6,33 @@ import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.components.TextFieldState
 
 data class AccountFormState(
-	val content: Content = Content.Loading,
+	val page: Page = Page.Loading,
 	val action: Action? = null,
 ) {
 	
-	sealed interface Content {
-		data object Loading : Content
+	sealed interface Page {
+		data object Loading : Page
 		data class Data(
 			val isNew: Boolean,
 			val currency: AccountCurrency,
 			val name: TextFieldState,
 			val balance: TextFieldState,
 			val color: FinancialColor?,
-		) : Content {
-			constructor(financialAccount: FinancialAccount) : this(
-				isNew = financialAccount.id == 0L,
-				currency = financialAccount.currency,
-				name = TextFieldState(value = financialAccount.name),
-				balance = TextFieldState(value = financialAccount.balance.toString()),
-				color = financialAccount.color,
+			val isShowOnNavigation: Boolean,
+		) : Page {
+			constructor(account: FinancialAccount, isShowOnNavigation: Boolean) : this(
+				isNew = account.id == 0L,
+				currency = account.currency,
+				name = TextFieldState(value = account.name),
+				balance = TextFieldState(value = account.balance.toString()),
+				color = account.color,
+				isShowOnNavigation = isShowOnNavigation,
 			)
 		}
 	}
 	
 	sealed interface Action {
-		data object SaveSuccess : Action
+		data class SaveSuccess(val isNew: Boolean, val isNeedRebuildApp: Boolean) : Action
 		data object Cancel : Action
 		data object SaveError : Action
 	}

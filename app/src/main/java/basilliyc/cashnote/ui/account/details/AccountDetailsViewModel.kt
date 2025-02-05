@@ -24,7 +24,11 @@ class AccountDetailsViewModel(
 	
 	val route: AppNavigation.AccountDetails = savedStateHandle.toRoute()
 	
-	var state by mutableStateOf(AccountDetailsState())
+	var state by mutableStateOf(
+		AccountDetailsState(
+			isFromNavigation = route.isFromNavigation
+		)
+	)
 		private set
 	
 	private var statePageData
@@ -142,8 +146,6 @@ class AccountDetailsViewModel(
 					this@AccountDetailsViewModel.statistics = statistics
 				}
 		}
-		
-		
 		
 		
 	}

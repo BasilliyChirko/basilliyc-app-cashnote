@@ -8,7 +8,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,7 +32,7 @@ import basilliyc.cashnote.utils.DefaultPreview
 @Preview(showBackground = true)
 fun MenuRowColorPreview1() = DefaultPreview {
 	MenuRowColor(
-		title = "Color",
+		title = "Title",
 		subtitle = "Subtitle",
 		color = FinancialColor.Blue,
 		onColorSelected = {}
@@ -44,7 +43,7 @@ fun MenuRowColorPreview1() = DefaultPreview {
 @Preview(showBackground = true)
 fun MenuRowColorPreview2() = DefaultPreview {
 	MenuRowColor(
-		title = "Color",
+		title = "Title",
 		color = FinancialColor.Blue,
 		onColorSelected = {}
 	)
@@ -54,7 +53,7 @@ fun MenuRowColorPreview2() = DefaultPreview {
 @Preview(showBackground = true)
 fun MenuRowColorPreview3() = DefaultPreview {
 	MenuRowColor(
-		title = "Color",
+		title = "Title",
 		color = null,
 		onColorSelected = {}
 	)
@@ -67,9 +66,9 @@ fun MenuRowColor(
 	color: FinancialColor?,
 	onColorSelected: (FinancialColor?) -> Unit,
 	enabled: Boolean = true,
-	contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding
+	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
 ) {
-
+	
 	var showDialogPicker by remember { mutableStateOf(false) }
 	
 	DropdownMenuItem(

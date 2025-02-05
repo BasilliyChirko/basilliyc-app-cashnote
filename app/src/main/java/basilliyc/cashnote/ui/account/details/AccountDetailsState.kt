@@ -5,7 +5,8 @@ import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialStatisticParams
 
 data class AccountDetailsState(
-	val page: Page = Page.Loading
+	val page: Page = Page.Loading,
+	val isFromNavigation: Boolean,
 ) {
 	
 	sealed interface Page {
@@ -18,7 +19,7 @@ data class AccountDetailsState(
 			val balanceSecondaryPositive: Double?,
 			val balanceSecondaryNegative: Double?,
 			val categories: List<CategoryWithBalance>,
-		): Page
+		) : Page
 	}
 	
 	data class CategoryWithBalance(

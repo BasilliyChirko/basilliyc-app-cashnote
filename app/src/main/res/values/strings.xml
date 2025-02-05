@@ -76,4 +76,11 @@
     <string name="transaction_form_label_type_increase">Increase</string>
     <string name="transaction_form_new_balance">New balance</string>
     <string name="transaction_form_toast_deviation_zero">Deviation can`t be zero</string>
+    <string name="financial_statistic_params_calculation_current_period_label">Current</string>
+    <string name="financial_statistic_params_calculation_previous_period_label">Previous</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month1_label">One month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month3_label">Three month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month6_label">Six month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_year_label">Year</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_all_time_label">All time</string>
 </resources>

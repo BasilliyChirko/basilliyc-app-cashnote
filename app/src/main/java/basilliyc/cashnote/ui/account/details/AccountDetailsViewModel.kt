@@ -58,7 +58,6 @@ class AccountDetailsViewModel(
 			state = state.copy(
 				page = Page.Data(
 					account = account,
-					showAccountStatistic = statisticsParams.showAccountStatistic,
 					balancePrimaryPositive = statistics.sumOf { it.primaryValuePositive },
 					balancePrimaryNegative = statistics.sumOf { it.primaryValueNegative },
 					balanceSecondaryPositive = statistics.sumOf { it.secondaryValuePositive },
@@ -71,7 +70,8 @@ class AccountDetailsViewModel(
 								?: 0.0,
 							secondaryValue = stats?.let { it.secondaryValuePositive + it.secondaryValueNegative }
 						)
-					}
+					},
+					statisticParams = statisticsParams,
 				)
 			)
 			
@@ -80,6 +80,18 @@ class AccountDetailsViewModel(
 	}
 	
 	private fun initLatestUpdates() {
+		//ACCOUNT
+		viewModelScope.launch {
+			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
+				if (account == null) return@collectLatest
+				statePageData = statePageData?.copy(
+					account = account,
+				)
+				this@AccountDetailsViewModel.account = account
+			}
+		}
+		
+		//CATEGORIES
 		viewModelScope.launch {
 			financialManager.getCategoryListAsFlow().collectLatest { categories ->
 				statePageData = statePageData?.copy(
@@ -97,16 +109,18 @@ class AccountDetailsViewModel(
 			}
 		}
 		
+		//STATISTIC PARAMS
 		viewModelScope.launch {
-			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
-				if (account == null) return@collectLatest
-				statePageData = statePageData?.copy(
-					account = account,
-				)
-				this@AccountDetailsViewModel.account = account
-			}
+			financialManager.getStatisticsParamsAsFlow()
+				.collectLatest { statisticsParams ->
+					statePageData = statePageData?.copy(
+						statisticParams = statisticsParams,
+					)
+					this@AccountDetailsViewModel.statisticsParams = statisticsParams
+				}
 		}
 		
+		//STATISTIC VALUES
 		viewModelScope.launch {
 			financialManager.getStatisticsListForAccountAsFlow(route.accountId)
 				.collectLatest { statistics ->
@@ -130,15 +144,7 @@ class AccountDetailsViewModel(
 		}
 		
 		
-		viewModelScope.launch {
-			financialManager.getStatisticsParamsAsFlow()
-				.collectLatest { statisticsParams ->
-					statePageData = statePageData?.copy(
-						showAccountStatistic = statisticsParams.showAccountStatistic,
-					)
-					this@AccountDetailsViewModel.statisticsParams = statisticsParams
-				}
-		}
+		
 		
 	}
 }

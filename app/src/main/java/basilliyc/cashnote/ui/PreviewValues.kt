@@ -5,6 +5,7 @@ import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialStatisticParams
 
 object PreviewValues {
 	
@@ -32,6 +33,10 @@ object PreviewValues {
 				icon = icon
 			)
 		}
+	}
+	
+	val statisticParams by lazy {
+		FinancialStatisticParams()
 	}
 	
 }

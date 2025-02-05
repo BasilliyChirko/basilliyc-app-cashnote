@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,12 +50,13 @@ fun CardBalance(
 	leadingIcon: CardBalanceLeadingIcon?,
 	color: AccountColor?,
 ) {
-	Card(
+	OutlinedCard(
 		modifier = modifier,
 		onClick = onClick,
-		colors = CardDefaults.cardColors(
+		colors = CardDefaults.outlinedCardColors(
 			containerColor = color?.color ?: Color.Unspecified
-		)
+		),
+		shape = MaterialTheme.shapes.small,
 	) {
 		Column(
 			modifier = Modifier.padding(8.dp)

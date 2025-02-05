@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Person2
 import androidx.compose.material.icons.filled.Person3
 import androidx.compose.material.icons.filled.Person4
+import androidx.compose.material.icons.filled.SmokingRooms
 import androidx.compose.material.icons.filled.WineBar
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,4 +40,5 @@ enum class FinancialCategoryIcon(val imageVector: ImageVector) {
 	Food(Icons.Filled.Fastfood),
 	Alcohol(Icons.Filled.WineBar),
 	Gift(Icons.Filled.CardGiftcard),
+	Smoking(Icons.Filled.SmokingRooms),
 }

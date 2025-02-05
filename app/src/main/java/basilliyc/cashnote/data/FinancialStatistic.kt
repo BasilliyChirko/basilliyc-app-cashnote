@@ -1,9 +1,13 @@
 package basilliyc.cashnote.data
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import basilliyc.cashnote.data.FinancialStatisticParams.Calculation.*
+import basilliyc.cashnote.R
 
 @Entity(
 	foreignKeys = [
@@ -60,3 +64,17 @@ data class FinancialStatisticParams(
 		AveragePreviousPeriodsForAllTime,
 	}
 }
+
+
+@Composable
+fun FinancialStatisticParams.Calculation.labelText(): String = stringResource(
+	when (this) {
+		CurrentPeriod -> R.string.financial_statistic_params_calculation_current_period_label
+		PreviousPeriod -> R.string.financial_statistic_params_calculation_previous_period_label
+		AveragePreviousPeriodsForMonth1 -> R.string.financial_statistic_params_calculation_average_previous_periods_for_month1_label
+		AveragePreviousPeriodsForMonth3 -> R.string.financial_statistic_params_calculation_average_previous_periods_for_month3_label
+		AveragePreviousPeriodsForMonth6 -> R.string.financial_statistic_params_calculation_average_previous_periods_for_month6_label
+		AveragePreviousPeriodsForYear -> R.string.financial_statistic_params_calculation_average_previous_periods_for_year_label
+		AveragePreviousPeriodsForAllTime -> R.string.financial_statistic_params_calculation_average_previous_periods_for_all_time_label
+	}
+)

@@ -43,7 +43,7 @@ val AccountCurrency.symbol: String
 		AccountCurrency.EUR -> "€"
 	}
 
-val AccountColor.color: Color
+val AccountColor?.color: Color
 	@Composable
 	get() = when (this) {
 		AccountColor.Orange -> if (isDarkTheme()) AccountColorNightOrange else AccountColorDayOrange
@@ -52,4 +52,5 @@ val AccountColor.color: Color
 		AccountColor.Yellow -> if (isDarkTheme()) AccountColorNightYellow else AccountColorDayYellow
 		AccountColor.Purple -> if (isDarkTheme()) AccountColorNightPurple else AccountColorDayPurple
 		AccountColor.Turquoise -> if (isDarkTheme()) AccountColorNightTurquoise else AccountColorDayTurquoise
+		null -> Color.Unspecified
 	}

@@ -2,6 +2,7 @@ package basilliyc.cashnote.ui.account.details
 
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialStatisticParams
 
 data class AccountDetailsState(
 	val page: Page = Page.Loading
@@ -11,7 +12,7 @@ data class AccountDetailsState(
 		data object Loading : Page
 		data class Data(
 			val account: FinancialAccount,
-			val showAccountStatistic: Boolean,
+			val statisticParams: FinancialStatisticParams,
 			val balancePrimaryPositive: Double,
 			val balancePrimaryNegative: Double,
 			val balanceSecondaryPositive: Double?,

@@ -2,9 +2,9 @@
 
 package basilliyc.cashnote.ui.account.form
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.AccountColor
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.color
@@ -45,10 +46,10 @@ import basilliyc.cashnote.ui.components.CardSelectable
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
+import basilliyc.cashnote.ui.components.menu.MenuRowColor
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -134,7 +135,7 @@ private fun Content(
 	onCurrencyChanged: (AccountCurrency) -> Unit,
 	onNameChanged: (String) -> Unit,
 	onBalanceChanged: (String) -> Unit,
-	onColorChanged: (AccountColor) -> Unit,
+	onColorChanged: (FinancialColor?) -> Unit,
 	onSaveClicked: () -> Unit,
 ) {
 	Scaffold(
@@ -213,7 +214,7 @@ private fun ContentData(
 	onCurrencyChanged: (AccountCurrency) -> Unit,
 	onNameChanged: (String) -> Unit,
 	onBalanceChanged: (String) -> Unit,
-	onColorChanged: (AccountColor) -> Unit,
+	onColorChanged: (FinancialColor?) -> Unit,
 	onSaveClicked: () -> Unit,
 ) {
 	Column(
@@ -231,10 +232,16 @@ private fun ContentData(
 			state = content.balance,
 			onChanged = onBalanceChanged,
 		)
-		AccountColor(
-			value = content.color,
-			onChanged = onColorChanged,
+		
+		MenuRowColor(
+			title = stringResource(R.string.account_form_label_color),
+			color = content.color,
+			onColorSelected = {
+				onColorChanged(it)
+			},
+			contentPadding = PaddingValues(horizontal = 16.dp)
 		)
+		
 		Button(
 			modifier = Modifier
 				.fillMaxWidth()
@@ -260,11 +267,6 @@ private fun ColumnScope.CurrencyPicker(
 	value: AccountCurrency,
 	onChanged: (AccountCurrency) -> Unit,
 ) {
-	Text(
-		text = stringResource(R.string.account_form_label_currency),
-		style = MaterialTheme.typography.titleMedium,
-		modifier = Modifier.padding(horizontal = 16.dp)
-	)
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -331,51 +333,4 @@ private fun ColumnScope.AccountBalance(
 			keyboardType = KeyboardType.Number
 		),
 	)
-}
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA.COLOR
-//--------------------------------------------------------------------------------------------------
-
-
-@Composable
-private fun ColumnScope.AccountColor(
-	value: AccountColor?,
-	onChanged: (AccountColor) -> Unit,
-) {
-	Text(
-		text = stringResource(R.string.account_form_label_color),
-		style = MaterialTheme.typography.titleMedium,
-		modifier = Modifier
-			.padding(horizontal = 16.dp)
-			.padding(bottom = 4.dp)
-	)
-	
-	VerticalGrid(
-		modifier = Modifier.padding(horizontal = 16.dp),
-		columns = VerticalGridCells.Adaptive(100.dp),
-		horizontalSpace = 8.dp,
-		itemsCount = AccountColor.entries.size,
-	) {
-		val accountColor = AccountColor.entries[it]
-		Card(
-			modifier = Modifier
-				.fillMaxWidth(),
-			colors = CardDefaults.cardColors(
-				containerColor = if (accountColor == value) {
-					accountColor.color
-				} else Color.Unspecified,
-			),
-			onClick = { onChanged(accountColor) }
-		) {
-			Text(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 8.dp),
-				text = accountColor.name,
-				textAlign = TextAlign.Center,
-			)
-		}
-	}
-	
 }

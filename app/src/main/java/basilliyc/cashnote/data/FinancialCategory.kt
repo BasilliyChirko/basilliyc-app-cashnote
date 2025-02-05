@@ -23,6 +23,7 @@ data class FinancialCategory(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0L,
 	val name: String,
 	val icon: FinancialCategoryIcon?,
+	val color: FinancialColor? = null, //TODO remove default value
 	val position: Int = id.toInt(),
 )
 

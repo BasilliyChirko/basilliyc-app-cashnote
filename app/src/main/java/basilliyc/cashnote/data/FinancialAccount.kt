@@ -23,7 +23,7 @@ data class FinancialAccount(
 	@PrimaryKey(autoGenerate = true) val id: Long = 0L,
 	val name: String,
 	val currency: AccountCurrency,
-	val color: AccountColor?,
+	val color: FinancialColor?,
 	val balance: Double,
 	val position: Int,
 )
@@ -32,9 +32,7 @@ enum class AccountCurrency {
 	UAH, USD, EUR,
 }
 
-enum class AccountColor {
-	Orange, Green, Blue, Yellow, Purple, Turquoise,
-}
+
 
 val AccountCurrency.symbol: String
 	get() = when (this) {
@@ -43,14 +41,3 @@ val AccountCurrency.symbol: String
 		AccountCurrency.EUR -> "€"
 	}
 
-val AccountColor?.color: Color
-	@Composable
-	get() = when (this) {
-		AccountColor.Orange -> if (isDarkTheme()) AccountColorNightOrange else AccountColorDayOrange
-		AccountColor.Green -> if (isDarkTheme()) AccountColorNightGreen else AccountColorDayGreen
-		AccountColor.Blue -> if (isDarkTheme()) AccountColorNightBlue else AccountColorDayBlue
-		AccountColor.Yellow -> if (isDarkTheme()) AccountColorNightYellow else AccountColorDayYellow
-		AccountColor.Purple -> if (isDarkTheme()) AccountColorNightPurple else AccountColorDayPurple
-		AccountColor.Turquoise -> if (isDarkTheme()) AccountColorNightTurquoise else AccountColorDayTurquoise
-		null -> Color.Unspecified
-	}

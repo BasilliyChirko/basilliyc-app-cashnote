@@ -76,6 +76,10 @@ class PopupMenuState(expanded: Boolean = false) {
 	fun expand() {
 		expanded.value = true
 	}
+	
+	fun collapse() {
+		expanded.value = false
+	}
 }
 
 @Composable

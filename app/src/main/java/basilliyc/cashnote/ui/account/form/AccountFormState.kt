@@ -1,7 +1,7 @@
 package basilliyc.cashnote.ui.account.form
 
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.AccountColor
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.components.TextFieldState
 
@@ -17,7 +17,7 @@ data class AccountFormState(
 			val currency: AccountCurrency,
 			val name: TextFieldState,
 			val balance: TextFieldState,
-			val color: AccountColor?,
+			val color: FinancialColor?,
 		) : Content {
 			constructor(financialAccount: FinancialAccount) : this(
 				isNew = financialAccount.id == 0L,

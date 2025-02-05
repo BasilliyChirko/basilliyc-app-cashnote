@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.AccountColor
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
@@ -125,7 +125,7 @@ class AccountFormViewModel(
 		return null
 	}
 	
-	fun onColorChanged(color: AccountColor) {
+	fun onColorChanged(color: FinancialColor?) {
 		updateStateContentData {
 			copy(color = color.takeIf { color != this.color })
 		}

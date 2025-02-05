@@ -83,4 +83,12 @@
     <string name="financial_statistic_params_calculation_average_previous_periods_for_month6_label">Six month</string>
     <string name="financial_statistic_params_calculation_average_previous_periods_for_year_label">Year</string>
     <string name="financial_statistic_params_calculation_average_previous_periods_for_all_time_label">All time</string>
+    <string name="account_color_orange">Orange</string>
+    <string name="account_color_green">Green</string>
+    <string name="account_color_blue">Blue</string>
+    <string name="account_color_yellow">Yellow</string>
+    <string name="account_color_purple">Purple</string>
+    <string name="account_color_turquoise">Turquoise</string>
+    <string name="account_color_none">None</string>
+    <string name="account_color_red">Red</string>
 </resources>

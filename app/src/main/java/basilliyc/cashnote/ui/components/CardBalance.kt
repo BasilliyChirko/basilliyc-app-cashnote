@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,10 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import basilliyc.cashnote.data.AccountColor
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.symbol
@@ -48,7 +45,7 @@ fun CardBalance(
 	primaryValue: Double,
 	secondaryValue: Double?,
 	leadingIcon: CardBalanceLeadingIcon?,
-	color: AccountColor?,
+	color: FinancialColor?,
 ) {
 	OutlinedCard(
 		modifier = modifier,
@@ -133,7 +130,7 @@ private fun CardBalancePreview() = DefaultPreview {
 		primaryValue = 100.0,
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(Icons.Default.Home),
-		color = AccountColor.Green,
+		color = FinancialColor.Green,
 	)
 }
 
@@ -148,7 +145,7 @@ private fun CardBalancePreview2() = DefaultPreview {
 		primaryValue = 100.0,
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(AccountCurrency.EUR),
-		color = AccountColor.Green,
+		color = FinancialColor.Green,
 	)
 }
 
@@ -163,6 +160,6 @@ private fun CardBalancePreview3() = DefaultPreview {
 		primaryValue = 100.0,
 		secondaryValue = 50.0,
 		leadingIcon = null,
-		color = AccountColor.Green,
+		color = FinancialColor.Green,
 	)
 }

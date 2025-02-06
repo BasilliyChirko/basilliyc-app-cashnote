@@ -18,7 +18,7 @@ import basilliyc.cashnote.data.FinancialStatisticParams
 		FinancialStatisticParams::class,
 	],
 	exportSchema = true,
-	version = 4, //previous version: 1
+	version = 1, //previous version: 1
 )
 @TypeConverters(AppDatabaseConverters::class)
 abstract class AppDatabase : RoomDatabase() {

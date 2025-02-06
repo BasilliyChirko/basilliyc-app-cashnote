@@ -15,7 +15,7 @@ val versionMinor = 0
 val versionPatch = 0
 val versionBuild = 1
 
-var versionBuildName = "$versionMajor.$versionMinor.$versionPatch-$versionBuild"
+var versionBuildName = "$versionMajor.$versionMinor.$versionPatch"
 
 android {
 	namespace = "basilliyc.cashnote"
@@ -28,7 +28,7 @@ android {
 		
 		versionCode = versionBuild
 		versionName = versionBuildName
-		setProperty("archivesBaseName", "Obsidian5-$versionName")
+		setProperty("archivesBaseName", "CashNote-$versionName")
 		
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}

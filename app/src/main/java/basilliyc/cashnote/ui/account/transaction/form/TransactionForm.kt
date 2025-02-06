@@ -69,7 +69,7 @@ import basilliyc.cashnote.utils.TimestampStyle
 import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.toPriceString
-import basilliyc.cashnote.utils.toast
+import basilliyc.cashnote.utils.showToast
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
@@ -109,11 +109,11 @@ private fun Action(
 			}
 			
 			TransactionFormState.Action.SaveError -> {
-				context.toast(R.string.transaction_form_toast_save_error)
+				context.showToast(R.string.transaction_form_toast_save_error)
 			}
 			
 			TransactionFormState.Action.DeviationCantBeZero -> {
-				context.toast(R.string.transaction_form_toast_deviation_zero)
+				context.showToast(R.string.transaction_form_toast_deviation_zero)
 			}
 		}
 		listener.onActionConsumed()

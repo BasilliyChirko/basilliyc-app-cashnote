@@ -58,7 +58,7 @@ import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.rememberSingleRunner
-import basilliyc.cashnote.utils.toast
+import basilliyc.cashnote.utils.showToast
 
 
 //--------------------------------------------------------------------------------------------------
@@ -95,46 +95,8 @@ fun AccountList() {
 		onDragCompleted = viewModel::onDragCompleted,
 		onDragReverted = viewModel::onDragReverted,
 		onDragMoved = viewModel::onDragMoved,
-		onAccountDeleteClicked = viewModel::onAccountDeleteClicked,
-		onAccountEditClicked = viewModel::onAccountEditClicked,
-		onAccountHistoryClicked = viewModel::onAccountHistoryClicked,
 	)
-	
-	
-	val action = state.action
-	LaunchedEffect(action) {
-		when (action) {
-			null -> Unit
-			
-			AccountListState.Action.AccountDeletionSuccess -> {
-				navController.popBackStack()
-				context.toast(R.string.account_transaction_toast_account_deletion_success)
-			}
-			
-			AccountListState.Action.AccountDeletionError -> {
-				context.toast(R.string.account_transaction_toast_account_deletion_error)
-			}
-			
-			is AccountListState.Action.AccountEdit -> {
-				navController.navigate(AppNavigation.AccountForm(action.accountId))
-			}
-			
-			is AccountListState.Action.AccountHistory -> {
-				navController.navigate(AppNavigation.AccountHistory(action.accountId))
-			}
-		}
-		viewModel.onActionConsumed()
-	}
-	
-	when (val dialogState = state.dialog) {
-		null -> Unit
-		is AccountListState.Dialog.AccountDeleteConfirmation -> DialogDeleteConfirmation(
-			onConfirm = {
-				viewModel.onAccountDeleteDialogConfirmed(dialogState.accountId)
-			},
-			onCancel = viewModel::onAccountDeleteDialogCanceled,
-		)
-	}
+
 }
 
 @Preview(showBackground = true)
@@ -180,9 +142,6 @@ private fun AccountListPreview() = DefaultPreview {
 		onDragCompleted = { _, _ -> },
 		onDragReverted = {},
 		onDragMoved = { _, _ -> },
-		onAccountEditClicked = {},
-		onAccountDeleteClicked = {},
-		onAccountHistoryClicked = {},
 	)
 }
 
@@ -200,9 +159,6 @@ private fun Content(
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
 	onDragMoved: (from: Int, to: Int) -> Unit,
-	onAccountEditClicked: (accountId: Long) -> Unit,
-	onAccountDeleteClicked: (accountId: Long) -> Unit,
-	onAccountHistoryClicked: (accountId: Long) -> Unit,
 ) {
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
@@ -228,9 +184,6 @@ private fun Content(
 					onDragCompleted = onDragCompleted,
 					onDragReverted = onDragReverted,
 					onDragMoved = onDragMoved,
-					onAccountEditClicked = onAccountEditClicked,
-					onAccountDeleteClicked = onAccountDeleteClicked,
-					onAccountHistoryClicked = onAccountHistoryClicked,
 				)
 				
 				is AccountListState.Content.DataEmpty -> ContentDataEmpty(
@@ -295,13 +248,8 @@ private fun ContentData(
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
 	onDragMoved: (from: Int, to: Int) -> Unit,
-	onAccountEditClicked: (accountId: Long) -> Unit,
-	onAccountDeleteClicked: (accountId: Long) -> Unit,
-	onAccountHistoryClicked: (accountId: Long) -> Unit,
 ) {
 	val accounts = draggedList ?: content.financialAccounts
-	var expandedId by remember { mutableLongStateOf(-1L) }
-	var dragStartedId by remember { mutableLongStateOf(-1L) }
 	
 	DraggableVerticalGrid(
 		modifier = modifier.fillMaxSize(),
@@ -309,17 +257,8 @@ private fun ContentData(
 		horizontalArrangement = Arrangement.spacedBy(8.dp),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 		contentPadding = PaddingValues(8.dp),
-		onDragStarted = {
-			onDragStarted()
-			dragStartedId = accounts[it].id
-		},
-		onDragCompleted = { from, to ->
-			onDragCompleted(from, to)
-			if (from == -1 && to == -1) {
-				expandedId = dragStartedId
-				dragStartedId = -1L
-			}
-		},
+		onDragStarted = { onDragStarted() },
+		onDragCompleted = onDragCompleted,
 		onDragReverted = onDragReverted,
 		onDragMoved = onDragMoved,
 	) {
@@ -328,55 +267,21 @@ private fun ContentData(
 			key = { accounts[it].id },
 			itemContent = { index, isDragged ->
 				val account = accounts[index]
-				PopupMenu(
-					expanded = expandedId == account.id,
-					onDismissRequest = { expandedId = -1L },
-					anchor = {
-						CardBalance(
-							modifier = Modifier
-								.applyIf({ isDragged }) {
-									this.shadow(
-										elevation = 4.dp,
-										shape = MaterialTheme.shapes.medium
-									)
-								},
-							onClick = { onClickAccount(account.id) },
-							title = account.name,
-							primaryValue = account.balance,
-							secondaryValue = 50.0,
-							leadingIcon = CardBalanceLeadingIcon(account.currency),
-							color = account.color,
-						)
-					},
-					items = {
-						PopupMenuItem(
-							text = stringResource(R.string.account_transaction_action_edit_accout),
-							onClick = {
-								expandedId = -1L
-								onAccountEditClicked(account.id)
-							},
-							leadingIcon = Icons.Filled.Edit,
-						)
-						PopupMenuItem(
-							text = stringResource(R.string.account_transaction_action_history),
-							onClick = {
-								expandedId = -1L
-								onAccountHistoryClicked(account.id)
-							},
-							leadingIcon = Icons.Filled.History,
-						)
-						PopupMenuItem(
-							text = stringResource(R.string.account_transaction_action_delete_accout),
-							onClick = {
-								expandedId = -1L
-								onAccountDeleteClicked(account.id)
-							},
-							leadingIcon = Icons.Filled.DeleteForever,
-						)
-					}
+				CardBalance(
+					modifier = Modifier
+						.applyIf({ isDragged }) {
+							this.shadow(
+								elevation = 4.dp,
+								shape = MaterialTheme.shapes.small
+							)
+						},
+					onClick = { onClickAccount(account.id) },
+					title = account.name,
+					primaryValue = account.balance,
+					secondaryValue = 50.0,
+					leadingIcon = CardBalanceLeadingIcon(account.currency),
+					color = account.color,
 				)
-				
-				
 			}
 		)
 	}
@@ -404,38 +309,3 @@ private fun ActionBar(
 )
 
 
-//--------------------------------------------------------------------------------------------------
-// DIALOG.DELETE_CONFIRMATION
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun DialogDeleteConfirmation(
-	onConfirm: () -> Unit,
-	onCancel: () -> Unit,
-) {
-	AlertDialog(
-		title = {
-			Text(text = stringResource(R.string.account_list_account_delete_confirmation_title))
-		},
-		text = {
-			Text(text = stringResource(R.string.account_list_account_delete_confirmation_text))
-		},
-		onDismissRequest = onCancel,
-		confirmButton = {
-			TextButton(
-				onClick = onConfirm,
-				content = {
-					Text(text = stringResource(R.string.account_list_account_delete_confirmation_submit))
-				}
-			)
-		},
-		dismissButton = {
-			TextButton(
-				onClick = onCancel,
-				content = {
-					Text(text = stringResource(R.string.account_list_account_delete_confirmation_cancel))
-				}
-			)
-		}
-	)
-}

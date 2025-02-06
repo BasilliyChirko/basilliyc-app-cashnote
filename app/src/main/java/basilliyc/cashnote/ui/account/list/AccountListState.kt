@@ -4,8 +4,6 @@ import basilliyc.cashnote.data.FinancialAccount
 
 data class AccountListState(
 	val content: Content = Content.Loading,
-	val dialog: Dialog? = null,
-	val action: Action? = null,
 ) {
 	
 	sealed interface Content {
@@ -16,15 +14,5 @@ data class AccountListState(
 		) : Content
 	}
 	
-	sealed interface Dialog {
-		data class AccountDeleteConfirmation(val accountId: Long) : Dialog
-	}
-	
-	sealed interface Action {
-		data class AccountEdit(val accountId: Long) : Action
-		data object AccountDeletionSuccess : Action
-		data object AccountDeletionError : Action
-		data class AccountHistory(val accountId: Long) : Action
-	}
 	
 }

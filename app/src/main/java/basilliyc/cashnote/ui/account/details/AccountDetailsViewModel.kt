@@ -20,21 +20,29 @@ import kotlinx.coroutines.launch
 
 class AccountDetailsViewModel(
 	savedStateHandle: SavedStateHandle,
-) : BaseViewModel() {
+) : BaseViewModel(), AccountDetailsListener {
 	
 	val route: AppNavigation.AccountDetails = savedStateHandle.toRoute()
 	
-	var state by mutableStateOf(
-		AccountDetailsState(
-			isFromNavigation = route.isFromNavigation
-		)
-	)
+	var state by mutableStateOf(AccountDetailsState(showBackButton = !route.isFromNavigation))
 		private set
 	
 	private var statePageData
 		get() = state.page as? Page.Data
 		set(value) {
 			if (value != null) state = state.copy(page = value)
+		}
+	
+	private var stateDialog
+		get() = state.dialog
+		set(value) {
+			state = state.copy(dialog = value)
+		}
+	
+	private var stateResult
+		get() = state.result
+		set(value) {
+			state = state.copy(result = value)
 		}
 	
 	private val financialManager: FinancialManager by inject()
@@ -46,8 +54,7 @@ class AccountDetailsViewModel(
 	init {
 		state = state.copy(page = Page.Loading)
 		viewModelScope.launch {
-			val account = (financialManager.getAccountById(route.accountId)
-				?: throw Throwable("Account with id ${route.accountId} not found"))
+			val account = financialManager.requireAccountById(route.accountId)
 				.also { account = it }
 			
 			val categories = financialManager.getCategoryList()
@@ -79,11 +86,11 @@ class AccountDetailsViewModel(
 				)
 			)
 			
-			initLatestUpdates()
+			listenForUpdates()
 		}
 	}
 	
-	private fun initLatestUpdates() {
+	private fun listenForUpdates() {
 		//ACCOUNT
 		viewModelScope.launch {
 			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
@@ -149,4 +156,56 @@ class AccountDetailsViewModel(
 		
 		
 	}
+	
+	override fun onResultConsumed() {
+		logcat.debug("onResultConsumed 1", stateResult)
+		stateResult = null
+		logcat.debug("onResultConsumed 2", stateResult)
+	}
+	
+	override fun onCategoryClicked(id: Long) {
+		stateResult = AccountDetailsState.Result.NavigateTransactionForm(
+			accountId = account.id,
+			categoryId = id,
+		)
+	}
+	
+	override fun onAccountCategoriesClicked() {
+		logcat.debug("onAccountCategoriesClicked")
+		stateResult = AccountDetailsState.Result.NavigateCategoryList
+	}
+	
+	override fun onAccountEditClicked() {
+		stateResult = AccountDetailsState.Result.NavigateAccountForm(
+			accountId = account.id
+		)
+	}
+	
+	override fun onAccountHistoryClicked() {
+		stateResult = AccountDetailsState.Result.NavigateAccountHistory(
+			accountId = account.id
+		)
+	}
+	
+	override fun onAccountDeleteClicked() {
+		stateDialog = AccountDetailsState.Dialog.AccountDeleteConfirmation
+	}
+	
+	override fun onDeleteAccountConfirmed() {
+		schedule {
+			try {
+				stateDialog = null
+				financialManager.deleteAccount(account.id)
+				stateResult = AccountDetailsState.Result.AccountDeletionSuccess
+			} catch (t: Throwable) {
+				stateResult = AccountDetailsState.Result.AccountDeletionError
+			}
+		}
+	}
+	
+	override fun onDeleteAccountCanceled() {
+		stateDialog = null
+	}
+	
+	
 }

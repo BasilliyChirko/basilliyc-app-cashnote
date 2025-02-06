@@ -12,6 +12,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -32,22 +35,23 @@ import basilliyc.cashnote.data.labelText
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
+import basilliyc.cashnote.ui.components.DeleteConfirmationDialog
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
+import basilliyc.cashnote.ui.components.PopupMenuState
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
-import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.ScaffoldBox
-import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.toPriceString
 
 //--------------------------------------------------------------------------------------------------
@@ -57,34 +61,75 @@ import basilliyc.cashnote.utils.toPriceString
 @Composable
 fun AccountDetails() {
 	val viewModel = viewModel<AccountDetailsViewModel>()
-	val state = viewModel.state
-	val navController = LocalNavController.current
-	val singleRunner = rememberSingleRunner()
-	
-	Page(
-		state = state,
-		onCategoryClicked = { categoryId ->
-			singleRunner.schedule {
-				navController.navigate(
+	Page(state = viewModel.state, listener = viewModel)
+	Dialog(dialog = viewModel.state.dialog, listener = viewModel)
+	Result(result = viewModel.state.result, listener = viewModel)
+}
+
+//--------------------------------------------------------------------------------------------------
+//  ACTION
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun Result(
+	result: AccountDetailsState.Result?,
+	listener: AccountDetailsListener,
+) {
+	rememberResultHandler().value.consume(result) {
+		listener.onResultConsumed()
+		when (it) {
+			null -> Unit
+			
+			is AccountDetailsState.Result.NavigateTransactionForm -> {
+				navigateForward(
 					AppNavigation.TransactionForm(
-						accountId = viewModel.route.accountId,
-						categoryId = categoryId,
+						accountId = it.accountId,
+						categoryId = it.categoryId,
 						transactionId = null,
 					)
 				)
 			}
-		},
-		onEmptyCategoriesSubmitted = {
-			singleRunner.schedule {
-				navController.navigate(AppNavigation.CategoryList)
+			
+			AccountDetailsState.Result.NavigateCategoryList -> {
+				navigateForward(AppNavigation.CategoryList)
 			}
-		},
-	)
+			
+			is AccountDetailsState.Result.NavigateAccountForm -> {
+				navigateForward(
+					AppNavigation.AccountForm(
+						accountId = it.accountId,
+					)
+				)
+			}
+			
+			is AccountDetailsState.Result.NavigateAccountHistory -> {
+				navigateForward(
+					AppNavigation.AccountHistory(
+						accountId = it.accountId,
+					)
+				)
+			}
+			
+			AccountDetailsState.Result.AccountDeletionSuccess -> {
+				showToast(R.string.account_details_toast_account_deletion_success)
+				navigateBack()
+			}
+			
+			AccountDetailsState.Result.AccountDeletionError -> {
+				showToast(R.string.account_details_toast_account_deletion_error)
+			}
+		}
+	}
 }
+
+
+//--------------------------------------------------------------------------------------------------
+//  PAGE
+//--------------------------------------------------------------------------------------------------
 
 @Composable
 @Preview(showBackground = true)
-private fun AccountDetailsPreview() = DefaultPreview {
+private fun PageDataPreview() = DefaultPreview {
 	PageData(
 		page = AccountDetailsState.Page.Data(
 			account = PreviewValues.accountTestUSD,
@@ -101,45 +146,41 @@ private fun AccountDetailsPreview() = DefaultPreview {
 				)
 			},
 		),
-		onCategoryClicked = {},
-		onEmptyCategoriesSubmitted = {},
+		listener = object : AccountDetailsListener {
+			override fun onResultConsumed() = Unit
+			override fun onCategoryClicked(id: Long) = Unit
+			override fun onAccountCategoriesClicked() = Unit
+			override fun onAccountEditClicked() = Unit
+			override fun onAccountHistoryClicked() = Unit
+			override fun onAccountDeleteClicked() = Unit
+			override fun onDeleteAccountConfirmed() = Unit
+			override fun onDeleteAccountCanceled() = Unit
+		}
 	)
 }
-
-//--------------------------------------------------------------------------------------------------
-//  PAGE
-//--------------------------------------------------------------------------------------------------
 
 @Composable
 private fun Page(
 	state: AccountDetailsState,
-	onCategoryClicked: (Long) -> Unit,
-	onEmptyCategoriesSubmitted: () -> Unit,
+	listener: AccountDetailsListener,
 ) {
 	when (val content = state.page) {
 		is AccountDetailsState.Page.Data -> PageData(
 			page = content,
-			onCategoryClicked = onCategoryClicked,
-			onEmptyCategoriesSubmitted = onEmptyCategoriesSubmitted,
-			showBackButton = !state.isFromNavigation
+			listener = listener,
+			showBackButton = state.showBackButton,
 		)
 		
 		AccountDetailsState.Page.Loading -> PageLoading(
-			showBackButton = !state.isFromNavigation
+			showBackButton = state.showBackButton,
 		)
 	}
 }
 
-
-//--------------------------------------------------------------------------------------------------
-//  PAGE.DATA
-//--------------------------------------------------------------------------------------------------
-
 @Composable
 private fun PageData(
 	page: AccountDetailsState.Page.Data,
-	onCategoryClicked: (Long) -> Unit,
-	onEmptyCategoriesSubmitted: () -> Unit,
+	listener: AccountDetailsListener,
 	showBackButton: Boolean = true,
 ) {
 	ScaffoldBox(
@@ -156,10 +197,9 @@ private fun PageData(
 							)
 						},
 						items = {
-							PopupMenuItem(
-								onClick = { onEmptyCategoriesSubmitted() },
-								text = stringResource(R.string.account_details_menu_categories),
-								leadingIcon = Icons.Filled.Category,
+							PageDataOptionsMenu(
+								page = page,
+								listener = listener,
 							)
 						},
 					)
@@ -179,11 +219,37 @@ private fun PageData(
 				PageDataBalance(page)
 				PageDataCategories(
 					page = page,
-					onCategoryClicked = onCategoryClicked,
-					onEmptyCategoriesSubmitted = onEmptyCategoriesSubmitted,
+					listener = listener,
 				)
 			}
 		}
+	)
+}
+
+@Composable
+private fun PopupMenuState.PageDataOptionsMenu(
+	page: AccountDetailsState.Page.Data,
+	listener: AccountDetailsListener,
+) {
+	PopupMenuItem(
+		onClick = listener::onAccountCategoriesClicked,
+		text = stringResource(R.string.account_details_menu_categories),
+		leadingIcon = Icons.Filled.Category,
+	)
+	PopupMenuItem(
+		text = stringResource(R.string.account_transaction_action_edit_accout),
+		onClick = listener::onAccountEditClicked,
+		leadingIcon = Icons.Filled.Edit,
+	)
+	PopupMenuItem(
+		text = stringResource(R.string.account_transaction_action_history),
+		onClick = listener::onAccountHistoryClicked,
+		leadingIcon = Icons.Filled.History,
+	)
+	PopupMenuItem(
+		text = stringResource(R.string.account_transaction_action_delete_accout),
+		onClick = listener::onAccountDeleteClicked,
+		leadingIcon = Icons.Filled.DeleteForever,
 	)
 }
 
@@ -268,7 +334,7 @@ private fun ColumnScope.PageDataBalance(
 				}
 				
 			}
-		
+			
 		}
 	}
 }
@@ -332,18 +398,15 @@ private fun RowScope.BalanceStatsValue(
 	)
 }
 
-
-
 @Composable
 private fun ColumnScope.PageDataCategories(
 	page: AccountDetailsState.Page.Data,
-	onCategoryClicked: (id: Long) -> Unit,
-	onEmptyCategoriesSubmitted: () -> Unit,
+	listener: AccountDetailsListener,
 ) {
 	val categories = page.categories
 	
 	if (categories.isEmpty()) {
-		PageDataCategoriesEmpty(onEmptyCategoriesSubmitted = onEmptyCategoriesSubmitted)
+		PageDataCategoriesEmpty(onEmptyCategoriesSubmitted = listener::onAccountCategoriesClicked)
 		return
 	}
 	
@@ -360,7 +423,7 @@ private fun ColumnScope.PageDataCategories(
 		val category = categories[index]
 		CardBalance(
 			modifier = Modifier,
-			onClick = { onCategoryClicked(category.category.id) },
+			onClick = { listener.onCategoryClicked(category.category.id) },
 			title = category.category.name,
 			primaryValue = category.primaryValue,
 			secondaryValue = category.secondaryValue,
@@ -390,4 +453,26 @@ private fun ColumnScope.PageDataCategoriesEmpty(
 			icon = Icons.Filled.Category,
 		)
 	}
+}
+
+//--------------------------------------------------------------------------------------------------
+//  DIALOG
+//--------------------------------------------------------------------------------------------------
+
+@Composable
+private fun Dialog(
+	dialog: AccountDetailsState.Dialog?,
+	listener: AccountDetailsListener,
+) {
+	
+	when (dialog) {
+		null -> Unit
+		AccountDetailsState.Dialog.AccountDeleteConfirmation -> DeleteConfirmationDialog(
+			title = stringResource(R.string.account_details_delete_confirmation_title),
+			text = stringResource(R.string.account_details_delete_confirmation_text),
+			onConfirm = listener::onDeleteAccountConfirmed,
+			onCancel = listener::onDeleteAccountCanceled,
+		)
+	}
+	
 }

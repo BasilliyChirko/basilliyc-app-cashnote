@@ -1,16 +1,17 @@
 package basilliyc.cashnote.backend.manager
 
 import androidx.room.withTransaction
+import basilliyc.cashnote.AppError
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.FinancialAccountDao
 import basilliyc.cashnote.backend.database.FinancialCategoryDao
 import basilliyc.cashnote.backend.database.FinancialStatisticDao
 import basilliyc.cashnote.backend.database.FinancialTransactionDao
 import basilliyc.cashnote.backend.preferences.AppPreferences
-import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.data.FinancialTransaction
@@ -52,6 +53,9 @@ class FinancialManager {
 	fun getAccountsListAsFlow() = accountDao.getListAsFlow()
 	
 	suspend fun getAccountById(id: Long) = accountDao.getById(id)
+	
+	suspend fun requireAccountById(id: Long) = accountDao.getById(id)
+		?: throw AppError.Database.AccountNotFound(id)
 	
 	fun getAccountByIdAsFlow(id: Long) = accountDao.getByIdAsFlow(id)
 	
@@ -121,6 +125,9 @@ class FinancialManager {
 	fun getCategoryListAsFlow() = categoryDao.getListAsFlow()
 	
 	suspend fun getCategoryById(id: Long) = categoryDao.getById(id)
+	
+	suspend fun requireCategoryById(id: Long) = categoryDao.getById(id)
+		?: throw AppError.Database.CategoryNotFound(id)
 	
 	private suspend fun FinancialCategoryDao.getNextPosition(): Int {
 		var currentMaxPosition = this.getMaxPosition()
@@ -207,6 +214,10 @@ class FinancialManager {
 	
 	suspend fun getTransactionById(id: Long) = transactionDao.getById(id)
 	
+	suspend fun requireTransactionById(id: Long) = transactionDao.getById(id)
+		?: throw AppError.Database.TransactionNotFound(id)
+	
+	
 	fun getTransactionListPagingSource(accountId: Long) =
 		transactionDao.getListPagingSource(accountId)
 	
@@ -239,9 +250,11 @@ class FinancialManager {
 	fun getStatisticsParamsAsFlow() = statisticDao.getParamsAsFlow()
 		.mapNotNull { it ?: FinancialStatisticParams() }
 	
-	suspend fun getStatisticsListForAccount(accountId: Long) = statisticDao.getListForAccount(accountId)
+	suspend fun getStatisticsListForAccount(accountId: Long) =
+		statisticDao.getListForAccount(accountId)
 	
-	fun getStatisticsListForAccountAsFlow(accountId: Long) = statisticDao.getListForAccountAsFlow(accountId)
+	fun getStatisticsListForAccountAsFlow(accountId: Long) =
+		statisticDao.getListForAccountAsFlow(accountId)
 	
 	suspend fun isStatisticValid(): Boolean {
 		return System.currentTimeMillis() <= getStatisticParams().calculationValidUntil

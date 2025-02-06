@@ -2,8 +2,6 @@
 
 package basilliyc.cashnote.ui.account.form
 
-import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -45,7 +43,7 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.rememberSingleRunner
-import basilliyc.cashnote.utils.toast
+import basilliyc.cashnote.utils.showToast
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -94,8 +92,8 @@ private fun Action(
 						
 					} else {
 						when (action.isNew) {
-							true -> context.toast(R.string.account_form_toast_save_new)
-							false -> context.toast(R.string.account_form_toast_save_update)
+							true -> context.showToast(R.string.account_form_toast_save_new)
+							false -> context.showToast(R.string.account_form_toast_save_update)
 						}
 						navController.popBackStack()
 					}
@@ -104,7 +102,7 @@ private fun Action(
 			
 			AccountFormState.Action.SaveError -> {
 				singleRunner.schedule {
-					context.toast(R.string.account_form_toast_save_error)
+					context.showToast(R.string.account_form_toast_save_error)
 				}
 			}
 			

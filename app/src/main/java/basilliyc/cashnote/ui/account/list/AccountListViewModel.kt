@@ -43,10 +43,6 @@ class AccountListViewModel : BaseViewModel() {
 		}
 	}
 	
-	fun onActionConsumed() {
-		state = state.copy(action = null)
-	}
-	
 	fun onDragStarted() {
 		val data = state.content.castOrNull<AccountListState.Content.Data>() ?: return
 		draggedList = data.financialAccounts
@@ -68,51 +64,5 @@ class AccountListViewModel : BaseViewModel() {
 		draggedList = draggedList?.let { ArrayList(it) }?.reordered(from, to)
 	}
 	
-	
-	fun onAccountEditClicked(accountId: Long) = schedule {
-		state = state.copy(
-			action = AccountListState.Action.AccountEdit(accountId)
-		)
-	}
-	
-	fun onAccountDeleteClicked(accountId: Long) {
-		state = state.copy(
-			dialog = AccountListState.Dialog.AccountDeleteConfirmation(accountId)
-		)
-	}
-	
-	fun onAccountHistoryClicked(accountId: Long) = schedule {
-		state = state.copy(
-			action = AccountListState.Action.AccountHistory(accountId)
-		)
-	}
-	
-	fun onAccountDeleteDialogCanceled() {
-		if (state.dialog !is AccountListState.Dialog.AccountDeleteConfirmation) return
-		state = state.copy(
-			dialog = null
-		)
-	}
-	
-	fun onAccountDeleteDialogConfirmed(accountId: Long) {
-		if (state.dialog !is AccountListState.Dialog.AccountDeleteConfirmation) return
-		state = state.copy(
-			dialog = null
-		)
-		
-		schedule {
-			try {
-				financialManager.deleteAccount(accountId)
-				state = state.copy(
-					action = AccountListState.Action.AccountDeletionSuccess
-				)
-			} catch (t: Throwable) {
-				logcat.error(t)
-				state = state.copy(
-					action = AccountListState.Action.AccountDeletionError
-				)
-			}
-		}
-	}
 	
 }

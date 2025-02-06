@@ -45,7 +45,7 @@ import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
-import basilliyc.cashnote.utils.toast
+import basilliyc.cashnote.utils.showToast
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -72,22 +72,22 @@ fun CategoryForm() {
 		when (action) {
 			CategoryFormState.Action.Cancel -> navController.popBackStack()
 			CategoryFormState.Action.DeleteError -> {
-				context.toast(R.string.transaction_category_form_delete_error)
+				context.showToast(R.string.transaction_category_form_delete_error)
 			}
 			
 			CategoryFormState.Action.DeleteSuccess -> {
-				context.toast(R.string.transaction_category_form_delete_success)
+				context.showToast(R.string.transaction_category_form_delete_success)
 				navController.popBackStack()
 			}
 			
 			CategoryFormState.Action.SaveError -> {
-				context.toast(R.string.transaction_category_form_save_error)
+				context.showToast(R.string.transaction_category_form_save_error)
 			}
 			
 			CategoryFormState.Action.SaveSuccess -> {
 				val isNew = (state.content as? CategoryFormState.Content.Data)?.isNew
 				when (isNew) {
-					true -> context.toast(R.string.transaction_category_form_save_success)
+					true -> context.showToast(R.string.transaction_category_form_save_success)
 					false -> Unit
 					null -> Unit
 				}

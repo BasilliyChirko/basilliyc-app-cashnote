@@ -23,8 +23,8 @@ abstract class BaseViewModel() : ViewModel() {
 	//  Event handling
 	//----------------------------------------------------------------------------------------------
 	
-	var defaultEventSkipIfBusy = false
-	var defaultEventPostDelay = false
+	var defaultEventSkipIfBusy = true
+	var defaultEventPostDelay = true
 	var defaultEventPostDelayValue = 750L
 	
 	val singleRunner: EventSingleRunner by lazy {

@@ -47,16 +47,12 @@ fun Main() {
 	val viewModel = viewModel<MainViewModel>()
 	val state by viewModel.state.collectAsState()
 	
-	log("Main", state)
-	
 	val startDestination = state.accountOnNavigation?.let {
 		AppNavigation.AccountDetails(
 			accountId = it.id,
 			isFromNavigation = true,
 		)
 	} ?: AppNavigation.AccountList
-	
-	log("Main", startDestination)
 	
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
@@ -169,10 +165,6 @@ private fun MainBottomNavigationBar(
 	
 	val isNavBarVisible = entities.any {
 		it.page.toString() == currentBackStackEntry?.toAppNavigationPath()
-	}
-	
-	entities.forEach {
-		log("MainBottomNavigationBar", it.page)
 	}
 	
 	AnimatedVisibility(

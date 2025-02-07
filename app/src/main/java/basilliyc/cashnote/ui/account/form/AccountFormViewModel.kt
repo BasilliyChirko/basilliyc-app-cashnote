@@ -48,7 +48,7 @@ class AccountFormViewModel(
 	init {
 		state = state.copy(page = AccountFormState.Page.Loading)
 		
-		val accountIdOnNavigation = preferences.accountIdOnNavigation
+		val accountIdOnNavigation = preferences.accountIdOnNavigation.value
 		
 		if (route.accountId != null) {
 			viewModelScope.launch {
@@ -178,16 +178,17 @@ class AccountFormViewModel(
 		
 		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				financialManager.saveAccount(account)
+				val accountId = financialManager.saveAccount(account)
+				var accountIdOnNavigation by preferences.accountIdOnNavigation
 				var isNeedRebuildApp = false
 				when {
-					!data.isShowOnNavigation && preferences.accountIdOnNavigation == account.id -> {
-						preferences.accountIdOnNavigation = null
+					!data.isShowOnNavigation && accountIdOnNavigation == accountId -> {
+						accountIdOnNavigation = null
 						isNeedRebuildApp = true
 					}
 					
-					data.isShowOnNavigation && preferences.accountIdOnNavigation != account.id -> {
-						preferences.accountIdOnNavigation = account.id
+					data.isShowOnNavigation && accountIdOnNavigation != accountId -> {
+						accountIdOnNavigation = accountId
 						isNeedRebuildApp = true
 					}
 				}

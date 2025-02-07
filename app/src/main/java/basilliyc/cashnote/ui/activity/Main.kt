@@ -38,7 +38,6 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
-import basilliyc.cashnote.utils.log
 
 
 @Composable
@@ -185,9 +184,7 @@ private fun MainBottomNavigationBar(
 private fun RestartActivityDialog() {
 	val context = LocalContext.current
 	AlertDialog(
-		onDismissRequest = {
-			context.restartActivity()
-		},
+		onDismissRequest = { context.restartActivity() },
 		title = {
 			Text(text = stringResource(R.string.main_restart_activity_dialog_title))
 		},
@@ -196,9 +193,7 @@ private fun RestartActivityDialog() {
 		},
 		confirmButton = {
 			TextButton(
-				onClick = {
-					context.restartActivity()
-				},
+				onClick = { context.restartActivity() },
 				content = {
 					Text(text = stringResource(android.R.string.ok))
 				}
@@ -210,8 +205,7 @@ private fun RestartActivityDialog() {
 private fun Context.restartActivity() {
 	val context = this
 	val packageManager: PackageManager = context.packageManager
-	val intent: Intent =
-		packageManager.getLaunchIntentForPackage(context.packageName)!!
+	val intent: Intent = packageManager.getLaunchIntentForPackage(context.packageName)!!
 	intent.flags += Intent.FLAG_ACTIVITY_CLEAR_TOP
 	context.startActivity(intent)
 }

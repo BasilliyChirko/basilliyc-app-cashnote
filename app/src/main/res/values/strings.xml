@@ -74,7 +74,7 @@
     <string name="transaction_form_label_type_no_changes">Without changes</string>
     <string name="transaction_form_label_type_decrease">Decrease</string>
     <string name="transaction_form_label_type_increase">Increase</string>
-    <string name="transaction_form_new_balance">New balance</string>
+    <string name="transaction_form_new_balance">Account balance</string>
     <string name="transaction_form_toast_deviation_zero">Deviation can`t be zero</string>
     <string name="financial_statistic_params_calculation_current_period_label">Current</string>
     <string name="financial_statistic_params_calculation_previous_period_label">Previous</string>

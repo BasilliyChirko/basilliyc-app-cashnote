@@ -23,6 +23,8 @@ import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -42,8 +44,8 @@ class FinancialManager {
 	private val preferences: AppPreferences by inject()
 	
 	
-	private suspend inline fun <T> databaseTransaction(crossinline block: suspend () -> T) {
-		appDatabase.withTransaction { block() }
+	private suspend inline fun <T> databaseTransaction(crossinline block: suspend () -> T): T {
+		return appDatabase.withTransaction { block() }
 	}
 	
 	//----------------------------------------------------------------------------------------------
@@ -67,9 +69,10 @@ class FinancialManager {
 				)
 			}
 		
-		accountDao.save(financialAccount)
-		
+		val id = accountDao.save(financialAccount)
 		refreshStatistics(force = true)
+		
+		id.takeIf { it > 0 } ?: financialAccount.id
 	}
 	
 	suspend fun deleteAccount(accountId: Long) = databaseTransaction {
@@ -85,8 +88,8 @@ class FinancialManager {
 		
 		refreshStatistics(force = true)
 		
-		if (preferences.accountIdOnNavigation == accountId) {
-			preferences.accountIdOnNavigation = null
+		if (preferences.accountIdOnNavigation.value == accountId) {
+			preferences.accountIdOnNavigation.value = null
 		}
 	}
 	
@@ -529,7 +532,7 @@ class FinancialManager {
 	}
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-
+		
 //		saveCategory(
 //			FinancialCategory(
 //				id = 4L,

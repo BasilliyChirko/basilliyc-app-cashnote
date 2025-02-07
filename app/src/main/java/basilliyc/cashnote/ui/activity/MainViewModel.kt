@@ -22,11 +22,13 @@ class MainViewModel : BaseViewModel() {
 	private val _state: MutableStateFlow<MainState>
 	
 	init {
-		val account = preferences.accountIdOnNavigation?.let {
+		val account = preferences.accountIdOnNavigation.value?.let {
 			runBlocking {
 				financialManager.getAccountById(it)
 			}
 		}
+		
+		logcat.debug("account: $account")
 		
 		_state = MutableStateFlow(
 			MainState(
@@ -35,9 +37,12 @@ class MainViewModel : BaseViewModel() {
 		)
 		
 		viewModelScope.launch {
-			preferences.accountIdOnNavigationAsFlow().collectLatest {
+			preferences.accountIdOnNavigation.flow.collectLatest { id ->
+				logcat.debug("accountIdOnNavigationAsFlow", id, _state.value.accountOnNavigation?.id)
 				
-				if (it != _state.value.accountOnNavigation?.id) {
+				val id = id?.let { financialManager.getAccountById(id)?.id }
+				
+				if (id != _state.value.accountOnNavigation?.id) {
 					_state.value = _state.value.copy(
 						isNeedRestartActivity = true
 					)

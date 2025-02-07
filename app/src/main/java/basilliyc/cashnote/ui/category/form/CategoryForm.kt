@@ -1,31 +1,25 @@
-package basilliyc.cashnote.ui.account.transaction.category.form
+package basilliyc.cashnote.ui.category.form
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -34,13 +28,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.components.TextField
 import basilliyc.cashnote.ui.components.TextFieldState
+import basilliyc.cashnote.ui.components.menu.MenuRowPopupIcon
+import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -65,6 +62,7 @@ fun CategoryForm() {
 		onIconChanged = viewModel::onIconChanged,
 		onSaveClicked = viewModel::onSaveClicked,
 		onDeletedClicked = viewModel::onDeleteClicked,
+		onColorSelected = viewModel::onColorChanged,
 	)
 	
 	val action = state.action
@@ -109,12 +107,14 @@ private fun TransactionCategoryFormPreview() = DefaultPreview {
 				isNew = true,
 				name = TextFieldState(value = ""),
 				icon = null,
+				color = null,
 			),
 		),
 		onNameChanged = {},
 		onIconChanged = {},
 		onSaveClicked = {},
 		onDeletedClicked = {},
+		onColorSelected = {},
 	)
 }
 
@@ -126,7 +126,8 @@ private fun TransactionCategoryFormPreview() = DefaultPreview {
 private fun Content(
 	state: CategoryFormState,
 	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialCategoryIcon?) -> Unit,
+	onIconChanged: (FinancialIcon?) -> Unit,
+	onColorSelected: (FinancialColor?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onDeletedClicked: () -> Unit,
 ) {
@@ -147,7 +148,8 @@ private fun Content(
 					onNameChanged = onNameChanged,
 					onIconChanged = onIconChanged,
 					onSaveClicked = onSaveClicked,
-					onDeletedClicked = onDeletedClicked
+					onDeletedClicked = onDeletedClicked,
+					onColorSelected = onColorSelected,
 				)
 				
 				is CategoryFormState.Content.Loading -> BoxLoading()
@@ -200,13 +202,13 @@ private fun ContentData(
 	modifier: Modifier,
 	content: CategoryFormState.Content.Data,
 	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialCategoryIcon?) -> Unit,
+	onIconChanged: (FinancialIcon?) -> Unit,
+	onColorSelected: (FinancialColor?) -> Unit,
 	onSaveClicked: () -> Unit,
 	onDeletedClicked: () -> Unit,
 ) {
 	Column(modifier = modifier) {
-		
-		TextField(
+		OutlinedTextField(
 			state = content.name,
 			onValueChange = onNameChanged,
 			label = { Text(text = stringResource(R.string.transaction_category_form_label_name)) },
@@ -217,11 +219,16 @@ private fun ContentData(
 			),
 		)
 		
-		Spacer(modifier = Modifier.height(16.dp))
-		
-		TransactionCategoryIconPicker(
+		MenuRowPopupIcon(
+			title = stringResource(R.string.transaction_category_form_label_icon),
 			icon = content.icon,
-			onIconChanged = onIconChanged
+			onIconSelected = onIconChanged
+		)
+		
+		MenuRowPopupColor(
+			title = stringResource(R.string.transaction_category_form_label_color),
+			color = content.color,
+			onColorSelected = onColorSelected,
 		)
 		
 		Spacer(modifier = Modifier.height(16.dp))
@@ -253,46 +260,6 @@ private fun ContentData(
 	}
 }
 
-@Composable
-private fun TransactionCategoryIconPicker(
-	icon: FinancialCategoryIcon?,
-	onIconChanged: (FinancialCategoryIcon?) -> Unit,
-) {
-	
-	val selectedIcon = icon
-	val icons = FinancialCategoryIcon.entries
-	
-	LazyVerticalGrid(
-		columns = GridCells.Adaptive(56.dp),
-		horizontalArrangement = Arrangement.spacedBy(8.dp),
-		verticalArrangement = Arrangement.spacedBy(8.dp),
-		contentPadding = PaddingValues(horizontal = 16.dp)
-	) {
-		items(icons.size) { index ->
-			val icon = icons[index]
-			
-			Card(
-				modifier = Modifier
-					.requiredSize(56.dp),
-				onClick = { onIconChanged(icon) },
-				colors = CardDefaults.cardColors(
-					containerColor = if (selectedIcon == icon) {
-						MaterialTheme.colorScheme.primaryContainer
-					} else {
-						MaterialTheme.colorScheme.surface
-					}
-				),
-				border = CardDefaults.outlinedCardBorder(),
-			) {
-				Icon(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(8.dp),
-					imageVector = icon.imageVector,
-					contentDescription = icon.name,
-				)
-			}
-		}
-	}
-	
-}
+
+
+

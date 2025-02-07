@@ -23,8 +23,6 @@ import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -367,6 +365,9 @@ class FinancialManager {
 		
 		var period = initialPeriodValue.previous
 		val periodsCount = this.getPeriodsCount(account, category, period)
+		
+		if (periodsCount <= 0) return 0.0 to 0.0
+		
 		repeat(periodsCount) {
 			val value = period.getValue(account, category)
 			positive += value.first
@@ -414,11 +415,18 @@ class FinancialManager {
 			}
 		}
 		
+		val earliestTransactionDate =
+			transactionDao.getEarliestTransactionDate(account.id, category.id)
+		
+		if (earliestTransactionDate == 0L) return 0
+		
 		calendarTarget.timeInMillis = maxOf(
 			calendarTarget.timeInMillis,
-			transactionDao.getEarliestTransactionDate(account.id, category.id),
+			minOf(
+				calendarCurrent.timeInMillis,
+				earliestTransactionDate,
+			),
 		)
-		
 		
 		while (calendarCurrent > calendarTarget) {
 			calendarCurrent.add(periodValue.period, -1)
@@ -532,7 +540,7 @@ class FinancialManager {
 	}
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-		
+
 //		saveCategory(
 //			FinancialCategory(
 //				id = 4L,

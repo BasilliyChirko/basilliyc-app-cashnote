@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.category.list
+package basilliyc.cashnote.ui.category.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -31,15 +31,16 @@ import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialIcon
+import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableLazyColumn
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.launch
 
@@ -59,6 +60,7 @@ fun CategoryList() {
 		mutableStateOf<List<FinancialCategory>?>(null)
 	}
 	
+	val singleRunner = rememberSingleRunner()
 	val coroutineScope = rememberCoroutineScope()
 	
 	val navController = LocalNavController.current
@@ -66,10 +68,14 @@ fun CategoryList() {
 	Content(
 		transactionCategories = transactionCategoriesDragged ?: transactionCategories,
 		onCategoryClicked = {
-			navController.navigate(AppNavigation.CategoryForm(it))
+			singleRunner.schedule {
+				navController.navigate(AppNavigation.CategoryForm(it))
+			}
 		},
 		onCategoryAddClicked = {
-			navController.navigate(AppNavigation.CategoryForm(null))
+			singleRunner.schedule {
+				navController.navigate(AppNavigation.CategoryForm(null))
+			}
 		},
 		onDragStarted = {
 			transactionCategoriesDragged = transactionCategories
@@ -101,12 +107,12 @@ private fun CategoryListPreview() = DefaultPreview {
 		FinancialCategory(
 			id = 1,
 			name = "Home",
-			icon = FinancialCategoryIcon.Home,
+			icon = FinancialIcon.Home,
 		),
 		FinancialCategory(
 			id = 2,
 			name = "Person",
-			icon = FinancialCategoryIcon.Person,
+			icon = FinancialIcon.Person,
 		),
 		FinancialCategory(
 			id = 3,

@@ -38,6 +38,7 @@ import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.menu.MenuRowColor
+import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
 import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -183,7 +184,7 @@ private fun PageData(
 					state = page.balance,
 					onChanged = listener::onBalanceChanged,
 				)
-				MenuRowColor(
+				MenuRowPopupColor(
 					title = stringResource(R.string.account_form_label_color),
 					color = page.color,
 					onColorSelected = listener::onColorChanged,

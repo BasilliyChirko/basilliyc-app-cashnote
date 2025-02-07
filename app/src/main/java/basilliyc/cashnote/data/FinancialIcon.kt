@@ -1,0 +1,33 @@
+package basilliyc.cashnote.data
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.DriveEta
+import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.FamilyRestroom
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Person2
+import androidx.compose.material.icons.filled.Person3
+import androidx.compose.material.icons.filled.Person4
+import androidx.compose.material.icons.filled.SmokingRooms
+import androidx.compose.material.icons.filled.WineBar
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.ui.graphics.vector.ImageVector
+
+enum class FinancialIcon(val imageVector: ImageVector) {
+	Salary(Icons.Filled.Work),
+	Smile(Icons.Filled.EmojiEmotions),
+	Home(Icons.Filled.Home),
+	Family(Icons.Filled.FamilyRestroom),
+	Person(Icons.Filled.Person),
+	Person2(Icons.Filled.Person2),
+	Person3(Icons.Filled.Person3),
+	Person4(Icons.Filled.Person4),
+	Car(Icons.Filled.DriveEta),
+	Food(Icons.Filled.Fastfood),
+	Alcohol(Icons.Filled.WineBar),
+	Gift(Icons.Filled.CardGiftcard),
+	Smoking(Icons.Filled.SmokingRooms),
+}

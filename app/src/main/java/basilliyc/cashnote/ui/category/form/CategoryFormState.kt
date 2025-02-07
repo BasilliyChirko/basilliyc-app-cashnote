@@ -1,7 +1,8 @@
-package basilliyc.cashnote.ui.account.transaction.category.form
+package basilliyc.cashnote.ui.category.form
 
 import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.components.TextFieldState
 
 data class CategoryFormState(
@@ -14,12 +15,14 @@ data class CategoryFormState(
 		data class Data(
 			val isNew: Boolean,
 			val name: TextFieldState,
-			val icon: FinancialCategoryIcon?,
+			val icon: FinancialIcon?,
+			val color: FinancialColor?,
 		) : Content {
 			constructor(category: FinancialCategory) : this(
 				isNew = category.id == 0L,
 				name = TextFieldState(value = category.name),
 				icon = category.icon,
+				color = category.color,
 			)
 		}
 	}

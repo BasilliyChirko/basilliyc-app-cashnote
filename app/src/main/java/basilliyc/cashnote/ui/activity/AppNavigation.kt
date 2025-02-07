@@ -15,8 +15,8 @@ import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.account.params.AccountParams
-import basilliyc.cashnote.ui.account.transaction.category.form.CategoryForm
-import basilliyc.cashnote.ui.account.transaction.category.list.CategoryList
+import basilliyc.cashnote.ui.category.form.CategoryForm
+import basilliyc.cashnote.ui.category.list.CategoryList
 import basilliyc.cashnote.ui.account.transaction.form.TransactionForm
 import basilliyc.cashnote.ui.settings.AppSettings
 import basilliyc.cashnote.ui.statistic.AccountStatistic

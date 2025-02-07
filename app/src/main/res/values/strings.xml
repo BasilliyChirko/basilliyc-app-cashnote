@@ -112,4 +112,6 @@
     <string name="financial_statistic_params_calculation_average_previous_periods_for_all_time">Average of previous periods in all time</string>
     <string name="account_params_statistic_primary_value_calculation">Statistic primary value</string>
     <string name="account_params_statistic_secondary_value_calculation">Statistic secondary value</string>
+    <string name="transaction_category_form_label_icon">Icon</string>
+    <string name="transaction_category_form_label_color">Color</string>
 </resources>

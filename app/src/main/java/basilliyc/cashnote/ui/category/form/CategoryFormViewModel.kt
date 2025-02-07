@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.category.form
+package basilliyc.cashnote.ui.category.form
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,16 +6,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.activity.AppNavigation
-import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class CategoryFormViewModel(
 	savedStateHandle: SavedStateHandle,
@@ -75,9 +73,15 @@ class CategoryFormViewModel(
 		return null
 	}
 	
-	fun onIconChanged(icon: FinancialCategoryIcon?) {
+	fun onIconChanged(icon: FinancialIcon?) {
 		updateStateContentData {
 			copy(icon = icon.takeIf { icon != this.icon })
+		}
+	}
+	
+	fun onColorChanged(color: FinancialColor?) {
+		updateStateContentData {
+			copy(color = color.takeIf { color != this.color })
 		}
 	}
 	
@@ -97,6 +101,7 @@ class CategoryFormViewModel(
 			id = route.categoryId ?: 0L,
 			name = nameString,
 			icon = data.icon,
+			color = data.color,
 		)
 		
 		schedule(skipIfBusy = true, postDelay = true) {

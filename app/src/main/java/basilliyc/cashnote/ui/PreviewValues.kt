@@ -4,7 +4,7 @@ import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialCategoryIcon
+import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.FinancialStatisticParams
 
 object PreviewValues {
@@ -21,11 +21,11 @@ object PreviewValues {
 	}
 	
 	val categoryHome by lazy {
-		categories.find { it.icon == FinancialCategoryIcon.Home }!!
+		categories.find { it.icon == FinancialIcon.Home }!!
 	}
 	
 	val categories by lazy {
-		FinancialCategoryIcon.entries.mapIndexed { index, icon ->
+		FinancialIcon.entries.mapIndexed { index, icon ->
 			FinancialCategory(
 				id = index.toLong(),
 				name = icon.name,

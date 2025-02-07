@@ -39,6 +39,7 @@ data class AccountDetailsState(
 		data class NavigateTransactionForm(val accountId: Long, val categoryId: Long) : Result
 		data class NavigateAccountForm(val accountId: Long) : Result
 		data class NavigateAccountHistory(val accountId: Long) : Result
+		data class NavigateAccountParams(val accountId: Long) : Result
 		data object AccountDeletionSuccess : Result
 		data object AccountDeletionError : Result
 	}

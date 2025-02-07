@@ -114,19 +114,21 @@ fun PopupMenuState.PopupMenuItem(
 	text: String,
 	leadingIcon: ImageVector? = null,
 ) {
+	
 	DropdownMenuItem(
 		text = { Text(text = text) },
 		onClick = {
 			this.expanded.value = false
 			onClick()
 		},
-		leadingIcon = {
-			if (leadingIcon != null) {
+		leadingIcon = if (leadingIcon != null) {
+			{
 				Icon(
 					imageVector = leadingIcon,
 					contentDescription = text
 				)
 			}
-		}
+		} else null
+	
 	)
 }

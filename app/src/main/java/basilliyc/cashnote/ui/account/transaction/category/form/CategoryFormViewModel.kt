@@ -21,8 +21,6 @@ class CategoryFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel() {
 	
-	private val financialManager: FinancialManager by inject()
-	
 	var state by mutableStateOf(CategoryFormState())
 		private set
 	private var stateContentData

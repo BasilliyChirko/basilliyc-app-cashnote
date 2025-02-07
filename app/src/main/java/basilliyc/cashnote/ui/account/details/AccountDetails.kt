@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.HomeRepairService
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -80,35 +81,29 @@ private fun Result(
 		when (it) {
 			null -> Unit
 			
-			is AccountDetailsState.Result.NavigateTransactionForm -> {
-				navigateForward(
-					AppNavigation.TransactionForm(
-						accountId = it.accountId,
-						categoryId = it.categoryId,
-						transactionId = null,
-					)
+			is AccountDetailsState.Result.NavigateTransactionForm -> navigateForward(
+				AppNavigation.TransactionForm(
+					accountId = it.accountId,
+					categoryId = it.categoryId,
+					transactionId = null,
 				)
-			}
+			)
 			
-			AccountDetailsState.Result.NavigateCategoryList -> {
-				navigateForward(AppNavigation.CategoryList)
-			}
+			AccountDetailsState.Result.NavigateCategoryList -> navigateForward(
+				AppNavigation.CategoryList
+			)
 			
-			is AccountDetailsState.Result.NavigateAccountForm -> {
-				navigateForward(
-					AppNavigation.AccountForm(
-						accountId = it.accountId,
-					)
-				)
-			}
+			is AccountDetailsState.Result.NavigateAccountForm -> navigateForward(
+				AppNavigation.AccountForm(accountId = it.accountId)
+			)
 			
-			is AccountDetailsState.Result.NavigateAccountHistory -> {
-				navigateForward(
-					AppNavigation.AccountHistory(
-						accountId = it.accountId,
-					)
-				)
-			}
+			is AccountDetailsState.Result.NavigateAccountHistory -> navigateForward(
+				AppNavigation.AccountHistory(accountId = it.accountId)
+			)
+			
+			is AccountDetailsState.Result.NavigateAccountParams -> navigateForward(
+				AppNavigation.AccountParams(accountId = it.accountId)
+			)
 			
 			AccountDetailsState.Result.AccountDeletionSuccess -> {
 				showToast(R.string.account_details_toast_account_deletion_success)
@@ -152,6 +147,7 @@ private fun PageDataPreview() = DefaultPreview {
 			override fun onAccountCategoriesClicked() = Unit
 			override fun onAccountEditClicked() = Unit
 			override fun onAccountHistoryClicked() = Unit
+			override fun onAccountParamsClicked() = Unit
 			override fun onAccountDeleteClicked() = Unit
 			override fun onDeleteAccountConfirmed() = Unit
 			override fun onDeleteAccountCanceled() = Unit
@@ -232,6 +228,11 @@ private fun PopupMenuState.PageDataOptionsMenu(
 	listener: AccountDetailsListener,
 ) {
 	PopupMenuItem(
+		onClick = listener::onAccountParamsClicked,
+		text = stringResource(R.string.account_details_menu_params),
+		leadingIcon = Icons.Filled.HomeRepairService,
+	)
+	PopupMenuItem(
 		onClick = listener::onAccountCategoriesClicked,
 		text = stringResource(R.string.account_details_menu_categories),
 		leadingIcon = Icons.Filled.Category,
@@ -307,7 +308,7 @@ private fun ColumnScope.PageDataBalance(
 				) {
 					BalanceStatsTitle(title = stringResource(R.string.account_balance_receive))
 					BalanceStatsValue(value = page.balancePrimaryPositive, showPlus = false)
-					if (page.balanceSecondaryPositive != null) {
+					if (page.statisticParams.showSecondaryValueForAccount && page.balanceSecondaryPositive != null) {
 						BalanceStatsValue(value = page.balanceSecondaryPositive, showPlus = false)
 					}
 				}
@@ -316,7 +317,7 @@ private fun ColumnScope.PageDataBalance(
 				) {
 					BalanceStatsTitle(title = stringResource(R.string.account_balance_spend))
 					BalanceStatsValue(value = page.balancePrimaryNegative, showPlus = false)
-					if (page.balanceSecondaryNegative != null) {
+					if (page.statisticParams.showSecondaryValueForAccount && page.balanceSecondaryNegative != null) {
 						BalanceStatsValue(value = page.balanceSecondaryNegative, showPlus = false)
 					}
 				}
@@ -328,7 +329,7 @@ private fun ColumnScope.PageDataBalance(
 						page.balanceSecondaryPositive?.plus(page.balanceSecondaryNegative ?: 0.0)
 					BalanceStatsTitle(title = stringResource(R.string.account_balance_profit))
 					BalanceStatsValue(value = valuePrimary, showPlus = true)
-					if (valueSecondary != null) {
+					if (page.statisticParams.showSecondaryValueForAccount && valueSecondary != null) {
 						BalanceStatsValue(value = valueSecondary, showPlus = true)
 					}
 				}
@@ -426,7 +427,7 @@ private fun ColumnScope.PageDataCategories(
 			onClick = { listener.onCategoryClicked(category.category.id) },
 			title = category.category.name,
 			primaryValue = category.primaryValue,
-			secondaryValue = category.secondaryValue,
+			secondaryValue = category.secondaryValue?.takeIf { page.statisticParams.showSecondaryValueForCategory },
 			leadingIcon = CardBalanceLeadingIcon(category.category.icon?.imageVector),
 			color = null,
 		)

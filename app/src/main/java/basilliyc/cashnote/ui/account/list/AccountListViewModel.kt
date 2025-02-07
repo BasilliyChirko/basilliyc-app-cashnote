@@ -15,9 +15,6 @@ import kotlinx.coroutines.launch
 
 class AccountListViewModel : BaseViewModel() {
 	
-	
-	private val financialManager: FinancialManager by inject()
-	
 	var state: AccountListState by mutableStateOf(AccountListState())
 		private set
 	

@@ -16,6 +16,12 @@ inline fun <T> T.applyIf(condition: T.() -> Boolean, block: T.() -> T): T {
 	return if (condition(this)) block(this) else this
 }
 
+inline fun anyTry(block: () -> Unit) {
+	try {
+		block()
+	} catch (ignore: Throwable) {
+	}
+}
 
 inline fun <reified T> Any?.castOrNull(): T? {
 	if (this == null) return null

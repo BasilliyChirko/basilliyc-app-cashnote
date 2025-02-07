@@ -45,7 +45,6 @@ class AccountDetailsViewModel(
 			state = state.copy(result = value)
 		}
 	
-	private val financialManager: FinancialManager by inject()
 	lateinit var account: FinancialAccount
 	lateinit var categories: List<FinancialCategory>
 	lateinit var statistics: List<FinancialStatistic>
@@ -183,6 +182,12 @@ class AccountDetailsViewModel(
 	
 	override fun onAccountHistoryClicked() {
 		stateResult = AccountDetailsState.Result.NavigateAccountHistory(
+			accountId = account.id
+		)
+	}
+	
+	override fun onAccountParamsClicked() {
+		stateResult = AccountDetailsState.Result.NavigateAccountParams(
 			accountId = account.id
 		)
 	}

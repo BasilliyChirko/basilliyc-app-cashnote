@@ -14,6 +14,7 @@ import basilliyc.cashnote.ui.account.details.AccountDetails
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
+import basilliyc.cashnote.ui.account.params.AccountParams
 import basilliyc.cashnote.ui.account.transaction.category.form.CategoryForm
 import basilliyc.cashnote.ui.account.transaction.category.list.CategoryList
 import basilliyc.cashnote.ui.account.transaction.form.TransactionForm
@@ -28,13 +29,16 @@ sealed interface AppNavigation {
 	data object AccountList : AppNavigation
 	
 	@Serializable
+	data class AccountForm(val accountId: Long?) : AppNavigation
+	
+	@Serializable
 	data class AccountDetails(
 		val isFromNavigation: Boolean,
 		val accountId: Long,
 	) : AppNavigation
 	
 	@Serializable
-	data class AccountForm(val accountId: Long?) : AppNavigation
+	data class AccountParams(val accountId: Long) : AppNavigation
 	
 	@Serializable
 	data class AccountHistory(val accountId: Long) : AppNavigation
@@ -70,6 +74,7 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountHistory> { AccountHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 	composable<AppNavigation.TransactionForm> { TransactionForm() }
+	composable<AppNavigation.AccountParams> { AccountParams() }
 }
 
 

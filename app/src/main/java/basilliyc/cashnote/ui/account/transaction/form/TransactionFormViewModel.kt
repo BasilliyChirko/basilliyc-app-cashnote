@@ -25,8 +25,6 @@ class TransactionFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), TransactionFormListener {
 	
-	private val financialManager: FinancialManager by inject()
-	
 	val route: AppNavigation.TransactionForm = savedStateHandle.toRoute()
 	
 	var state by mutableStateOf(TransactionFormState())

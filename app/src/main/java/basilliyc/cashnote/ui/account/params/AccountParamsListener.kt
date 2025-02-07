@@ -1,0 +1,12 @@
+package basilliyc.cashnote.ui.account.params
+
+import basilliyc.cashnote.data.FinancialStatisticParams
+
+interface AccountParamsListener {
+	fun onStatisticPeriodChanged(period: FinancialStatisticParams.Period)
+	fun onStatisticPrimaryValueCalculationChanged(calculation: FinancialStatisticParams.Calculation)
+	fun onStatisticSecondaryValueCalculationChanged(calculation: FinancialStatisticParams.Calculation)
+	fun onStatisticShowAccountStatisticChanged(showAccountStatistic: Boolean)
+	fun onStatisticShowSecondaryValueForCategoryChanged(showSecondaryValueForCategory: Boolean)
+	fun onStatisticShowSecondaryValueForAccountChanged(showSecondaryValueForAccount: Boolean)
+}

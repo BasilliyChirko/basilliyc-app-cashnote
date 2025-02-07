@@ -23,8 +23,6 @@ class AccountFormViewModel(
 	savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), AccountFormListener {
 	
-	private val financialManager: FinancialManager by inject()
-	private val preferences: AppPreferences by inject()
 	
 	var state by mutableStateOf(AccountFormState())
 		private set

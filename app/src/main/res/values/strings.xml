@@ -93,5 +93,23 @@
     <string name="account_color_red">Red</string>
     <string name="account_form_show_on_navigation">Show account on navigation panel</string>
     <string name="main_restart_activity_dialog_title">App will be restarted</string>
-    <string name="main_restart_activity_dialog_text">This is required for appling navigation bar changes</string>
+    <string name="main_restart_activity_dialog_text">This is required for applying navigation bar changes</string>
+    <string name="account_params_title">Account Params</string>
+    <string name="account_details_menu_params">Params</string>
+    <string name="account_params_statistic_show_account_statistic">Show account statistics</string>
+    <string name="account_params_statistic_show_secondary_value_for_category">Show secondary value for category</string>
+    <string name="account_params_statistic_show_secondary_value_for_account">Show secondary value for balance</string>
+    <string name="account_params_statistic_period">Statistic period</string>
+    <string name="financial_statistic_params_period_day">Day</string>
+    <string name="financial_statistic_params_period_month">Month</string>
+    <string name="financial_statistic_params_period_year">Year</string>
+    <string name="financial_statistic_params_calculation_current_period">Current period</string>
+    <string name="financial_statistic_params_calculation_previous_period">Previous period</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month1">Average of previous periods in one month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month3">Average of previous periods in three month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_month6">Average of previous periods in six month</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_year">Average of previous periods in one year</string>
+    <string name="financial_statistic_params_calculation_average_previous_periods_for_all_time">Average of previous periods in all time</string>
+    <string name="account_params_statistic_primary_value_calculation">Statistic primary value</string>
+    <string name="account_params_statistic_secondary_value_calculation">Statistic secondary value</string>
 </resources>

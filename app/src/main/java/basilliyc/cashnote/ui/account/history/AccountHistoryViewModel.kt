@@ -19,11 +19,9 @@ class AccountHistoryViewModel(
 ) : BaseViewModel() {
 	
 	companion object {
-		const val PAGE_SIZE_INITIAL = 40 //TODO increase to 100
-		const val PAGE_SIZE_NEXT = 20 //TODO increase to 50
+		const val PAGE_SIZE_INITIAL = 100
+		const val PAGE_SIZE_NEXT = 50
 	}
-	
-	private val financialManager by inject<FinancialManager>()
 	
 	var state by mutableStateOf(AccountHistoryState())
 		private set

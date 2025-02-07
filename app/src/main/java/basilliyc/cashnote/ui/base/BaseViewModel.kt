@@ -2,8 +2,11 @@ package basilliyc.cashnote.ui.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import basilliyc.cashnote.backend.manager.FinancialManager
+import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.utils.EventSingleRunner
 import basilliyc.cashnote.utils.Logcat
+import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +19,9 @@ import java.util.LinkedList
 import kotlin.coroutines.CoroutineContext
 
 abstract class BaseViewModel() : ViewModel() {
+	
+	val financialManager: FinancialManager by inject()
+	val preferences: AppPreferences by inject()
 	
 	val logcat = Logcat(this)
 	

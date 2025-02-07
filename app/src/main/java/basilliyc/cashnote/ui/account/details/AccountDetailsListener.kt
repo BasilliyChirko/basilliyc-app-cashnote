@@ -6,6 +6,7 @@ interface AccountDetailsListener {
 	fun onAccountCategoriesClicked()
 	fun onAccountEditClicked()
 	fun onAccountHistoryClicked()
+	fun onAccountParamsClicked()
 	fun onAccountDeleteClicked()
 	fun onDeleteAccountConfirmed()
 	fun onDeleteAccountCanceled()

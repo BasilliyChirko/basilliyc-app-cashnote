@@ -2,6 +2,8 @@ package basilliyc.cashnote.utils
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
@@ -26,7 +28,6 @@ fun ScaffoldBox(
 	contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
 	content: @Composable BoxScope.() -> Unit,
 ) {
-	
 	Scaffold(
 		modifier = modifier,
 		topBar = topBar,
@@ -44,5 +45,36 @@ fun ScaffoldBox(
 			)
 		},
 	)
-	
+}
+
+@Composable
+fun ScaffoldColumn(
+	modifier: Modifier = Modifier,
+	topBar: @Composable () -> Unit = {},
+	bottomBar: @Composable () -> Unit = {},
+	snackbarHost: @Composable () -> Unit = {},
+	floatingActionButton: @Composable () -> Unit = {},
+	floatingActionButtonPosition: FabPosition = FabPosition.End,
+	containerColor: Color = MaterialTheme.colorScheme.background,
+	contentColor: Color = contentColorFor(containerColor),
+	contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+	content: @Composable ColumnScope.() -> Unit,
+) {
+	Scaffold(
+		modifier = modifier,
+		topBar = topBar,
+		bottomBar = bottomBar,
+		snackbarHost = snackbarHost,
+		floatingActionButton = floatingActionButton,
+		floatingActionButtonPosition = floatingActionButtonPosition,
+		containerColor = containerColor,
+		contentColor = contentColor,
+		contentWindowInsets = contentWindowInsets,
+		content = {
+			Column(
+				modifier = Modifier.padding(it),
+				content = content
+			)
+		},
+	)
 }

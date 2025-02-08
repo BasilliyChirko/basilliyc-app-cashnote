@@ -155,9 +155,7 @@ class AccountDetailsViewModel(
 	}
 	
 	override fun onResultConsumed() {
-		logcat.debug("onResultConsumed 1", stateResult)
 		stateResult = null
-		logcat.debug("onResultConsumed 2", stateResult)
 	}
 	
 	override fun onCategoryClicked(id: Long) {

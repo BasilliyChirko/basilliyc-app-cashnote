@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.activity
+package basilliyc.cashnote
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,13 +9,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import basilliyc.cashnote.ui.main.Main
 import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.LocalLogcat
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.Logcat
 
 
-class MainActivity : ComponentActivity() {
+class AppActivity : ComponentActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)

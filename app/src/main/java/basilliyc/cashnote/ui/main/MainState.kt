@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.activity
+package basilliyc.cashnote.ui.main
 
 import basilliyc.cashnote.data.FinancialAccount
 

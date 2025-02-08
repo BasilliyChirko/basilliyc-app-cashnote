@@ -1,9 +1,10 @@
-package basilliyc.cashnote.ui.activity
+package basilliyc.cashnote.ui.main
 
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.PaddingValues
@@ -76,6 +77,12 @@ fun Main() {
 			navController = LocalNavController.current as NavHostController,
 			startDestination = startDestination,
 			builder = { createNavigationGraph() },
+			enterTransition = {
+				fadeIn(animationSpec = tween(300))
+			},
+			exitTransition = {
+				fadeOut(animationSpec = tween(300))
+			},
 		)
 	}
 	

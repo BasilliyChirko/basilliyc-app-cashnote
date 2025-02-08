@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.activity
+package basilliyc.cashnote.ui.main
 
 import androidx.lifecycle.viewModelScope
 import basilliyc.cashnote.ui.base.BaseViewModel
@@ -19,8 +19,6 @@ class MainViewModel : BaseViewModel() {
 			}
 		}
 		
-		logcat.debug("account: $account")
-		
 		_state = MutableStateFlow(
 			MainState(
 				accountOnNavigation = account,
@@ -29,12 +27,6 @@ class MainViewModel : BaseViewModel() {
 		
 		viewModelScope.launch {
 			preferences.accountIdOnNavigation.flow.collectLatest { id ->
-				logcat.debug(
-					"accountIdOnNavigationAsFlow",
-					id,
-					_state.value.accountOnNavigation?.id
-				)
-				
 				val id = id?.let { financialManager.getAccountById(id)?.id }
 				
 				if (id != _state.value.accountOnNavigation?.id) {
@@ -42,12 +34,6 @@ class MainViewModel : BaseViewModel() {
 						isNeedRestartActivity = true
 					)
 				}
-
-//				_state.value = _state.value.copy(
-//					accountOnNavigation = it?.let { accountId ->
-//						financialManager.getAccountById(accountId)
-//					}
-//				)
 			}
 		}
 	}

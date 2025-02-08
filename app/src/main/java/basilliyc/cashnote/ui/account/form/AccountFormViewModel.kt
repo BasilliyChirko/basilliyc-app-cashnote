@@ -6,16 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.backend.manager.FinancialManager
-import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialColor
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.letIf
 import kotlinx.coroutines.launch
 

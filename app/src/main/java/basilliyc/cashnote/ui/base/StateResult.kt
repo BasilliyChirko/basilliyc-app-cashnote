@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.StateResult.Handler
 import basilliyc.cashnote.utils.EventSingleRunner
 import basilliyc.cashnote.utils.LocalNavController

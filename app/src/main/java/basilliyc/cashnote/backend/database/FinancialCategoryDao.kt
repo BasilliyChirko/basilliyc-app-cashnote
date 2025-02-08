@@ -23,6 +23,9 @@ interface FinancialCategoryDao {
 	@Query("SELECT * FROM FinancialCategory WHERE id=:id")
 	suspend fun getById(id: Long): FinancialCategory?
 	
+	@Query("SELECT * FROM FinancialCategory WHERE id=:id")
+	fun getByIdAsFlow(id: Long): Flow<FinancialCategory?>
+	
 	@Upsert
 	suspend fun save(transaction: FinancialCategory): Long
 	

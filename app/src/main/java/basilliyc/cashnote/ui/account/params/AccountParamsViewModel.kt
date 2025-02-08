@@ -6,7 +6,7 @@ import androidx.navigation.toRoute
 import basilliyc.cashnote.data.FinancialStatisticParams.*
 import basilliyc.cashnote.data.getAllowedCalculations
 import basilliyc.cashnote.ui.account.params.AccountParamsStateHolder.Page
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.utils.anyTry
 import kotlinx.coroutines.launch

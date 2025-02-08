@@ -6,15 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.ui.account.details.AccountDetailsState.Page
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
-import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

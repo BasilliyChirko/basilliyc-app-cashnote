@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.activity
+package basilliyc.cashnote
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.NavigationBarItem
@@ -18,6 +18,7 @@ import basilliyc.cashnote.ui.account.params.AccountParams
 import basilliyc.cashnote.ui.category.form.CategoryForm
 import basilliyc.cashnote.ui.category.list.CategoryList
 import basilliyc.cashnote.ui.account.transaction.form.TransactionForm
+import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletion
 import basilliyc.cashnote.ui.settings.AppSettings
 import basilliyc.cashnote.ui.statistic.AccountStatistic
 import basilliyc.cashnote.utils.LocalNavController
@@ -57,6 +58,9 @@ sealed interface AppNavigation {
 	data class CategoryForm(val categoryId: Long?) : AppNavigation
 	
 	@Serializable
+	data class CategoryExtendedDeletion(val categoryId: Long) : AppNavigation
+	
+	@Serializable
 	data object Statistic : AppNavigation
 	
 	@Serializable
@@ -70,11 +74,12 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.Settings> { AppSettings() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
 	composable<AppNavigation.CategoryList> { CategoryList() }
-	dialog<AppNavigation.CategoryForm> { CategoryForm() }
+	composable<AppNavigation.CategoryForm> { CategoryForm() }
 	composable<AppNavigation.AccountHistory> { AccountHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 	composable<AppNavigation.TransactionForm> { TransactionForm() }
 	composable<AppNavigation.AccountParams> { AccountParams() }
+	dialog<AppNavigation.CategoryExtendedDeletion> { CategoryExtendedDeletion() }
 }
 
 

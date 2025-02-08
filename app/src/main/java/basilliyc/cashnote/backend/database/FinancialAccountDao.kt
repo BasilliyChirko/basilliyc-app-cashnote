@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.data.FinancialTransaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -50,5 +51,11 @@ interface FinancialAccountDao {
 	
 	@Query("SELECT MAX(position) FROM FinancialAccount")
 	suspend fun getMaxPosition(): Int
+	
+//	@Query("SELECT COUNT(*) FROM FinancialAccount WHERE categoryId=:categoryId")
+//	suspend fun getCountWithCategory(categoryId: Long): Int
+//
+//	@Query("SELECT * FROM FinancialAccount WHERE categoryId=:categoryId")
+//	suspend fun getListWithCategory(categoryId: Long): List<FinancialTransaction>
 	
 }

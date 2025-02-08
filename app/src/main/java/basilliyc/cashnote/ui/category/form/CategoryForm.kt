@@ -9,256 +9,194 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
-import basilliyc.cashnote.ui.components.BackButton
-import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.OutlinedTextField
+import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.components.menu.MenuRowPopupIcon
 import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
+import basilliyc.cashnote.ui.components.menu.MenuRowPopupIcon
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
-import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
+import basilliyc.cashnote.utils.ScaffoldColumn
 import basilliyc.cashnote.utils.showToast
-
-//--------------------------------------------------------------------------------------------------
-//  ROOT
-//--------------------------------------------------------------------------------------------------
 
 @Composable
 fun CategoryForm() {
-	
-	val navController = LocalNavController.current
-	val context = LocalContext.current
 	val viewModel = viewModel<CategoryFormViewModel>()
-	val state = viewModel.state
-	
-	Content(
-		state = state,
-		onNameChanged = viewModel::onNameChanged,
-		onIconChanged = viewModel::onIconChanged,
-		onSaveClicked = viewModel::onSaveClicked,
-		onDeletedClicked = viewModel::onDeleteClicked,
-		onColorSelected = viewModel::onColorChanged,
-	)
-	
-	val action = state.action
-	LaunchedEffect(action) {
-		when (action) {
-			CategoryFormState.Action.Cancel -> navController.popBackStack()
-			CategoryFormState.Action.DeleteError -> {
+	Page(page = viewModel.state.page, listener = viewModel)
+	Result(result = viewModel.state.result, listener = viewModel)
+}
+
+
+@Composable
+private fun Result(
+	result: CategoryFormStateHolder.Result?,
+	listener: CategoryFormListener,
+) {
+	rememberResultHandler().value.consume(result) {
+		listener.onResultConsumed()
+		when (result) {
+			
+			null -> Unit
+			
+			CategoryFormStateHolder.Result.DeleteError -> {
 				context.showToast(R.string.transaction_category_form_delete_error)
 			}
 			
-			CategoryFormState.Action.DeleteSuccess -> {
+			CategoryFormStateHolder.Result.DeleteSuccess -> {
 				context.showToast(R.string.transaction_category_form_delete_success)
 				navController.popBackStack()
 			}
 			
-			CategoryFormState.Action.SaveError -> {
+			CategoryFormStateHolder.Result.SaveError -> {
 				context.showToast(R.string.transaction_category_form_save_error)
 			}
 			
-			CategoryFormState.Action.SaveSuccess -> {
-				val isNew = (state.content as? CategoryFormState.Content.Data)?.isNew
-				when (isNew) {
-					true -> context.showToast(R.string.transaction_category_form_save_success)
-					false -> Unit
-					null -> Unit
-				}
+			is CategoryFormStateHolder.Result.SaveSuccess -> {
+				if (result.isNew) context.showToast(R.string.transaction_category_form_save_success)
 				navController.popBackStack()
 			}
 			
-			null -> Unit
+			CategoryFormStateHolder.Result.NavigateBack -> {
+				navController.popBackStack()
+			}
+			
+			is CategoryFormStateHolder.Result.NavigateCategoryExtendedDeletion -> {
+				navigateForward(AppNavigation.CategoryExtendedDeletion(result.categoryId))
+			}
 		}
-		viewModel.onActionConsumed()
 	}
 }
+
 
 @Composable
 @Preview(showBackground = true)
-private fun TransactionCategoryFormPreview() = DefaultPreview {
-	Content(
-		state = CategoryFormState(
-			content = CategoryFormState.Content.Data(
-				isNew = true,
-				name = TextFieldState(value = ""),
-				icon = null,
-				color = null,
-			),
+private fun PageDataPreview() = DefaultPreview {
+	PageData(
+		page = CategoryFormStateHolder.Page.Data(
+			isNew = true,
+			name = TextFieldState(value = ""),
+			icon = null,
+			color = null,
 		),
-		onNameChanged = {},
-		onIconChanged = {},
-		onSaveClicked = {},
-		onDeletedClicked = {},
-		onColorSelected = {},
+		listener = object : CategoryFormListener {
+			override fun onResultConsumed() {}
+			override fun onNameChanged(name: String) {}
+			override fun onIconChanged(icon: FinancialIcon?) {}
+			override fun onColorChanged(color: FinancialColor?) {}
+			override fun onSaveClicked() {}
+			override fun onDeleteClicked() {}
+		}
 	)
 }
 
-//--------------------------------------------------------------------------------------------------
-//  CONTENT
-//--------------------------------------------------------------------------------------------------
-
 @Composable
-private fun Content(
-	state: CategoryFormState,
-	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialIcon?) -> Unit,
-	onColorSelected: (FinancialColor?) -> Unit,
-	onSaveClicked: () -> Unit,
-	onDeletedClicked: () -> Unit,
+private fun Page(
+	page: CategoryFormStateHolder.Page,
+	listener: CategoryFormListener,
 ) {
-	Surface(
-		color = MaterialTheme.colorScheme.background,
-		shape = MaterialTheme.shapes.medium,
-	) {
-		Column {
-			ActionBar(
-				state = state,
-				onSaveClicked = onSaveClicked
-			)
-			
-			when (val content = state.content) {
-				is CategoryFormState.Content.Data -> ContentData(
-					modifier = Modifier,
-					content = content,
-					onNameChanged = onNameChanged,
-					onIconChanged = onIconChanged,
-					onSaveClicked = onSaveClicked,
-					onDeletedClicked = onDeletedClicked,
-					onColorSelected = onColorSelected,
-				)
-				
-				is CategoryFormState.Content.Loading -> BoxLoading()
-			}
-		}
+	when (page) {
+		is CategoryFormStateHolder.Page.Data -> PageData(
+			page = page,
+			listener = listener,
+		)
+		
+		CategoryFormStateHolder.Page.Loading -> PageLoading()
 	}
 }
 
-//--------------------------------------------------------------------------------------------------
-//  ACTION BAR
-//--------------------------------------------------------------------------------------------------
 
 @Composable
-private fun ActionBar(
-	state: CategoryFormState,
-	onSaveClicked: () -> Unit,
+private fun PageData(
+	page: CategoryFormStateHolder.Page.Data,
+	listener: CategoryFormListener,
 ) {
-	SimpleActionBar(
-		title = {
-			Text(
-				text = when (state.content) {
-					is CategoryFormState.Content.Data -> {
-						if (state.content.isNew) stringResource(R.string.transaction_cagetory_form_new_category)
-						else stringResource(R.string.transaction_category_form_edit_category)
-					}
-					
-					is CategoryFormState.Content.Loading -> ""
+	ScaffoldColumn(
+		topBar = {
+			SimpleActionBar(
+				title = if (page.isNew) stringResource(R.string.transaction_cagetory_form_new_category)
+				else stringResource(R.string.transaction_category_form_edit_category),
+				
+				actions = {
+					IconButton(
+						onClick = listener::onSaveClicked,
+						imageVector = Icons.Filled.Done,
+						contentDescription = stringResource(R.string.transaction_category_form_action_save)
+					)
 				}
 			)
-		},
-		navigationIcon = {
-			BackButton(imageVector = Icons.Filled.Close)
-		},
-		actions = {
-			IconButton(
-				onClick = onSaveClicked,
-				imageVector = Icons.Filled.Done,
-				contentDescription = stringResource(R.string.transaction_category_form_action_save)
-			)
 		}
-	)
-}
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun ContentData(
-	modifier: Modifier,
-	content: CategoryFormState.Content.Data,
-	onNameChanged: (String) -> Unit,
-	onIconChanged: (FinancialIcon?) -> Unit,
-	onColorSelected: (FinancialColor?) -> Unit,
-	onSaveClicked: () -> Unit,
-	onDeletedClicked: () -> Unit,
-) {
-	Column(modifier = modifier) {
-		OutlinedTextField(
-			state = content.name,
-			onValueChange = onNameChanged,
-			label = { Text(text = stringResource(R.string.transaction_category_form_label_name)) },
-			singleLine = true,
-			keyboardOptions = KeyboardOptions(
-				capitalization = KeyboardCapitalization.Sentences,
-				keyboardType = KeyboardType.Text
-			),
-		)
-		
-		MenuRowPopupIcon(
-			title = stringResource(R.string.transaction_category_form_label_icon),
-			icon = content.icon,
-			onIconSelected = onIconChanged
-		)
-		
-		MenuRowPopupColor(
-			title = stringResource(R.string.transaction_category_form_label_color),
-			color = content.color,
-			onColorSelected = onColorSelected,
-		)
-		
-		Spacer(modifier = Modifier.height(16.dp))
-		
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(16.dp),
-		) {
-			if (!content.isNew) {
-				OutlinedButton(
-					onClick = onDeletedClicked,
-					text = stringResource(R.string.transaction_category_form_action_delete),
+	) {
+		Column {
+			OutlinedTextField(
+				state = page.name,
+				onValueChange = listener::onNameChanged,
+				label = { Text(text = stringResource(R.string.transaction_category_form_label_name)) },
+				singleLine = true,
+				keyboardOptions = KeyboardOptions(
+					capitalization = KeyboardCapitalization.Sentences,
+					keyboardType = KeyboardType.Text
+				),
+			)
+			
+			MenuRowPopupIcon(
+				title = stringResource(R.string.transaction_category_form_label_icon),
+				icon = page.icon,
+				onIconSelected = listener::onIconChanged
+			)
+			
+			MenuRowPopupColor(
+				title = stringResource(R.string.transaction_category_form_label_color),
+				color = page.color,
+				onColorSelected = listener::onColorChanged,
+			)
+			
+			Spacer(modifier = Modifier.height(16.dp))
+			
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(16.dp),
+			) {
+				if (!page.isNew) {
+					OutlinedButton(
+						onClick = listener::onDeleteClicked,
+						text = stringResource(R.string.transaction_category_form_action_delete),
+						modifier = Modifier.weight(1f),
+					)
+					Spacer(modifier = Modifier.width(16.dp))
+				}
+				
+				Button(
+					onClick = listener::onSaveClicked,
+					text = stringResource(
+						if (page.isNew) R.string.transaction_category_form_action_save
+						else R.string.transaction_category_form_action_save_short
+					),
 					modifier = Modifier.weight(1f),
 				)
-				Spacer(modifier = Modifier.width(16.dp))
 			}
-			
-			Button(
-				onClick = onSaveClicked,
-				text = stringResource(
-					if (content.isNew) R.string.transaction_category_form_action_save
-					else R.string.transaction_category_form_action_save_short
-				),
-				modifier = Modifier.weight(1f),
-			)
 		}
-		
 	}
 }
+
 
 
 

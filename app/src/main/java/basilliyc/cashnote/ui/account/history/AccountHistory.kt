@@ -41,8 +41,7 @@ import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.activity.AppNavigation
-import basilliyc.cashnote.ui.activity.AppNavigation.*
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.utils.Button
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController

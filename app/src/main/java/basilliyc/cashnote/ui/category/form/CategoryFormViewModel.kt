@@ -1,72 +1,68 @@
 package basilliyc.cashnote.ui.category.form
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import basilliyc.cashnote.AppNavigation
+import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.base.BaseViewModel
+import basilliyc.cashnote.ui.category.form.CategoryFormStateHolder.Page
+import basilliyc.cashnote.ui.category.form.CategoryFormStateHolder.Result
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.activity.AppNavigation
 import kotlinx.coroutines.launch
 
 class CategoryFormViewModel(
 	savedStateHandle: SavedStateHandle,
-) : BaseViewModel() {
-	
-	var state by mutableStateOf(CategoryFormState())
-		private set
-	private var stateContentData
-		get() = state.content as? CategoryFormState.Content.Data
-		set(value) {
-			if (value != null) state = state.copy(content = value)
-		}
+) : BaseViewModel(), CategoryFormListener {
 	
 	private val route: AppNavigation.CategoryForm = savedStateHandle.toRoute()
 	
+	val state = CategoryFormStateHolder()
+	
 	init {
-		state = state.copy(content = CategoryFormState.Content.Loading)
-		if (route.categoryId != null) {
-			viewModelScope.launch {
-				val category = (financialManager.getCategoryById(route.categoryId)
-					?: throw IllegalStateException("TransactionCategory with id ${route.categoryId} is not present in database"))
-				state = state.copy(content = CategoryFormState.Content.Data(category))
-			}
-		} else {
-			val newCategory = FinancialCategory(
-				name = "",
-				icon = null,
-				color = null,
-			)
-			state = state.copy(content = CategoryFormState.Content.Data(newCategory))
-		}
-	}
-	
-	private fun updateStateContentData(call: CategoryFormState.Content.Data.() -> CategoryFormState.Content.Data) {
-		val content = state.content
-		if (content is CategoryFormState.Content.Data) {
-			state = state.copy(content = content.call())
-		}
-	}
-	
-	fun onActionConsumed() {
-		state = state.copy(action = null)
-	}
-	
-	fun onNameChanged(name: String) {
-		updateStateContentData {
-			copy(
-				name = TextFieldState(
-					value = name,
-					error = getNameTextError(name)
+		viewModelScope.launch {
+			state.page = Page.Loading
+			
+			val category = if (route.categoryId != null) {
+				financialManager.requireCategoryById(route.categoryId)
+			} else {
+				FinancialCategory(
+					name = "",
+					icon = null,
+					color = null,
 				)
-			)
+			}
+			
+			state.page = Page.Data(category)
+			
+			listenForUpdates()
 		}
+	}
+	
+	private fun listenForUpdates() {
+		viewModelScope.launch {
+			if (route.categoryId == null) return@launch
+			financialManager.getCategoryByIdAsFlow(route.categoryId).collect {
+				if (it == null) {
+					state.result = Result.NavigateBack
+				}
+			}
+		}
+	}
+	
+	override fun onResultConsumed() {
+		state.result = null
+	}
+	
+	override fun onNameChanged(name: String) {
+		state.pageDataName = TextFieldState(
+			value = name,
+			error = getNameTextError(name)
+		)
 	}
 	
 	private fun getNameTextError(name: String): TextFieldError? {
@@ -74,27 +70,21 @@ class CategoryFormViewModel(
 		return null
 	}
 	
-	fun onIconChanged(icon: FinancialIcon?) {
-		updateStateContentData {
-			copy(icon = icon.takeIf { icon != this.icon })
-		}
+	override fun onIconChanged(icon: FinancialIcon?) {
+		state.pageData = state.pageData?.copy(icon = icon)
 	}
 	
-	fun onColorChanged(color: FinancialColor?) {
-		updateStateContentData {
-			copy(color = color.takeIf { color != this.color })
-		}
+	override fun onColorChanged(color: FinancialColor?) {
+		state.pageData = state.pageData?.copy(color = color)
 	}
 	
-	fun onSaveClicked() {
-		val data = stateContentData ?: return
+	override fun onSaveClicked() {
+		val data = state.pageData ?: return
 		
 		val nameString = data.name.value.trim()
 		val nameTextError = getNameTextError(nameString)
 		if (nameTextError != null) {
-			updateStateContentData {
-				copy(name = name.copy(error = nameTextError))
-			}
+			state.pageDataName = data.name.copy(error = nameTextError)
 			return
 		}
 		
@@ -108,24 +98,38 @@ class CategoryFormViewModel(
 		schedule(skipIfBusy = true, postDelay = true) {
 			try {
 				financialManager.saveCategory(category)
-				state = state.copy(action = CategoryFormState.Action.SaveSuccess)
+				state.result = Result.SaveSuccess(data.isNew)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				state = state.copy(action = CategoryFormState.Action.SaveError)
+				state.result = Result.SaveError
 			}
 		}
 	}
 	
-	fun onDeleteClicked() {
-		if (route.categoryId == null) return
+	override fun onDeleteClicked() {
+		val categoryId: Long = route.categoryId ?: return
 		
 		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				financialManager.deleteCategory(route.categoryId)
-				state = state.copy(action = CategoryFormState.Action.DeleteSuccess)
+				
+				val extendedResult = financialManager.checkExtendedDeletionForCategory(categoryId)
+				
+				if (extendedResult.transactionCount == 0) {
+					//No transactions. Just delete category
+					financialManager.deleteCategoryExtended(
+						categoryId,
+						FinancialManager.DeleteCategoryExtendedStrategy.DeleteTransactions(
+							affectAccounts = false
+						)
+					)
+					state.result = Result.DeleteSuccess
+				} else {
+					state.result = Result.NavigateCategoryExtendedDeletion(categoryId)
+				}
+				
 			} catch (t: Throwable) {
 				logcat.error(t)
-				state = state.copy(action = CategoryFormState.Action.DeleteError)
+				state.result = Result.DeleteError
 			}
 		}
 	}

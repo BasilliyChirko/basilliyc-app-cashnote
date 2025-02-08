@@ -130,6 +130,8 @@ class FinancialManager {
 	suspend fun requireCategoryById(id: Long) = categoryDao.getById(id)
 		?: throw AppError.Database.CategoryNotFound(id)
 	
+	fun getCategoryByIdAsFlow(id: Long) = categoryDao.getByIdAsFlow(id)
+	
 	private suspend fun FinancialCategoryDao.getNextPosition(): Int {
 		var currentMaxPosition = this.getMaxPosition()
 		
@@ -155,8 +157,7 @@ class FinancialManager {
 		refreshStatistics(force = true)
 	}
 	
-	suspend fun deleteCategory(categoryId: Long) = databaseTransaction {
-		categoryDao.delete(categoryId)
+	private suspend fun refreshCategoriesPositions() {
 		val categories = categoryDao.getList()
 			.mapIndexed { index, category ->
 				category.copy(
@@ -164,7 +165,54 @@ class FinancialManager {
 				)
 			}
 		categoryDao.save(categories)
+	}
+	
+	data class CategoryExtendedDeletionResult(
+//		val accountCount: Int,
+		val transactionCount: Int,
+	)
+	
+	suspend fun checkExtendedDeletionForCategory(categoryId: Long): CategoryExtendedDeletionResult {
+		return CategoryExtendedDeletionResult(
+			transactionCount = transactionDao.getCountByCategory(categoryId)
+		)
+	}
+	
+	sealed interface DeleteCategoryExtendedStrategy {
+		data class ChangeTransactionsCategory(val targetCategory: FinancialCategory) :
+			DeleteCategoryExtendedStrategy
 		
+		data class DeleteTransactions(val affectAccounts: Boolean) : DeleteCategoryExtendedStrategy
+	}
+	
+	suspend fun deleteCategoryExtended(
+		categoryId: Long,
+		strategy: DeleteCategoryExtendedStrategy,
+	) = databaseTransaction {
+		
+		when (strategy) {
+			is DeleteCategoryExtendedStrategy.ChangeTransactionsCategory -> {
+				transactionDao.getListByCategory(categoryId)
+					.map { it.copy(categoryId = strategy.targetCategory.id) }
+					.let { transactionDao.save(it) }
+			}
+			
+			is DeleteCategoryExtendedStrategy.DeleteTransactions -> {
+				if (strategy.affectAccounts) {
+					transactionDao.getListByCategory(categoryId).groupBy {
+						it.accountId
+					}.forEach { (accountId, transactions) ->
+						val account = accountDao.getById(accountId)!!
+						accountDao.save(account.copy(balance = account.balance - transactions.sumOf { it.value }))
+					}
+				}
+				
+				transactionDao.deleteByCategory(categoryId)
+			}
+		}
+		
+		categoryDao.delete(categoryId)
+		refreshCategoriesPositions()
 		refreshStatistics(force = true)
 	}
 	
@@ -220,7 +268,7 @@ class FinancialManager {
 	
 	
 	fun getTransactionListPagingSource(accountId: Long) =
-		transactionDao.getListPagingSource(accountId)
+		transactionDao.getPagingSourceByAccount(accountId)
 	
 	suspend fun deleteTransaction(transactionId: Long) = databaseTransaction {
 		val transaction = transactionDao.getById(transactionId)!!

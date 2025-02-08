@@ -16,10 +16,10 @@ interface FinancialTransactionDao {
 	//----------------------------------------------------------------------------------------------
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId")
-	fun getListAsFlow(accountId: Long): Flow<List<FinancialTransaction>>
+	fun getListByAccountAsFlow(accountId: Long): Flow<List<FinancialTransaction>>
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId")
-	suspend fun getList(accountId: Long): List<FinancialTransaction>
+	suspend fun getListByAccount(accountId: Long): List<FinancialTransaction>
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE id=:id")
 	suspend fun getById(id: Long): FinancialTransaction?
@@ -40,8 +40,7 @@ interface FinancialTransactionDao {
 	suspend fun delete(transactions: List<FinancialTransaction>): Int
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId ORDER BY date DESC")
-	fun getListPagingSource(accountId: Long): PagingSource<Int, FinancialTransaction>
-	
+	fun getPagingSourceByAccount(accountId: Long): PagingSource<Int, FinancialTransaction>
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId AND categoryId=:categoryId AND date>=:periodStart AND date<=:periodEnd")
 	suspend fun getListForStatistic(
@@ -56,6 +55,15 @@ interface FinancialTransactionDao {
 		accountId: Long,
 		categoryId: Long,
 	): Long
+	
+	@Query("SELECT COUNT(*) FROM FinancialTransaction WHERE categoryId=:categoryId")
+	suspend fun getCountByCategory(categoryId: Long): Int
+	
+	@Query("SELECT * FROM FinancialTransaction WHERE categoryId=:categoryId")
+	suspend fun getListByCategory(categoryId: Long): List<FinancialTransaction>
+	
+	@Query("DELETE FROM FinancialTransaction WHERE categoryId=:categoryId")
+	suspend fun deleteByCategory(categoryId: Long): Int
 	
 	
 }

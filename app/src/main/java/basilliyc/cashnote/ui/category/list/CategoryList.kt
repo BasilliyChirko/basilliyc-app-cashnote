@@ -34,7 +34,7 @@ import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.color
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.utils.DefaultPreview

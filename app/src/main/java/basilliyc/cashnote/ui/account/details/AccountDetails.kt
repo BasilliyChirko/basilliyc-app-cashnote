@@ -35,7 +35,7 @@ import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.labelText
 import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
-import basilliyc.cashnote.ui.activity.AppNavigation
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.CardBalance

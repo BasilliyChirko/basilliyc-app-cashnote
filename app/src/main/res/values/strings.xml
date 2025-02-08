@@ -114,4 +114,16 @@
     <string name="account_params_statistic_secondary_value_calculation">Statistic secondary value</string>
     <string name="transaction_category_form_label_icon">Icon</string>
     <string name="transaction_category_form_label_color">Color</string>
+    <string name="category_extended_deletion_title">Category deletion</string>
+    <string name="category_extended_deletion_strategy_label">Deletion strategy</string>
+    <string name="category_extended_deletion_message">You have %1$d transactions in category %2$s. What you want to do with them?</string>
+    <string name="category_extended_deletion_strategy_delete_transactions">Delete transactions</string>
+    <string name="category_extended_deletion_strategy_change_transactions_category">Change transaction category</string>
+    <string name="category_extended_deletion_strategy_delete_transactions_affect_accounts">Change accounts balance</string>
+    <string name="category_extended_deletion_strategy_change_transactions_category_target">To category</string>
+    <string name="category_extended_deletion_strategy_change_transactions_category_target_none">Not selected</string>
+    <string name="category_extended_deletion_action_delete">Delete</string>
+    <string name="category_extended_deletion_error">Deletion failed</string>
+    <string name="category_extended_deletion_success">Category deleted</string>
+    <string name="category_extended_deletion_target_category_required">Select target category</string>
 </resources>

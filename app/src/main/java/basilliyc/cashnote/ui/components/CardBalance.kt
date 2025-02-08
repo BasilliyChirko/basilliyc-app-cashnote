@@ -1,5 +1,6 @@
 package basilliyc.cashnote.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,9 +52,11 @@ fun CardBalance(
 		modifier = modifier,
 		onClick = onClick,
 		colors = CardDefaults.outlinedCardColors(
-			containerColor = color?.color ?: Color.Unspecified
+			containerColor = color.color
 		),
 		shape = MaterialTheme.shapes.small,
+		border = color?.color?.let { BorderStroke(1.dp, it) }
+			?: CardDefaults.outlinedCardBorder(),
 	) {
 		Column(
 			modifier = Modifier.padding(8.dp)

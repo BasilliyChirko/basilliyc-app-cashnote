@@ -622,6 +622,7 @@ class FinancialManager {
 					name = "Test Category 1",
 					position = 0,
 					icon = null,
+					color = FinancialColor.Red,
 				)
 			)
 			
@@ -631,6 +632,7 @@ class FinancialManager {
 					name = "Test Category 2",
 					position = 0,
 					icon = null,
+					color = FinancialColor.Blue
 				)
 			)
 			
@@ -640,6 +642,7 @@ class FinancialManager {
 					name = "Test Category 3",
 					position = 0,
 					icon = null,
+					color = null,
 				)
 			)
 			

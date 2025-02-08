@@ -429,7 +429,7 @@ private fun ColumnScope.PageDataCategories(
 			primaryValue = category.primaryValue,
 			secondaryValue = category.secondaryValue?.takeIf { page.statisticParams.showSecondaryValueForCategory },
 			leadingIcon = CardBalanceLeadingIcon(category.category.icon?.imageVector),
-			color = null,
+			color = category.category.color,
 		)
 	}
 }

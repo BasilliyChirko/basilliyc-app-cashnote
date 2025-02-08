@@ -41,6 +41,7 @@ class CategoryFormViewModel(
 			val newCategory = FinancialCategory(
 				name = "",
 				icon = null,
+				color = null,
 			)
 			state = state.copy(content = CategoryFormState.Content.Data(newCategory))
 		}

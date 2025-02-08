@@ -1,5 +1,6 @@
 package basilliyc.cashnote.ui.category.list
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,10 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
+import basilliyc.cashnote.data.color
 import basilliyc.cashnote.ui.activity.AppNavigation
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -108,16 +110,19 @@ private fun CategoryListPreview() = DefaultPreview {
 			id = 1,
 			name = "Home",
 			icon = FinancialIcon.Home,
+			color = FinancialColor.Green,
 		),
 		FinancialCategory(
 			id = 2,
 			name = "Person",
 			icon = FinancialIcon.Person,
+			color = FinancialColor.Red,
 		),
 		FinancialCategory(
 			id = 3,
 			name = "Other",
 			icon = null,
+			color = null
 		),
 	)
 	Content(
@@ -202,15 +207,19 @@ private fun LazyItemScope.CategoryItem(
 	category: FinancialCategory,
 	onClick: (Long) -> Unit,
 ) {
-	Card(
+	OutlinedCard(
 		modifier = modifier
 			.fillMaxWidth(),
 		onClick = { onClick(category.id) },
-		colors = CardDefaults.cardColors(
-			containerColor = Color.Unspecified
-		)
+		colors = CardDefaults.outlinedCardColors(
+			containerColor = category.color.color,
+		),
+		shape = MaterialTheme.shapes.small,
+		border = category.color?.color?.let { BorderStroke(1.dp, it) }
+			?: CardDefaults.outlinedCardBorder(),
 	) {
 		Row(
+			modifier = Modifier.padding(vertical = 8.dp),
 			verticalAlignment = Alignment.CenterVertically,
 		) {
 			category.icon?.imageVector?.let { icon ->

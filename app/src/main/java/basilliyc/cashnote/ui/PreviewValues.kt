@@ -30,7 +30,8 @@ object PreviewValues {
 				id = index.toLong(),
 				name = icon.name,
 				position = index,
-				icon = icon
+				icon = icon,
+				color = null,
 			)
 		}
 	}

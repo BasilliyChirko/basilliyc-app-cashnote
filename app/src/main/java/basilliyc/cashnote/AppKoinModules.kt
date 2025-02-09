@@ -17,11 +17,11 @@ fun AppValues.koinModules() = module {
 		Room.databaseBuilder(androidContext(), AppDatabase::class.java, "AppDatabase")
 			.addMigrations(*AppDatabaseMigrations.getAllMigrations().toTypedArray())
 			.apply {
-				if (BuildConfig.DEBUG) {
-					fallbackToDestructiveMigration()
-				}
+//				if (BuildConfig.DEBUG) {
+//					fallbackToDestructiveMigration()
+//				}
 			}
-			.allowMainThreadQueries()
+//			.allowMainThreadQueries()
 			.build()
 	}
 	
@@ -29,7 +29,6 @@ fun AppValues.koinModules() = module {
 	single { get<AppDatabase>().transactionDao() }
 	single { get<AppDatabase>().categoryDao() }
 	single { get<AppDatabase>().statisticDao() }
-	
-
+	single { get<AppDatabase>().categoryToAccountParamsDao() }
 	
 }

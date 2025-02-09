@@ -1,0 +1,5 @@
+package basilliyc.cashnote
+
+import basilliyc.cashnote.data.FinancialCategoryToFinancialAccountParams
+
+typealias CategoryToAccountParams = FinancialCategoryToFinancialAccountParams

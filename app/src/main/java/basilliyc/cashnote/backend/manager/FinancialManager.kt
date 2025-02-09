@@ -2,9 +2,11 @@ package basilliyc.cashnote.backend.manager
 
 import androidx.room.withTransaction
 import basilliyc.cashnote.AppError
+import basilliyc.cashnote.CategoryToAccountParams
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.FinancialAccountDao
 import basilliyc.cashnote.backend.database.FinancialCategoryDao
+import basilliyc.cashnote.backend.database.FinancialCategoryToFinancialAccountParamsDao
 import basilliyc.cashnote.backend.database.FinancialStatisticDao
 import basilliyc.cashnote.backend.database.FinancialTransactionDao
 import basilliyc.cashnote.backend.preferences.AppPreferences
@@ -31,6 +33,10 @@ import kotlin.system.measureTimeMillis
 
 class FinancialManager {
 	
+	init {
+		CategoryToAccountParams::class
+	}
+	
 	@Suppress("unused")
 	private val logcat = Logcat(this)
 	
@@ -39,6 +45,7 @@ class FinancialManager {
 	private val transactionDao: FinancialTransactionDao by inject()
 	private val categoryDao: FinancialCategoryDao by inject()
 	private val statisticDao: FinancialStatisticDao by inject()
+	private val categoryToAccountParamsDao: FinancialCategoryToFinancialAccountParamsDao by inject()
 	private val preferences: AppPreferences by inject()
 	
 	
@@ -60,17 +67,28 @@ class FinancialManager {
 	fun getAccountByIdAsFlow(id: Long) = accountDao.getByIdAsFlow(id)
 	
 	suspend fun saveAccount(financialAccount: FinancialAccount) = databaseTransaction {
-		val financialAccount = financialAccount
+		val account = financialAccount
 			.applyIf({ id == 0L }) {
-				copy(
-					position = accountDao.getNextPosition()
-				)
+				copy(position = accountDao.getNextPosition())
 			}
 		
-		val id = accountDao.save(financialAccount)
+		val isNeedCreateParams = account.id == 0L
+		
+		val accountId = accountDao.save(account)
+		
+		if (isNeedCreateParams) {
+			val params = categoryDao.getList().map { category ->
+				CategoryToAccountParams(
+					accountId = accountId,
+					categoryId = category.id,
+				)
+			}
+			categoryToAccountParamsDao.save(params)
+		}
+		
 		refreshStatistics(force = true)
 		
-		id.takeIf { it > 0 } ?: financialAccount.id
+		accountId.takeIf { it > 0 } ?: account.id
 	}
 	
 	suspend fun deleteAccount(accountId: Long) = databaseTransaction {
@@ -152,7 +170,19 @@ class FinancialManager {
 				)
 			}
 		
-		categoryDao.save(category)
+		val isNeedCreateParams = category.id == 0L
+		
+		val categoryId = categoryDao.save(category)
+		
+		if (isNeedCreateParams) {
+			val params = accountDao.getList().map { account ->
+				CategoryToAccountParams(
+					accountId = account.id,
+					categoryId = categoryId,
+				)
+			}
+			categoryToAccountParamsDao.save(params)
+		}
 		
 		refreshStatistics(force = true)
 	}

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import basilliyc.cashnote.utils.Logcat
+import basilliyc.cashnote.utils.getLong
+import basilliyc.cashnote.utils.map
 
 object AppDatabaseMigrations {
 	
@@ -29,7 +31,26 @@ object AppDatabaseMigrations {
 	
 	@SuppressLint("Range")
 	fun getAllMigrations(): List<Migration> = listOf(
-		//Here will be declared all migrations
+		createMigration(1, 2) {
+			val tableCategoryToAccount = "FinancialCategoryToFinancialAccountParams"
+			execSQL("CREATE TABLE IF NOT EXISTS `${tableCategoryToAccount}` (`accountId` INTEGER NOT NULL, `categoryId` INTEGER NOT NULL, `visible` INTEGER NOT NULL, PRIMARY KEY(`accountId`, `categoryId`), FOREIGN KEY(`accountId`) REFERENCES `FinancialAccount`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `FinancialCategory`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+			execSQL("CREATE INDEX IF NOT EXISTS `index_FinancialCategoryToFinancialAccountParams_accountId` ON `${tableCategoryToAccount}` (`accountId`)")
+			execSQL("CREATE INDEX IF NOT EXISTS `index_FinancialCategoryToFinancialAccountParams_categoryId` ON `${tableCategoryToAccount}` (`categoryId`)")
+			
+			val accountsIds = query("SELECT (id) FROM FinancialAccount").use {
+				it.map { it.getLong("id") }
+			}
+			
+			val categoriesIds = query("SELECT (id) FROM FinancialCategory").use {
+				it.map { it.getLong("id") }
+			}
+			
+			for (accountId in accountsIds) {
+				for (categoryId in categoriesIds) {
+					execSQL("INSERT INTO `${tableCategoryToAccount}` (`accountId`, `categoryId`, `visible`) VALUES ($accountId, $categoryId, 1)")
+				}
+			}
+		}
 	)
 	
 }

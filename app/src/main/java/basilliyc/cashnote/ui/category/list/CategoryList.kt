@@ -28,13 +28,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.color
-import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.utils.DefaultPreview
@@ -89,7 +89,6 @@ fun CategoryList() {
 			
 			coroutineScope.launch {
 				financialManager.changeCategoryPosition(from, to)
-//				transactionCategoriesDragged = null
 			}
 		},
 		onDragReverted = {

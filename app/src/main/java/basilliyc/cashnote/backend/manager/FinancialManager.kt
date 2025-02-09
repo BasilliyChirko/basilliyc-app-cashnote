@@ -162,7 +162,10 @@ class FinancialManager {
 		return currentMaxPosition + 1
 	}
 	
-	suspend fun saveCategory(category: FinancialCategory) = databaseTransaction {
+	suspend fun saveCategory(
+		category: FinancialCategory,
+		usedInAccounts: List<Long>,
+	) = databaseTransaction {
 		val category = category
 			.applyIf({ id == 0L }) {
 				copy(
@@ -172,7 +175,7 @@ class FinancialManager {
 		
 		val isNeedCreateParams = category.id == 0L
 		
-		val categoryId = categoryDao.save(category)
+		val categoryId = categoryDao.save(category).takeIf { it > 0 } ?: category.id
 		
 		if (isNeedCreateParams) {
 			val params = accountDao.getList().map { account ->
@@ -183,6 +186,21 @@ class FinancialManager {
 			}
 			categoryToAccountParamsDao.save(params)
 		}
+		
+		logcat.debug(usedInAccounts)
+		
+		categoryToAccountParamsDao.getListByCategoryId(categoryId)
+			.also {
+				logcat.debug(it.map { it.accountId })
+			}
+			.map {
+				it.copy(
+					visible = it.accountId in usedInAccounts
+				)
+			}
+			.let {
+				categoryToAccountParamsDao.save(it)
+			}
 		
 		refreshStatistics(force = true)
 	}
@@ -259,12 +277,18 @@ class FinancialManager {
 		categoryDao.save(categories)
 	}
 	
+	suspend fun getCategoryListVisibleInAccount(accountId: Long) =
+		categoryDao.getListVisibleInAccount(accountId)
+	
+	fun getCategoryListVisibleInAccountAsFlow(accountId: Long) =
+		categoryDao.getListVisibleInAccountAsFlow(accountId)
+	
 	//----------------------------------------------------------------------------------------------
 	//  Category to Account Params
 	//----------------------------------------------------------------------------------------------
 	
 	suspend fun getCategoryToAccountParamsList() = categoryToAccountParamsDao.getList()
-
+	
 	fun getCategoryToAccountParamsListAsFlow() = categoryToAccountParamsDao.getListAsFlow()
 	
 	suspend fun getCategoryToAccountParamsListByAccountId(accountId: Long) =
@@ -277,15 +301,15 @@ class FinancialManager {
 		accountId: Long,
 		categoryId: Long,
 	) = categoryToAccountParamsDao.get(accountId, categoryId)
-
+	
 	fun getCategoryToAccountParamsByAccountIdAndCategoryIdAsFlow(
 		accountId: Long,
 		categoryId: Long,
 	) = categoryToAccountParamsDao.getAsFlow(accountId, categoryId)
-
+	
 	suspend fun saveCategoryToAccountParams(params: CategoryToAccountParams) =
 		categoryToAccountParamsDao.save(params)
-
+	
 	suspend fun saveCategoryToAccountParams(params: List<CategoryToAccountParams>) =
 		categoryToAccountParamsDao.save(params)
 	
@@ -294,7 +318,7 @@ class FinancialManager {
 	
 	suspend fun deleteCategoryToAccountParams(params: List<CategoryToAccountParams>) =
 		categoryToAccountParamsDao.delete(params)
-
+	
 	
 	//----------------------------------------------------------------------------------------------
 	//  Transaction
@@ -738,7 +762,8 @@ class FinancialManager {
 					position = 0,
 					icon = null,
 					color = FinancialColor.Red,
-				)
+				),
+				usedInAccounts = listOf(1L),
 			)
 			
 			saveCategory(
@@ -748,7 +773,8 @@ class FinancialManager {
 					position = 0,
 					icon = null,
 					color = FinancialColor.Blue
-				)
+				),
+				usedInAccounts = listOf(1L),
 			)
 			
 			saveCategory(
@@ -758,7 +784,8 @@ class FinancialManager {
 					position = 0,
 					icon = null,
 					color = null,
-				)
+				),
+				usedInAccounts = listOf(1L),
 			)
 			
 			val timestamp = System.currentTimeMillis()

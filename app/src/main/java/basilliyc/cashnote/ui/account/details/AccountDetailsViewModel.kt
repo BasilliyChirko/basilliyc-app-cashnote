@@ -6,12 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.ui.account.details.AccountDetailsState.Page
-import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -54,7 +54,7 @@ class AccountDetailsViewModel(
 			val account = financialManager.requireAccountById(route.accountId)
 				.also { account = it }
 			
-			val categories = financialManager.getCategoryList()
+			val categories = financialManager.getCategoryListVisibleInAccount(route.accountId)
 				.also { categories = it }
 			
 			val statistics = financialManager.getStatisticsListForAccount(route.accountId)
@@ -101,7 +101,7 @@ class AccountDetailsViewModel(
 		
 		//CATEGORIES
 		viewModelScope.launch {
-			financialManager.getCategoryListAsFlow().collectLatest { categories ->
+			financialManager.getCategoryListVisibleInAccountAsFlow(route.accountId).collectLatest { categories ->
 				statePageData = statePageData?.copy(
 					categories = categories.map { category ->
 						val stats = statistics.find { it.categoryId == category.id }

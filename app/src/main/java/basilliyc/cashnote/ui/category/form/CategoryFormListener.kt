@@ -10,4 +10,5 @@ interface CategoryFormListener {
 	fun onColorChanged(color: FinancialColor?)
 	fun onSaveClicked()
 	fun onDeleteClicked()
+	fun onAccountClicked(accountId: Long)
 }

@@ -51,4 +51,10 @@ interface FinancialCategoryDao {
 	@Query("SELECT MAX(position) FROM FinancialCategory")
 	suspend fun getMaxPosition(): Int
 	
+	@Query("SELECT * FROM FinancialCategory WHERE id IN ( SELECT categoryId FROM FinancialCategoryToFinancialAccountParams WHERE accountId=:accountId AND visible=1 )")
+	suspend fun getListVisibleInAccount(accountId: Long): List<FinancialCategory>
+	
+	@Query("SELECT * FROM FinancialCategory WHERE id IN ( SELECT categoryId FROM FinancialCategoryToFinancialAccountParams WHERE accountId=:accountId AND visible=1 )")
+	fun getListVisibleInAccountAsFlow(accountId: Long): Flow<List<FinancialCategory>>
+	
 }

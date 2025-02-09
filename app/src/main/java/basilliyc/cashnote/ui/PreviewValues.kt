@@ -1,9 +1,9 @@
 package basilliyc.cashnote.ui
 
-import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.AccountCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.FinancialStatisticParams
 
@@ -12,9 +12,20 @@ object PreviewValues {
 	val accountTestUSD by lazy {
 		FinancialAccount(
 			id = 0L,
-			name = "Test Account",
+			name = "Test Account USD",
 			currency = AccountCurrency.USD,
 			color = FinancialColor.Green,
+			balance = 3456.78,
+			position = 0
+		)
+	}
+	
+	val accountTestEUR by lazy {
+		FinancialAccount(
+			id = 0L,
+			name = "Test Account EUR",
+			currency = AccountCurrency.EUR,
+			color = FinancialColor.Blue,
 			balance = 3456.78,
 			position = 0
 		)

@@ -13,6 +13,9 @@ import basilliyc.cashnote.ui.category.form.CategoryFormStateHolder.Page
 import basilliyc.cashnote.ui.category.form.CategoryFormStateHolder.Result
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
+import basilliyc.cashnote.utils.flowZip
+import basilliyc.cashnote.utils.updateIf
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class CategoryFormViewModel(
@@ -37,7 +40,7 @@ class CategoryFormViewModel(
 				)
 			}
 			
-			state.page = Page.Data(category)
+			state.page = Page.Data(category, emptyList())
 			
 			listenForUpdates()
 		}
@@ -50,6 +53,24 @@ class CategoryFormViewModel(
 				if (it == null) {
 					state.result = Result.NavigateBack
 				}
+			}
+		}
+		
+		viewModelScope.launch {
+			flowZip(
+				financialManager.getAccountsListAsFlow(),
+				financialManager.getCategoryToAccountParamsListAsFlow(),
+			) { accounts, categoryToAccountParamsList ->
+				accounts.map {
+					CategoryFormStateHolder.AccountWithUsing(
+						account = it,
+						using = categoryToAccountParamsList.find { params ->
+							params.accountId == it.id && params.categoryId == route.categoryId
+						}?.visible == true
+					)
+				}
+			}.collectLatest {
+				state.pageData = state.pageData?.copy(accounts = it)
 			}
 		}
 	}
@@ -95,9 +116,11 @@ class CategoryFormViewModel(
 			color = data.color,
 		)
 		
+		val usedInAccounts = data.accounts.filter { it.using }.map { it.account.id }
+		
 		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				financialManager.saveCategory(category)
+				financialManager.saveCategory(category, usedInAccounts)
 				state.result = Result.SaveSuccess(data.isNew)
 			} catch (t: Throwable) {
 				logcat.error(t)
@@ -132,6 +155,15 @@ class CategoryFormViewModel(
 				state.result = Result.DeleteError
 			}
 		}
+	}
+	
+	override fun onAccountClicked(accountId: Long) {
+		val data = state.pageData ?: return
+		state.pageData = data.copy(
+			accounts = data.accounts.updateIf({ it.account.id == accountId }) {
+				it.copy(using = !it.using)
+			}
+		)
 	}
 	
 }

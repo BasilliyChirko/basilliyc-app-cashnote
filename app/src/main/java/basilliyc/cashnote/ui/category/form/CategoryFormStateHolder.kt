@@ -1,12 +1,13 @@
 package basilliyc.cashnote.ui.category.form
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.components.TextFieldState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 
 class CategoryFormStateHolder(
 	page: Page = Page.Loading,
@@ -37,15 +38,25 @@ class CategoryFormStateHolder(
 			val name: TextFieldState,
 			val icon: FinancialIcon?,
 			val color: FinancialColor?,
+			val accounts: List<AccountWithUsing>,
 		) : Page {
-			constructor(category: FinancialCategory) : this(
+			constructor(
+				category: FinancialCategory,
+				accounts: List<AccountWithUsing>,
+			) : this(
 				isNew = category.id == 0L,
 				name = TextFieldState(value = category.name),
 				icon = category.icon,
 				color = category.color,
+				accounts = accounts,
 			)
 		}
 	}
+	
+	data class AccountWithUsing(
+		val account: FinancialAccount,
+		val using: Boolean,
+	)
 	
 	sealed interface Result {
 		data class SaveSuccess(val isNew: Boolean) : Result

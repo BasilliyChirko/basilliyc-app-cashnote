@@ -260,6 +260,43 @@ class FinancialManager {
 	}
 	
 	//----------------------------------------------------------------------------------------------
+	//  Category to Account Params
+	//----------------------------------------------------------------------------------------------
+	
+	suspend fun getCategoryToAccountParamsList() = categoryToAccountParamsDao.getList()
+
+	fun getCategoryToAccountParamsListAsFlow() = categoryToAccountParamsDao.getListAsFlow()
+	
+	suspend fun getCategoryToAccountParamsListByAccountId(accountId: Long) =
+		categoryToAccountParamsDao.getListByAccountId(accountId)
+	
+	fun getCategoryToAccountParamsListByAccountIdAsFlow(accountId: Long) =
+		categoryToAccountParamsDao.getListByAccountIdAsFlow(accountId)
+	
+	suspend fun getCategoryToAccountParamsByAccountIdAndCategoryId(
+		accountId: Long,
+		categoryId: Long,
+	) = categoryToAccountParamsDao.get(accountId, categoryId)
+
+	fun getCategoryToAccountParamsByAccountIdAndCategoryIdAsFlow(
+		accountId: Long,
+		categoryId: Long,
+	) = categoryToAccountParamsDao.getAsFlow(accountId, categoryId)
+
+	suspend fun saveCategoryToAccountParams(params: CategoryToAccountParams) =
+		categoryToAccountParamsDao.save(params)
+
+	suspend fun saveCategoryToAccountParams(params: List<CategoryToAccountParams>) =
+		categoryToAccountParamsDao.save(params)
+	
+	suspend fun deleteCategoryToAccountParams(params: CategoryToAccountParams) =
+		categoryToAccountParamsDao.delete(params)
+	
+	suspend fun deleteCategoryToAccountParams(params: List<CategoryToAccountParams>) =
+		categoryToAccountParamsDao.delete(params)
+
+	
+	//----------------------------------------------------------------------------------------------
 	//  Transaction
 	//----------------------------------------------------------------------------------------------
 	

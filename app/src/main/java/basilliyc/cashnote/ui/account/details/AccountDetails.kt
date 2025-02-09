@@ -76,7 +76,7 @@ private fun Result(
 	result: AccountDetailsState.Result?,
 	listener: AccountDetailsListener,
 ) {
-	rememberResultHandler().value.consume(result) {
+	rememberResultHandler().value.handle(result) {
 		listener.onResultConsumed()
 		when (it) {
 			null -> Unit

@@ -42,7 +42,7 @@ private fun Result(
 	result: CategoryExtendedDeletionStateHolder.Result?,
 	listener: CategoryExtendedDeletionListener,
 ) {
-	rememberResultHandler().value.consume(result) {
+	rememberResultHandler().value.handle(result) {
 		listener.onResultConsumed()
 		when (result) {
 			null -> Unit

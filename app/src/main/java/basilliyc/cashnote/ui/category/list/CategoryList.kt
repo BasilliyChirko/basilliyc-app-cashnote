@@ -2,210 +2,138 @@ package basilliyc.cashnote.ui.category.list
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import basilliyc.cashnote.AppNavigation
+import androidx.lifecycle.viewmodel.compose.viewModel
+import basilliyc.cashnote.AppNavigation.*
 import basilliyc.cashnote.R
-import basilliyc.cashnote.backend.manager.FinancialManager
-import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialColor
-import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.color
+import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.utils.DefaultPreview
-import basilliyc.cashnote.utils.DraggableLazyColumn
-import basilliyc.cashnote.utils.LocalNavController
+import basilliyc.cashnote.utils.DraggableVerticalGrid
+import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.applyIf
-import basilliyc.cashnote.utils.inject
-import basilliyc.cashnote.utils.rememberSingleRunner
-import basilliyc.cashnote.utils.reordered
-import kotlinx.coroutines.launch
-
-//--------------------------------------------------------------------------------------------------
-//  ROOT
-//--------------------------------------------------------------------------------------------------
 
 @Composable
 fun CategoryList() {
-	val financialManager by remember { inject<FinancialManager>() }
-	
-	
-	val transactionCategories by financialManager.getCategoryListAsFlow()
-		.collectAsState(emptyList())
-	
-	var transactionCategoriesDragged by remember {
-		mutableStateOf<List<FinancialCategory>?>(null)
-	}
-	
-	val singleRunner = rememberSingleRunner()
-	val coroutineScope = rememberCoroutineScope()
-	
-	val navController = LocalNavController.current
-	
-	Content(
-		transactionCategories = transactionCategoriesDragged ?: transactionCategories,
-		onCategoryClicked = {
-			singleRunner.schedule {
-				navController.navigate(AppNavigation.CategoryForm(it))
-			}
-		},
-		onCategoryAddClicked = {
-			singleRunner.schedule {
-				navController.navigate(AppNavigation.CategoryForm(null))
-			}
-		},
-		onDragStarted = {
-			transactionCategoriesDragged = transactionCategories
-		},
-		onDragCompleted = { from, to ->
-			
-			transactionCategoriesDragged =
-				transactionCategories.let { ArrayList(it) }.reordered(from, to)
-			
-			coroutineScope.launch {
-				financialManager.changeCategoryPosition(from, to)
-			}
-		},
-		onDragReverted = {
-			transactionCategoriesDragged = null
-		},
-		onDragMoved = { from, to ->
-			transactionCategoriesDragged =
-				transactionCategoriesDragged?.let { ArrayList(it) }?.reordered(from, to)
-		}
-	)
+	val viewModel = viewModel<CategoryListViewModel>()
+	Page(page = viewModel.state.page, listener = viewModel)
+	Result(result = viewModel.state.result, listener = viewModel)
 }
 
 @Composable
-@Preview(showBackground = true)
-private fun CategoryListPreview() = DefaultPreview {
-	val availableCategories = listOf(
-		FinancialCategory(
-			id = 1,
-			name = "Home",
-			icon = FinancialIcon.Home,
-			color = FinancialColor.Green,
-		),
-		FinancialCategory(
-			id = 2,
-			name = "Person",
-			icon = FinancialIcon.Person,
-			color = FinancialColor.Red,
-		),
-		FinancialCategory(
-			id = 3,
-			name = "Other",
-			icon = null,
-			color = null
-		),
-	)
-	Content(
-		transactionCategories = availableCategories,
-		onCategoryClicked = {},
-		onCategoryAddClicked = {},
-		onDragCompleted = { _, _ -> },
-		onDragReverted = {},
-		onDragMoved = { _, _ -> },
-		onDragStarted = {},
-	)
-}
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun Content(
-	transactionCategories: List<FinancialCategory>,
-	onCategoryClicked: (Long) -> Unit,
-	onCategoryAddClicked: () -> Unit,
-	onDragStarted: () -> Unit,
-	onDragCompleted: (from: Int, to: Int) -> Unit,
-	onDragReverted: () -> Unit,
-	onDragMoved: (from: Int, to: Int) -> Unit,
+private fun Result(
+	result: CategoryListStateHolder.Result?,
+	listener: CategoryListListener,
 ) {
-	Scaffold(
+	rememberResultHandler().value.handle(result) {
+		listener.onResultHandled()
+		when (it) {
+			
+			null -> Unit
+			
+			is CategoryListStateHolder.Result.NavigateCategoryForm -> {
+				navigateForward(CategoryForm(it.categoryId))
+			}
+			
+		}
+	}
+}
+
+@Composable
+private fun Page(
+	page: CategoryListStateHolder.Page,
+	listener: CategoryListListener,
+) {
+	when (page) {
+		is CategoryListStateHolder.Page.Data -> PageData(page, listener)
+		CategoryListStateHolder.Page.Loading -> PageLoading()
+	}
+}
+
+@Composable
+private fun PageData(
+	page: CategoryListStateHolder.Page.Data,
+	listener: CategoryListListener,
+) {
+	ScaffoldBox(
 		topBar = {
 			SimpleActionBar(
 				title = { Text(text = stringResource(R.string.transaction_categories_title)) },
 				actions = {
 					IconButton(
-						onClick = onCategoryAddClicked,
+						onClick = listener::onCategoryAddClicked,
 						imageVector = Icons.Filled.Add,
 						contentDescription = stringResource(R.string.transaction_categories_action_add)
 					)
 				}
 			)
-		},
-		content = { innerPadding ->
-			
-			DraggableLazyColumn(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
-					.padding(horizontal = 16.dp),
-				verticalArrangement = Arrangement.spacedBy(8.dp),
-				onDragStarted = onDragStarted,
-				onDragMoved = onDragMoved,
-				onDragCompleted = onDragCompleted,
-				onDragReverted = onDragReverted,
-				isOverscrollEnabled = false,
-			) {
-				items(
-					count = transactionCategories.size,
-					key = { transactionCategories[it].id },
-					animateItem = true,
-					itemContent = { index, isDragged ->
-						CategoryItem(
-							modifier = Modifier
-								.applyIf({ isDragged }) {
-									this.shadow(
-										elevation = 4.dp,
-										shape = MaterialTheme.shapes.medium
-									)
-								},
-							category = transactionCategories[index],
-							onClick = onCategoryClicked,
-						)
-					}
-				)
-			}
-		},
-	)
+		}
+	) {
+		val categories = page.categoriesDragged ?: page.categories
+		
+		DraggableVerticalGrid(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(horizontal = 16.dp),
+			verticalArrangement = Arrangement.spacedBy(8.dp),
+			horizontalArrangement = Arrangement.spacedBy(8.dp),
+			onDragStarted = { listener.onDragStarted() },
+			onDragMoved = listener::onDragMoved,
+			onDragCompleted = listener::onDragCompleted,
+			onDragReverted = listener::onDragReverted,
+			columns = GridCells.Adaptive(140.dp),
+		) {
+			items(
+				count = categories.size,
+				key = { categories[it].category.id },
+				animateItem = true,
+				itemContent = { index, isDragged ->
+					CategoryItem(
+						modifier = Modifier
+							.applyIf({ isDragged }) {
+								this.shadow(
+									elevation = 4.dp,
+									shape = MaterialTheme.shapes.small
+								)
+							},
+						categoryWithCount = categories[index],
+						onClick = listener::onCategoryClicked,
+					)
+				}
+			)
+		}
+	}
 }
 
-
 @Composable
-private fun LazyItemScope.CategoryItem(
+private fun LazyGridItemScope.CategoryItem(
 	modifier: Modifier = Modifier,
-	category: FinancialCategory,
+	categoryWithCount: CategoryListStateHolder.CategoryWithCount,
 	onClick: (Long) -> Unit,
 ) {
+	val category = categoryWithCount.category
 	OutlinedCard(
 		modifier = modifier
 			.fillMaxWidth(),
@@ -228,11 +156,22 @@ private fun LazyItemScope.CategoryItem(
 					modifier = Modifier.padding(start = 8.dp)
 				)
 			}
-			Text(
+			Column(
 				modifier = Modifier.padding(8.dp),
-				text = category.name,
-				maxLines = 1,
-			)
+			) {
+				Text(
+					text = category.name,
+					style = MaterialTheme.typography.titleMedium
+				)
+				Text(
+					text = pluralStringResource(
+						R.plurals.category_list_item_used_in_accounts_count,
+						categoryWithCount.visibleInAccountsCount,
+						categoryWithCount.visibleInAccountsCount,
+					),
+				)
+			}
+			
 		}
 	}
 }

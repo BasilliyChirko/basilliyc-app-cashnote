@@ -13,6 +13,9 @@ interface FinancialCategoryToFinancialAccountParamsDao {
 	@Query("SELECT * FROM FinancialCategoryToFinancialAccountParams")
 	suspend fun getList(): List<FinancialCategoryToFinancialAccountParams>
 	
+	@Query("SELECT * FROM FinancialCategoryToFinancialAccountParams")
+	fun getListAsFlow(): Flow<List<FinancialCategoryToFinancialAccountParams>>
+	
 	@Query("SELECT * FROM FinancialCategoryToFinancialAccountParams WHERE accountId=:accountId")
 	suspend fun getListByAccountId(accountId: Long): List<FinancialCategoryToFinancialAccountParams>
 	

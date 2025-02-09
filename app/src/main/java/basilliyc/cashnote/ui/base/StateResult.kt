@@ -111,7 +111,7 @@ class StateResult<T> : MutableState<T?> {
 		}
 		
 		@Composable
-		inline fun <reified T : Any?> consume(result: T, crossinline block: Handler.(T) -> Unit) {
+		inline fun <reified T : Any?> handle(result: T, crossinline block: Handler.(T) -> Unit) {
 			LaunchedEffect(result) {
 				block(result)
 			}

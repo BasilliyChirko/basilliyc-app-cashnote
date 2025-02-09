@@ -50,7 +50,7 @@ private fun Result(
 	result: CategoryFormStateHolder.Result?,
 	listener: CategoryFormListener,
 ) {
-	rememberResultHandler().value.consume(result) {
+	rememberResultHandler().value.handle(result) {
 		listener.onResultConsumed()
 		when (result) {
 			

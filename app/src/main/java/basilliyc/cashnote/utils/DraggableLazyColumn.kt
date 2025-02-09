@@ -80,10 +80,7 @@ fun DraggableLazyColumn(
 	var overscrollJob by remember { mutableStateOf<Job?>(null) }
 	val draggableLazyColumnScope by remember { mutableStateOf(DraggableLazyColumnScope(null)) }
 	
-	val context = LocalContext.current
-	val vibrator = if (vibrate) {
-		remember { getSystemService(context, Vibrator::class.java) }
-	} else null
+	val vibrator = if (vibrate) { rememberVibrator() } else null
 	
 	CompositionLocalProvider(
 		LocalDraggableLazyColumnState provides draggableListState,
@@ -98,7 +95,7 @@ fun DraggableLazyColumn(
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
 							onDragStarted()
-							vibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+							vibrator.vibrate(Vibration.Short)
 						},
 						onDragEnd = {
 							draggableListState.onDragInterrupted()

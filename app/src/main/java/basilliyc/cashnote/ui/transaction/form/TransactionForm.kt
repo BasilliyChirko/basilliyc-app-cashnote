@@ -1,8 +1,9 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.transaction.form
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -40,6 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -66,10 +68,13 @@ import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.TimestampStyle
+import basilliyc.cashnote.utils.Vibration
 import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.rememberSingleRunner
+import basilliyc.cashnote.utils.rememberVibrator
 import basilliyc.cashnote.utils.toPriceString
 import basilliyc.cashnote.utils.showToast
+import basilliyc.cashnote.utils.vibrate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
@@ -268,12 +273,25 @@ private fun ColumnScope.PageDataInputDeviation(
 	page: TransactionFormState.Page.Data,
 	listener: TransactionFormListener,
 ) {
+	val vibrator = rememberVibrator()
 	if (page.focusedField != TransactionFormState.Focus.Deviation) {
 		
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.clickable(onClick = { listener.onFocusChanged(TransactionFormState.Focus.Deviation) }),
+//				.clickable(onClick = {
+//					vibrator.vibrate(Vibration.Short)
+//					listener.onFocusChanged(TransactionFormState.Focus.Deviation)
+//				})
+				.pointerInput(Unit) {
+					detectTapGestures(
+						onPress = {
+							vibrator.vibrate(Vibration.Short)
+							listener.onFocusChanged(TransactionFormState.Focus.Deviation)
+						}
+					)
+				}
+			,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Spacer(modifier = Modifier.height(16.dp))
@@ -314,12 +332,22 @@ private fun ColumnScope.PageDataInputBalance(
 	page: TransactionFormState.Page.Data,
 	listener: TransactionFormListener,
 ) {
+	val vibrator = rememberVibrator()
 	if (page.focusedField != TransactionFormState.Focus.Balance) {
 		
 		Column(
 			modifier = Modifier
 				.fillMaxWidth()
-				.clickable(onClick = { listener.onFocusChanged(TransactionFormState.Focus.Balance) }),
+//				.clickable(onClick = { listener.onFocusChanged(TransactionFormState.Focus.Balance) })
+				.pointerInput(Unit) {
+					detectTapGestures(
+						onLongPress = {
+							vibrator.vibrate(Vibration.Short)
+							listener.onFocusChanged(TransactionFormState.Focus.Balance)
+						}
+					)
+				}
+			,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Spacer(modifier = Modifier.height(16.dp))

@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.transaction.form
 
 import android.icu.util.Calendar
 import androidx.compose.runtime.getValue
@@ -10,8 +10,7 @@ import androidx.navigation.toRoute
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialTransaction
-import basilliyc.cashnote.ui.account.transaction.form.TransactionFormState.Action
-import basilliyc.cashnote.ui.account.transaction.form.TransactionFormState.Page
+import basilliyc.cashnote.ui.transaction.form.TransactionFormState.Action
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
@@ -29,7 +28,7 @@ class TransactionFormViewModel(
 		private set
 	
 	private var statePageData
-		get() = state.page as? Page.Data
+		get() = state.page as? TransactionFormState.Page.Data
 		set(value) {
 			if (value != null) state = state.copy(page = value)
 		}
@@ -51,7 +50,7 @@ class TransactionFormViewModel(
 	lateinit var category: FinancialCategory
 	
 	init {
-		state = state.copy(page = Page.Loading)
+		state = state.copy(page = TransactionFormState.Page.Loading)
 		
 		viewModelScope.launch {
 			
@@ -68,7 +67,7 @@ class TransactionFormViewModel(
 			val deviation = transaction?.value ?: 0.0
 			
 			val timeInMillis = transaction?.date ?: System.currentTimeMillis()
-			statePageData = Page.Data(
+			statePageData = TransactionFormState.Page.Data(
 				account = account,
 				category = category,
 				isNew = transaction == null,

@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.account.transaction.form
+package basilliyc.cashnote.ui.transaction.form
 
 interface TransactionFormListener {
 	fun onActionConsumed() {}

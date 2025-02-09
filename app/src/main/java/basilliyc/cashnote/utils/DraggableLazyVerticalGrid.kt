@@ -94,10 +94,7 @@ fun DraggableVerticalGrid(
 		)
 	}
 	
-	val context = LocalContext.current
-	val vibrator = if (vibrate) {
-		remember { getSystemService(context, Vibrator::class.java) }
-	} else null
+	val vibrator = if (vibrate) { rememberVibrator() } else null
 	
 	CompositionLocalProvider(
 		LocalDraggableLazyVerticalGridState provides draggableListState,
@@ -112,7 +109,7 @@ fun DraggableVerticalGrid(
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
 							onDragStarted(draggableListState.currentIndexOfDraggedItem!!)
-							vibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+							vibrator.vibrate(Vibration.Short)
 						},
 						onDragEnd = {
 							draggableListState.onDragInterrupted()

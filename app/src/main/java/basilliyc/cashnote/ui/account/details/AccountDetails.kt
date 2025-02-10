@@ -29,13 +29,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.labelText
-import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
-import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.CardBalance
@@ -49,6 +48,7 @@ import basilliyc.cashnote.ui.components.PopupMenuState
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.OutlinedButton
@@ -346,7 +346,7 @@ private fun BalanceRow(
 	modifier: Modifier = Modifier,
 	title: String,
 	value: Double,
-	currency: AccountCurrency,
+	currency: FinancialCurrency,
 ) {
 	Row(
 		modifier = modifier

@@ -10,7 +10,7 @@ import basilliyc.cashnote.backend.database.FinancialCategoryToFinancialAccountPa
 import basilliyc.cashnote.backend.database.FinancialStatisticDao
 import basilliyc.cashnote.backend.database.FinancialTransactionDao
 import basilliyc.cashnote.backend.preferences.AppPreferences
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
@@ -748,7 +748,7 @@ class FinancialManager {
 				FinancialAccount(
 					id = 1L,
 					name = "Test Account",
-					currency = AccountCurrency.EUR,
+					currency = FinancialCurrency.EUR,
 					color = FinancialColor.Blue,
 					balance = 0.0,
 					position = 0,

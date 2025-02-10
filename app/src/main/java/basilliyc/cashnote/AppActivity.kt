@@ -41,9 +41,7 @@ class AppActivity : ComponentActivity() {
 					)
 				}
 				
-				CashNoteTheme {
-					Main()
-				}
+				Main()
 				
 				//todo remove after test
 //				LaunchedEffect(navController) {

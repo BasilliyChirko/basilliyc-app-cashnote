@@ -28,8 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.AccountCurrency
-import basilliyc.cashnote.data.symbol
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.components.CardSelectable
 import basilliyc.cashnote.ui.components.IconButton
@@ -37,9 +36,9 @@ import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.components.menu.MenuRowColor
 import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
 import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.ScaffoldBox
@@ -205,15 +204,15 @@ private fun PageData(
 
 @Composable
 private fun ColumnScope.CurrencyPicker(
-	value: AccountCurrency,
-	onChanged: (AccountCurrency) -> Unit,
+	value: FinancialCurrency,
+	onChanged: (FinancialCurrency) -> Unit,
 ) {
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(horizontal = 8.dp),
 	) {
-		AccountCurrency.entries.forEach { currency ->
+		FinancialCurrency.entries.forEach { currency ->
 			CardSelectable(
 				modifier = Modifier
 					.padding(8.dp)

@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -42,7 +41,7 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.createNavigationGraph
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.toAppNavigationPath
-import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.LocalNavController
 
 
@@ -59,43 +58,44 @@ fun Main() {
 		)
 	} ?: AppNavigation.AccountList
 	
-	Scaffold(
-		modifier = Modifier.fillMaxSize(),
-		bottomBar = {
-			MainBottomNavigationBar(
-				accountOnNavigation = state.accountOnNavigation
+	
+	CashNoteTheme(
+		themeMode = state.themeMode
+	) {
+		
+		Scaffold(
+			modifier = Modifier.fillMaxSize(),
+			bottomBar = {
+				MainBottomNavigationBar(
+					accountOnNavigation = state.accountOnNavigation
+				)
+			}
+		) { innerPadding ->
+			val paddingValues = PaddingValues(
+				bottom = innerPadding.calculateBottomPadding()
+			)
+			NavHost(
+				modifier = Modifier
+					.padding(paddingValues)
+					.consumeWindowInsets(paddingValues),
+				navController = LocalNavController.current as NavHostController,
+				startDestination = startDestination,
+				builder = { createNavigationGraph() },
+				enterTransition = {
+					fadeIn(animationSpec = tween(300))
+				},
+				exitTransition = {
+					fadeOut(animationSpec = tween(300))
+				},
 			)
 		}
-	) { innerPadding ->
-		val paddingValues = PaddingValues(
-			bottom = innerPadding.calculateBottomPadding()
-		)
-		NavHost(
-			modifier = Modifier
-				.padding(paddingValues)
-				.consumeWindowInsets(paddingValues),
-			navController = LocalNavController.current as NavHostController,
-			startDestination = startDestination,
-			builder = { createNavigationGraph() },
-			enterTransition = {
-				fadeIn(animationSpec = tween(300))
-			},
-			exitTransition = {
-				fadeOut(animationSpec = tween(300))
-			},
-		)
+		
+		if (state.isNeedRestartActivity) {
+			RestartActivityDialog()
+		}
+		
 	}
 	
-	if (state.isNeedRestartActivity) {
-		RestartActivityDialog()
-	}
-	
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun MainPreview() = DefaultPreview {
-	Main()
 }
 
 @Composable

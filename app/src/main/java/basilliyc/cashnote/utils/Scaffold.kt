@@ -50,6 +50,7 @@ fun ScaffoldBox(
 @Composable
 fun ScaffoldColumn(
 	modifier: Modifier = Modifier,
+	columnModifier: Modifier = Modifier,
 	topBar: @Composable () -> Unit = {},
 	bottomBar: @Composable () -> Unit = {},
 	snackbarHost: @Composable () -> Unit = {},
@@ -72,7 +73,7 @@ fun ScaffoldColumn(
 		contentWindowInsets = contentWindowInsets,
 		content = {
 			Column(
-				modifier = Modifier.padding(it),
+				modifier = columnModifier.padding(it),
 				content = content
 			)
 		},

@@ -22,6 +22,7 @@ class MainViewModel : BaseViewModel() {
 		_state = MutableStateFlow(
 			MainState(
 				accountOnNavigation = account,
+				themeMode = preferences.themeMode.value
 			)
 		)
 		
@@ -34,6 +35,14 @@ class MainViewModel : BaseViewModel() {
 						isNeedRestartActivity = true
 					)
 				}
+			}
+		}
+		
+		viewModelScope.launch {
+			preferences.themeMode.flow.collectLatest {
+				_state.value = _state.value.copy(
+					themeMode = it
+				)
 			}
 		}
 	}

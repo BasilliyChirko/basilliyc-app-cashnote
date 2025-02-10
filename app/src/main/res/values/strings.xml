@@ -129,6 +129,12 @@
     <string name="category_form_account_using_true">Visible</string>
     <string name="category_form_account_using_false">Hidden</string>
     <string name="transaction_category_form_accounts">Visible in accounts</string>
+    <string name="theme_mode_night">Night</string>
+    <string name="theme_mode_day">Day</string>
+    <string name="theme_mode_system">System</string>
+    <string name="settings_common_theme_mode">Theme</string>
+    <string name="settings_common_group_title">Common</string>
+    <string name="settings_title">Settings</string>
     <plurals name="category_list_item_used_in_accounts_count">
         <item quantity="one">In %d account</item>
         <item quantity="other">In %d accounts</item>

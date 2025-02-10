@@ -2,7 +2,6 @@
 
 package basilliyc.cashnote.ui.transaction.form
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,7 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
@@ -63,6 +61,7 @@ import basilliyc.cashnote.ui.components.SimpleDatePickerDialog
 import basilliyc.cashnote.ui.components.SimpleTimePickerDialog
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -72,8 +71,8 @@ import basilliyc.cashnote.utils.Vibration
 import basilliyc.cashnote.utils.format
 import basilliyc.cashnote.utils.rememberSingleRunner
 import basilliyc.cashnote.utils.rememberVibrator
-import basilliyc.cashnote.utils.toPriceString
 import basilliyc.cashnote.utils.showToast
+import basilliyc.cashnote.utils.toPriceString
 import basilliyc.cashnote.utils.vibrate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest

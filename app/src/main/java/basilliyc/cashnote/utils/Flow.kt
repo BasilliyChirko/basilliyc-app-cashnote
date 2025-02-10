@@ -30,6 +30,31 @@ private class ZippedFlowInstance<T>(
 	}
 }
 
+fun <T1, R> CoroutineScope.flowZip(
+	flow1: Flow<T1>,
+	transform: (T1) -> R,
+): Flow<R> {
+	
+	val flows = ArrayList<ZippedFlowInstance<*>>()
+	val zippedFlow1 = ZippedFlowInstance(flow = flow1).also { flows.add(it) }
+	val resultFlow = MutableSharedFlow<R>()
+	
+	fun together() {
+		if (flows.all { it.isValueSet.value }) {
+			val result = transform(
+				zippedFlow1.get(),
+			)
+			launch { resultFlow.emit(result) }
+		}
+	}
+	
+	flows.forEach {
+		launch { it.collect { together() } }
+	}
+	
+	return resultFlow
+}
+
 fun <T1, T2, R> CoroutineScope.flowZip(
 	flow1: Flow<T1>,
 	flow2: Flow<T2>,

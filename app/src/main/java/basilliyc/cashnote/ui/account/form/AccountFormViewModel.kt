@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.AppNavigation
@@ -60,7 +60,7 @@ class AccountFormViewModel(
 		} else {
 			val account = FinancialAccount(
 				name = "",
-				currency = AccountCurrency.UAH,
+				currency = FinancialCurrency.UAH,
 				color = null,
 				balance = 0.0,
 				position = 0,
@@ -78,7 +78,7 @@ class AccountFormViewModel(
 		state = state.copy(action = null)
 	}
 	
-	override fun onCurrencyChanged(currency: AccountCurrency) {
+	override fun onCurrencyChanged(currency: FinancialCurrency) {
 		updateStateContentData {
 			copy(currency = currency)
 		}

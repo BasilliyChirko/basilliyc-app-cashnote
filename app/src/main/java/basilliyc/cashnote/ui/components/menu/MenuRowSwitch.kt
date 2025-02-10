@@ -27,10 +27,12 @@ fun MenuRowSwitch(
 	onCheckedChange: (Boolean) -> Unit,
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
+	leadingIcon: @Composable (() -> Unit)? = null,
 ) {
 	
 	DropdownMenuItem(
 		modifier = Modifier,
+		leadingIcon = leadingIcon,
 		text = { MenuTitle(title = title, subtitle = subtitle) },
 		trailingIcon = {
 			Switch(

@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.components.BoxLoading
@@ -97,7 +97,7 @@ private fun AccountListPreview() = DefaultPreview {
 						id = 1,
 						name = "Account 1",
 						balance = 100.0,
-						currency = AccountCurrency.UAH,
+						currency = FinancialCurrency.UAH,
 						color = null,
 						position = 0,
 					),
@@ -105,7 +105,7 @@ private fun AccountListPreview() = DefaultPreview {
 						id = 2,
 						name = "Account 2",
 						balance = 200.0,
-						currency = AccountCurrency.UAH,
+						currency = FinancialCurrency.UAH,
 						color = null,
 						position = 1,
 					),
@@ -113,7 +113,7 @@ private fun AccountListPreview() = DefaultPreview {
 						id = 3,
 						name = "Account 3",
 						balance = 300.0,
-						currency = AccountCurrency.UAH,
+						currency = FinancialCurrency.UAH,
 						color = null,
 						position = 2,
 					),

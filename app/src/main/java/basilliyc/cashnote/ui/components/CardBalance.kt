@@ -18,23 +18,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.data.FinancialColor
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.color
-import basilliyc.cashnote.data.symbol
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.toPriceString
 
 sealed interface CardBalanceLeadingIcon {
 	data class Vector(val imageVector: ImageVector?) : CardBalanceLeadingIcon
-	data class Currency(val currency: AccountCurrency) : CardBalanceLeadingIcon
+	data class Currency(val currency: FinancialCurrency) : CardBalanceLeadingIcon
 }
 
-fun CardBalanceLeadingIcon(currency: AccountCurrency) = CardBalanceLeadingIcon.Currency(currency)
+fun CardBalanceLeadingIcon(currency: FinancialCurrency) = CardBalanceLeadingIcon.Currency(currency)
 
 fun CardBalanceLeadingIcon(imageVector: ImageVector?) = CardBalanceLeadingIcon.Vector(imageVector)
 
@@ -147,7 +146,7 @@ private fun CardBalancePreview2() = DefaultPreview {
 		title = "Card",
 		primaryValue = 100.0,
 		secondaryValue = 50.0,
-		leadingIcon = CardBalanceLeadingIcon(AccountCurrency.EUR),
+		leadingIcon = CardBalanceLeadingIcon(FinancialCurrency.EUR),
 		color = FinancialColor.Green,
 	)
 }

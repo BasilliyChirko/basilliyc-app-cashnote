@@ -25,7 +25,6 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
-import basilliyc.cashnote.data.symbol
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.base.rememberResultHandler
 import basilliyc.cashnote.ui.components.CardSelectable
@@ -38,8 +37,8 @@ import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
 import basilliyc.cashnote.ui.components.menu.MenuRowPopupIcon
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.utils.DefaultPreview
-import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.ScaffoldColumn
 import basilliyc.cashnote.utils.showToast
 

@@ -1,6 +1,6 @@
 package basilliyc.cashnote.ui
 
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
@@ -13,7 +13,7 @@ object PreviewValues {
 		FinancialAccount(
 			id = 0L,
 			name = "Test Account USD",
-			currency = AccountCurrency.USD,
+			currency = FinancialCurrency.USD,
 			color = FinancialColor.Green,
 			balance = 3456.78,
 			position = 0
@@ -24,7 +24,7 @@ object PreviewValues {
 		FinancialAccount(
 			id = 0L,
 			name = "Test Account EUR",
-			currency = AccountCurrency.EUR,
+			currency = FinancialCurrency.EUR,
 			color = FinancialColor.Blue,
 			balance = 3456.78,
 			position = 0

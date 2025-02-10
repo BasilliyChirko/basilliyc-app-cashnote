@@ -36,11 +36,13 @@ fun MenuRowPopup(
 	value: String,
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
+	leadingIcon: @Composable (() -> Unit)? = null,
 	items: @Composable PopupMenuState.() -> Unit,
 ) {
 	val popupMenuState = rememberPopupMenuState()
 	DropdownMenuItem(
 		modifier = Modifier,
+		leadingIcon = leadingIcon,
 		text = { MenuTitle(title = title, subtitle = subtitle) },
 		trailingIcon = {
 			PopupMenu(

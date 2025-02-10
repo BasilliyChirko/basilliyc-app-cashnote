@@ -2,7 +2,7 @@ package basilliyc.cashnote.ui.account.form
 
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialColor
-import basilliyc.cashnote.data.AccountCurrency
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.components.TextFieldState
 
 data class AccountFormState(
@@ -14,7 +14,7 @@ data class AccountFormState(
 		data object Loading : Page
 		data class Data(
 			val isNew: Boolean,
-			val currency: AccountCurrency,
+			val currency: FinancialCurrency,
 			val name: TextFieldState,
 			val balance: TextFieldState,
 			val color: FinancialColor?,

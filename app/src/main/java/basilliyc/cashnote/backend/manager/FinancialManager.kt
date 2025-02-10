@@ -196,9 +196,6 @@ class FinancialManager {
 		logcat.debug(usedInAccounts)
 		
 		categoryToAccountParamsDao.getListByCategoryId(categoryId)
-			.also {
-				logcat.debug(it.map { it.accountId })
-			}
 			.map {
 				it.copy(
 					visible = it.accountId in usedInAccounts
@@ -692,7 +689,7 @@ class FinancialManager {
 			when (version) {
 				1 -> {
 					
-					rootObject.getListJsonObject("accounts").map {
+					val accounts = rootObject.getListJsonObject("accounts").map {
 						FinancialAccount(
 							id = it.getLong("id"),
 							name = it.getString("name"),
@@ -701,11 +698,12 @@ class FinancialManager {
 							color = it.getStringOrNull("color")?.let { FinancialColor.valueOf(it) },
 							position = it.getInt("position"),
 						)
-					}.let {
+					}
+					accounts.let {
 						accountDao.save(it)
 					}
 					
-					rootObject.getListJsonObject("categories").map {
+					val categories = rootObject.getListJsonObject("categories").map {
 						FinancialCategory(
 							id = it.getLong("id"),
 							name = it.getString("name"),
@@ -713,7 +711,8 @@ class FinancialManager {
 							icon = it.getStringOrNull("icon")?.let { FinancialIcon.valueOf(it) },
 							color = it.getStringOrNull("color")?.let { FinancialColor.valueOf(it) },
 						)
-					}.let {
+					}
+					categories.let {
 						categoryDao.save(it)
 					}
 					
@@ -730,12 +729,26 @@ class FinancialManager {
 						transactionDao.save(it)
 					}
 					
+					
+					accounts.map { account ->
+						categories.map { category ->
+							CategoryToAccountParams(
+								accountId = account.id,
+								categoryId = category.id,
+								visible = true,
+							)
+						}
+					}.flatMap { it }.let {
+						categoryToAccountParamsDao.save(it)
+					}
+					
 				}
+				
 				else -> throw AppError.Database.BackupVersionNotSupported(version)
 			}
 			
 			refreshStatistics(force = true)
-
+			
 		}
 		
 		

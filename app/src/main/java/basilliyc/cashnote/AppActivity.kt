@@ -1,9 +1,9 @@
 package basilliyc.cashnote
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,7 +15,8 @@ import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.Logcat
 
 
-class AppActivity : ComponentActivity() {
+//class AppActivity : ComponentActivity() {
+class AppActivity : AppCompatActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)

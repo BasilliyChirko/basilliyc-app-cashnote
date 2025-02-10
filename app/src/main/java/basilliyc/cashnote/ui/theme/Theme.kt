@@ -1,16 +1,15 @@
 package basilliyc.cashnote.ui.theme
 
-import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
 	primary = Purple80,
@@ -52,7 +51,7 @@ fun isDarkTheme(): Boolean {
 
 @Composable
 fun CashNoteTheme(
-	themeMode: ThemeMode = ThemeMode.System, // TODO replace with LocalNightMode
+	themeMode: ThemeMode = ThemeMode.System,
 	// Dynamic color is available on Android 12+
 	dynamicColor: Boolean = true,
 	content: @Composable () -> Unit,
@@ -62,7 +61,26 @@ fun CashNoteTheme(
 		LocalThemeMode provides themeMode,
 	) {
 		
-		val darkTheme = isDarkTheme()
+		
+		(LocalActivity.current as? ComponentActivity)?.let { activity ->
+			
+			val activityMode = AppCompatDelegate.getDefaultNightMode()
+			
+			val requestedMode = when (themeMode) {
+				ThemeMode.Night -> AppCompatDelegate.MODE_NIGHT_YES
+				ThemeMode.Day -> AppCompatDelegate.MODE_NIGHT_NO
+				ThemeMode.System -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+			}
+			
+			if (activityMode != requestedMode) {
+				AppCompatDelegate.setDefaultNightMode(requestedMode)
+			}
+			
+			
+		}
+		
+		val isNight = isDarkTheme()
+		
 		
 		val colorScheme = when {
 //			dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -70,7 +88,7 @@ fun CashNoteTheme(
 //				if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 //			}
 			
-			darkTheme -> DarkColorScheme
+			isNight -> DarkColorScheme
 			else -> LightColorScheme
 		}
 		

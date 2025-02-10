@@ -2,6 +2,7 @@ package basilliyc.cashnote.backend.manager
 
 import androidx.room.withTransaction
 import basilliyc.cashnote.AppError
+import basilliyc.cashnote.AppValues
 import basilliyc.cashnote.CategoryToAccountParams
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.FinancialAccountDao
@@ -10,16 +11,19 @@ import basilliyc.cashnote.backend.database.FinancialCategoryToFinancialAccountPa
 import basilliyc.cashnote.backend.database.FinancialStatisticDao
 import basilliyc.cashnote.backend.database.FinancialTransactionDao
 import basilliyc.cashnote.backend.preferences.AppPreferences
-import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialCurrency
+import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.utils.CalendarInstance
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.applyIf
+import basilliyc.cashnote.utils.getListJsonObject
+import basilliyc.cashnote.utils.getStringOrNull
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
@@ -27,6 +31,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.Calendar
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
@@ -604,6 +610,136 @@ class FinancialManager {
 		return positive to negative
 	}
 	
+	//----------------------------------------------------------------------------------------------
+	//  Backup
+	//----------------------------------------------------------------------------------------------
+	
+	suspend fun createBackupString(): String {
+		val rootObject = JSONObject()
+		databaseTransaction {
+			
+			rootObject.put("header", JSONObject().apply {
+				put("version", 1)
+			})
+			
+			accountDao.getList().let { accounts ->
+				rootObject.put("accounts", JSONArray().apply {
+					accounts.forEach { account ->
+						put(JSONObject().apply {
+							put("id", account.id)
+							put("name", account.name)
+							put("balance", account.balance)
+							put("currency", account.currency.name)
+							put("color", account.color?.name)
+							put("position", account.position)
+						})
+					}
+				})
+			}
+			
+			
+			categoryDao.getList().let { categories ->
+				rootObject.put("categories", JSONArray().apply {
+					categories.forEach { category ->
+						put(JSONObject().apply {
+							put("id", category.id)
+							put("name", category.name)
+							put("position", category.position)
+							put("icon", category.icon?.name)
+							put("color", category.color?.name)
+						})
+					}
+				})
+			}
+			
+			
+			transactionDao.getList().let { transactions ->
+				rootObject.put("transactions", JSONArray().apply {
+					transactions.forEach { transaction ->
+						put(JSONObject().apply {
+							put("id", transaction.id)
+							put("value", transaction.value)
+							put("date", transaction.date)
+							put("accountId", transaction.accountId)
+							put("categoryId", transaction.categoryId)
+							put("comment", transaction.comment)
+						})
+					}
+				})
+			}
+			
+			
+		}
+		return rootObject.toString()
+	}
+	
+	suspend fun restoreBackupString(string: String) {
+		val rootObject = JSONObject(string)
+		
+		val header = rootObject.getJSONObject("header")
+		val version = header.getInt("version")
+		
+		if (version < AppValues.BackupMinVersion || version > AppValues.BackupMaxVersion) {
+			throw AppError.Database.BackupVersionNotSupported(version)
+		}
+		
+		databaseTransaction {
+			
+			transactionDao.deleteAll()
+			categoryDao.deleteAll()
+			accountDao.deleteAll()
+			
+			when (version) {
+				1 -> {
+					
+					rootObject.getListJsonObject("accounts").map {
+						FinancialAccount(
+							id = it.getLong("id"),
+							name = it.getString("name"),
+							balance = it.getDouble("balance"),
+							currency = FinancialCurrency.valueOf(it.getString("currency")),
+							color = it.getStringOrNull("color")?.let { FinancialColor.valueOf(it) },
+							position = it.getInt("position"),
+						)
+					}.let {
+						accountDao.save(it)
+					}
+					
+					rootObject.getListJsonObject("categories").map {
+						FinancialCategory(
+							id = it.getLong("id"),
+							name = it.getString("name"),
+							position = it.getInt("position"),
+							icon = it.getStringOrNull("icon")?.let { FinancialIcon.valueOf(it) },
+							color = it.getStringOrNull("color")?.let { FinancialColor.valueOf(it) },
+						)
+					}.let {
+						categoryDao.save(it)
+					}
+					
+					rootObject.getListJsonObject("transactions").map {
+						FinancialTransaction(
+							id = it.getLong("id"),
+							value = it.getDouble("value"),
+							date = it.getLong("date"),
+							accountId = it.getLong("accountId"),
+							categoryId = it.getLong("categoryId"),
+							comment = it.getStringOrNull("comment"),
+						)
+					}.let {
+						transactionDao.save(it)
+					}
+					
+				}
+				else -> throw AppError.Database.BackupVersionNotSupported(version)
+			}
+			
+			refreshStatistics(force = true)
+
+		}
+		
+		
+	}
 	
 	//----------------------------------------------------------------------------------------------
 	//  Other

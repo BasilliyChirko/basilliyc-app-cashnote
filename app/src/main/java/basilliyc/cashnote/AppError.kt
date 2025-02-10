@@ -13,6 +13,12 @@ sealed class AppError(message: String, cause: Throwable? = null) : Throwable(mes
 		class TransactionNotFound(id: Long) :
 			Database("Transaction with id=$id not found in database")
 		
+		data class BackupVersionNotSupported(
+			val currentVersion: Int,
+			val minVersion: Int = AppValues.BackupMinVersion,
+			val maxVersion: Int = AppValues.BackupMaxVersion,
+		) : Database("Backup version $currentVersion is not supported. Supported from $minVersion to $maxVersion")
+		
 	}
 	
 }

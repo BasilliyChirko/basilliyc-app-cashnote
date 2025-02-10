@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import basilliyc.cashnote.ui.main.Main
-import basilliyc.cashnote.ui.theme.CashNoteTheme
 import basilliyc.cashnote.utils.LocalLogcat
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.Logcat

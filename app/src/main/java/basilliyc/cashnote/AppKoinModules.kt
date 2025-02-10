@@ -1,5 +1,6 @@
 package basilliyc.cashnote
 
+import android.content.Context
 import androidx.room.Room
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.AppDatabaseMigrations
@@ -12,6 +13,8 @@ fun AppValues.koinModules() = module {
 	
 	single { FinancialManager() }
 	single { AppPreferences() }
+	
+	factory { get<Context>().contentResolver }
 	
 	single {
 		Room.databaseBuilder(androidContext(), AppDatabase::class.java, "AppDatabase")

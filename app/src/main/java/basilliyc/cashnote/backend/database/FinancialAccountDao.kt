@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -35,6 +34,9 @@ interface FinancialAccountDao {
 	
 	@Delete
 	suspend fun delete(financialAccounts: List<FinancialAccount>)
+	
+	@Query("DELETE FROM FinancialAccount")
+	suspend fun deleteAll()
 	
 	@Query("SELECT * FROM FinancialAccount ORDER BY position ASC")
 	fun getListAsFlow(): Flow<List<FinancialAccount>>

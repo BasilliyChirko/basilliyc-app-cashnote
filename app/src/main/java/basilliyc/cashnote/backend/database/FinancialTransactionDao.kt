@@ -21,6 +21,12 @@ interface FinancialTransactionDao {
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId")
 	suspend fun getListByAccount(accountId: Long): List<FinancialTransaction>
 	
+	@Query("SELECT * FROM FinancialTransaction")
+	fun getListAsFlow(): Flow<List<FinancialTransaction>>
+	
+	@Query("SELECT * FROM FinancialTransaction")
+	suspend fun getList(): List<FinancialTransaction>
+	
 	@Query("SELECT * FROM FinancialTransaction WHERE id=:id")
 	suspend fun getById(id: Long): FinancialTransaction?
 	
@@ -38,6 +44,9 @@ interface FinancialTransactionDao {
 	
 	@Delete
 	suspend fun delete(transactions: List<FinancialTransaction>): Int
+	
+	@Query("DELETE FROM FinancialTransaction")
+	suspend fun deleteAll()
 	
 	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId ORDER BY date DESC")
 	fun getPagingSourceByAccount(accountId: Long): PagingSource<Int, FinancialTransaction>

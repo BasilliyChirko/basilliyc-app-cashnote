@@ -111,9 +111,9 @@ class StateResult<T> : MutableState<T?> {
 		}
 		
 		@Composable
-		inline fun <reified T : Any?> handle(result: T, crossinline block: Handler.(T) -> Unit) {
+		inline fun <reified T : Any> handle(result: T?, crossinline block: Handler.(T) -> Unit) {
 			LaunchedEffect(result) {
-				block(result)
+				result?.let { block(it) }
 			}
 		}
 		
@@ -164,6 +164,19 @@ fun rememberResultHandler(): State<Handler> {
 	}
 }
 
+
+@Composable
+inline fun <reified T : Any> handleResult(result: T?, crossinline block: Handler.(T) -> Unit) {
+	rememberResultHandler().value.handle(result, block)
+}
+
+@Composable
+inline fun <reified T : Any> handleResult(result: T?, listener: BaseListener, crossinline block: Handler.(T) -> Unit) {
+	rememberResultHandler().value.handle(result) {
+		block(it)
+		listener.onResultHandled()
+	}
+}
 
 
 

@@ -1,11 +1,16 @@
 package basilliyc.cashnote.ui.settings
 
+import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -17,9 +22,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
+import basilliyc.cashnote.ui.base.handleResult
+import basilliyc.cashnote.ui.components.ConfirmationDialog
 import basilliyc.cashnote.ui.components.PopupMenuItem
+import basilliyc.cashnote.ui.components.RegisterActivityRequests
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.menu.MenuRowPopup
+import basilliyc.cashnote.ui.components.menu.MenuRowText
 import basilliyc.cashnote.ui.settings.SettingsStateHolder.Page
 import basilliyc.cashnote.ui.stringName
 import basilliyc.cashnote.ui.theme.ThemeMode
@@ -29,7 +38,28 @@ import basilliyc.cashnote.utils.ScaffoldColumn
 @Composable
 fun AppSettings() {
 	val viewModel = viewModel<SettingsViewModel>()
+	RegisterActivityRequests(viewModel)
 	Page(page = viewModel.state.page, listener = viewModel)
+	Dialog(dialog = viewModel.state.dialog, listener = viewModel)
+	Result(result = viewModel.state.result, listener = viewModel)
+}
+
+@Composable
+private fun Result(
+	result: SettingsStateHolder.Result?,
+	listener: SettingsListener,
+) {
+	handleResult(result, listener) {
+		when (it) {
+			SettingsStateHolder.Result.BackupRestoreSuccess -> {
+				showToast(R.string.settings_backup_restore_success)
+			}
+			
+			SettingsStateHolder.Result.BackupRestoreFailure -> {
+				showToast(R.string.settings_backup_restore_failure)
+			}
+		}
+	}
 }
 
 @Preview(showBackground = true)
@@ -42,7 +72,12 @@ private fun PageDataPreview() = DefaultPreview {
 			)
 		),
 		listener = object : SettingsListener {
+			override fun onResultHandled() {}
 			override fun onThemeModeChanged(themeMode: ThemeMode) {}
+			override fun onBackupCreateClicked(activity: Activity) {}
+			override fun onBackupRestoreClicked() {}
+			override fun onBackupRestoreConfirmed() {}
+			override fun onBackupRestoreCanceled() {}
 		}
 	)
 }
@@ -71,6 +106,7 @@ private fun PageData(
 		}
 	) {
 		SettingsCommon(common = page.common, listener = listener)
+		SettingsBackup(listener = listener)
 	}
 }
 
@@ -98,6 +134,7 @@ private fun ColumnScope.SettingsCommon(
 	listener: SettingsListener,
 ) {
 	Group(title = stringResource(R.string.settings_common_group_title)) {
+		
 		MenuRowPopup(
 			title = stringResource(R.string.settings_common_theme_mode),
 			value = common.themeMode.stringName,
@@ -115,6 +152,62 @@ private fun ColumnScope.SettingsCommon(
 					)
 				}
 			},
+		)
+		
+	}
+}
+
+@Composable
+private fun ColumnScope.SettingsBackup(
+	listener: SettingsListener,
+) {
+	Group(title = stringResource(R.string.settings_backup_group_title)) {
+		
+		val activity = LocalActivity.current
+		
+		MenuRowText(
+			title = stringResource(R.string.settings_backup_create),
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Filled.FileUpload,
+					contentDescription = stringResource(R.string.settings_backup_create)
+				)
+			},
+			onClick = {
+				activity?.let { listener.onBackupCreateClicked(it) }
+			},
+		)
+		
+		HorizontalDivider()
+		
+		MenuRowText(
+			title = stringResource(R.string.settings_backup_restore),
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Filled.FileDownload,
+					contentDescription = stringResource(R.string.settings_backup_restore)
+				)
+			},
+			onClick = listener::onBackupRestoreClicked,
+		)
+		
+	}
+}
+
+@Composable
+private fun Dialog(
+	dialog: SettingsStateHolder.Dialog?,
+	listener: SettingsListener,
+) {
+	when (dialog) {
+		null -> Unit
+		
+		SettingsStateHolder.Dialog.RestoreBackupConfirmation -> ConfirmationDialog(
+			title = stringResource(R.string.settings_backup_restore_confirmation_title),
+			text = stringResource(R.string.settings_backup_restore_confirmation_text),
+			confirm = stringResource(R.string.settings_backup_restore_confirmation_confirm),
+			onConfirm = listener::onBackupRestoreConfirmed,
+			onCancel = listener::onBackupRestoreCanceled
 		)
 	}
 }

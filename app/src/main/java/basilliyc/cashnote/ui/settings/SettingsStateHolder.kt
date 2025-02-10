@@ -7,6 +7,8 @@ import basilliyc.cashnote.ui.theme.ThemeMode
 
 class SettingsStateHolder(
 	page: Page,
+	result: Result? = null,
+	dialog: Dialog? = null,
 ) {
 	
 	var page by mutableStateOf(page)
@@ -25,6 +27,10 @@ class SettingsStateHolder(
 			pageData = pageData?.copy(common = value)
 		}
 	
+	var result by mutableStateOf(result)
+	
+	var dialog by mutableStateOf(dialog)
+	
 	sealed interface Page {
 		data class Data(
 			val common: Common,
@@ -34,6 +40,15 @@ class SettingsStateHolder(
 	data class Common(
 		val themeMode: ThemeMode,
 	)
+	
+	sealed interface Dialog {
+		data object RestoreBackupConfirmation : Dialog
+	}
+	
+	sealed interface Result {
+		data object BackupRestoreSuccess : Result
+		data object BackupRestoreFailure : Result
+	}
 	
 }
 

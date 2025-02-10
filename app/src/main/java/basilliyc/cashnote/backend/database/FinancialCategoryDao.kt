@@ -41,6 +41,9 @@ interface FinancialCategoryDao {
 	@Delete
 	suspend fun delete(transactions: List<FinancialCategory>): Int
 	
+	@Query("DELETE FROM FinancialCategory")
+	suspend fun deleteAll()
+	
 	//----------------------------------------------------------------------------------------------
 	//  OTHER
 	//----------------------------------------------------------------------------------------------

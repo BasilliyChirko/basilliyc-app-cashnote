@@ -5,75 +5,82 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import basilliyc.cashnote.ui.base.BaseViewModel
-import basilliyc.cashnote.utils.castOrNull
 import basilliyc.cashnote.utils.flowZip
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.launch
 
-class AccountListViewModel : BaseViewModel() {
+class AccountListViewModel : BaseViewModel(), AccountListListener {
 	
-	var state: AccountListState by mutableStateOf(AccountListState())
-		private set
-	
-	var draggedList by mutableStateOf<List<AccountListState.AccountBalance>?>(null)
+	var state: AccountListStateHolder by mutableStateOf(AccountListStateHolder())
 		private set
 	
 	init {
-		state = state.copy(content = AccountListState.Content.Loading)
+		state.page = AccountListStateHolder.Page.Loading
 		viewModelScope.launch {
-			
 			flowZip(
 				financialManager.getAccountsListAsFlow(),
 				financialManager.getStatisticsListAsFlow()
 			) { accounts, statistics ->
-				state = state.copy(
-					content = if (accounts.isNotEmpty()) {
-						val data = accounts.map { account ->
-							val primaryValue = statistics.filter { it.accountId == account.id }
-								.sumOf { it.primaryValuePositive + it.primaryValueNegative }
-								.takeIf { it != 0.0 }
-							AccountListState.AccountBalance(
-								account = account,
-								primaryValue = primaryValue
-							)
-						}
-						AccountListState.Content.Data(data)
-					} else AccountListState.Content.DataEmpty
+				val data = accounts.map { account ->
+					val primaryValue = statistics.filter { it.accountId == account.id }
+						.sumOf { it.primaryValuePositive + it.primaryValueNegative }
+						.takeIf { it != 0.0 }
+					AccountListStateHolder.AccountBalance(
+						account = account,
+						primaryValue = primaryValue
+					)
+				}
+				
+				state.pageData = AccountListStateHolder.Page.Data(
+					accounts = data,
+					accountsDragged = null
 				)
-				draggedList = null
 			}
-			
-			
-//			financialManager.getAccountsListAsFlow().collectLatest {
-//				state = state.copy(
-//					content = if (it.isNotEmpty()) AccountListState.Content.Data(it)
-//					else AccountListState.Content.DataEmpty
-//				)
-//				draggedList = null
-//			}
 		}
 	}
 	
-	fun onDragStarted() {
-		val data = state.content.castOrNull<AccountListState.Content.Data>() ?: return
-		draggedList = data.accounts
+	override fun onResultHandled() {
+		state.result = null
 	}
 	
-	fun onDragCompleted(from: Int, to: Int) {
-		val data = state.content.castOrNull<AccountListState.Content.Data>() ?: return
-		draggedList = ArrayList(data.accounts).reordered(from, to)
+	override fun onDragStarted() {
+		val data = state.pageData ?: return
+		state.pageData = data.copy(
+			accountsDragged = data.accounts
+		)
+	}
+	
+	override fun onDragCompleted(from: Int, to: Int) {
+		val data = state.pageData ?: return
+		state.pageData = data.copy(
+			accountsDragged = ArrayList(data.accounts).reordered(from, to)
+		)
 		viewModelScope.launch {
 			financialManager.changeAccountPosition(from, to)
 		}
 	}
 	
-	fun onDragReverted() {
-		draggedList = null
+	override fun onDragReverted() {
+		val data = state.pageData ?: return
+		state.pageData = data.copy(
+			accountsDragged = null
+		)
 	}
 	
-	fun onDragMoved(from: Int, to: Int) {
-		draggedList = draggedList?.let { ArrayList(it) }?.reordered(from, to)
+	override fun onDragMoved(from: Int, to: Int) {
+		val data = state.pageData ?: return
+		val draggedList = data.accountsDragged ?: return
+		state.pageData = data.copy(
+			accountsDragged = ArrayList(draggedList).reordered(from, to)
+		)
 	}
 	
+	override fun onClickAddNewAccount() {
+		state.result = AccountListStateHolder.Result.NavigateAccountForm
+	}
+	
+	override fun onClickAccount(id: Long) {
+		state.result = AccountListStateHolder.Result.NavigateAccountDetails(id)
+	}
 	
 }

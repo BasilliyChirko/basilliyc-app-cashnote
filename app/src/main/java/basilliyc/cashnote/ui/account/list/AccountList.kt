@@ -16,18 +16,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Kayaking
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,16 +31,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
 import basilliyc.cashnote.ui.PreviewValues
-import basilliyc.cashnote.ui.account.list.AccountListState.*
-import basilliyc.cashnote.ui.components.BoxLoading
+import basilliyc.cashnote.ui.account.list.AccountListStateHolder.AccountBalance
+import basilliyc.cashnote.ui.base.handleResult
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
+import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.PageLoading
+import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableVerticalGrid
-import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.OutlinedButton
+import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.applyIf
-import basilliyc.cashnote.utils.rememberSingleRunner
 
 
 //--------------------------------------------------------------------------------------------------
@@ -55,119 +52,139 @@ import basilliyc.cashnote.utils.rememberSingleRunner
 @Composable
 fun AccountList() {
 	val viewModel = viewModel<AccountListViewModel>()
-	val navController = LocalNavController.current
-	val state = viewModel.state
-	val context = LocalContext.current
-	val singleRunner = rememberSingleRunner()
-	
-	Content(
-		state = state,
-		draggedList = viewModel.draggedList,
-		onClickAddNewAccount = {
-			singleRunner.schedule {
-				navController.navigate(AppNavigation.AccountForm(accountId = null))
-			}
-		},
-		onClickAccount = {
-			singleRunner.schedule {
-				navController.navigate(
+	Result(result = viewModel.state.result, listener = viewModel)
+	Page(page = viewModel.state.page, listener = viewModel)
+}
+
+@Composable
+private fun Result(
+	result: AccountListStateHolder.Result?,
+	listener: AccountListListener,
+) {
+	handleResult(result, listener) {
+		when (it) {
+			is AccountListStateHolder.Result.NavigateAccountDetails -> {
+				navigateForward(
 					AppNavigation.AccountDetails(
-						accountId = it,
+						accountId = it.id,
 						isFromNavigation = false
 					)
 				)
 			}
-		},
-		onDragStarted = viewModel::onDragStarted,
-		onDragCompleted = viewModel::onDragCompleted,
-		onDragReverted = viewModel::onDragReverted,
-		onDragMoved = viewModel::onDragMoved,
-	)
-
+			
+			is AccountListStateHolder.Result.NavigateAccountForm -> {
+				navigateForward(AppNavigation.AccountForm(accountId = null))
+			}
+		}
+	}
 }
+
 
 @Preview(showBackground = true)
 @Composable
 private fun AccountListPreview() = DefaultPreview {
-	Content(
-		state = AccountListState(
-			content = Content.Data(
-				PreviewValues.accounts.map {
-					AccountBalance(
-						account = it,
-						primaryValue = it.balance,
-					)
-				}
-			),
+	PageData(
+		page = AccountListStateHolder.Page.Data(
+			accounts = PreviewValues.accounts.map {
+				AccountBalance(
+					account = it,
+					primaryValue = it.balance,
+				)
+			},
+			accountsDragged = null,
 		),
-		draggedList = null,
-		onClickAddNewAccount = {},
-		onClickAccount = {},
-		onDragStarted = {},
-		onDragCompleted = { _, _ -> },
-		onDragReverted = {},
-		onDragMoved = { _, _ -> },
-	)
-}
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun Content(
-	state: AccountListState,
-	draggedList: List<AccountBalance>?,
-	onClickAddNewAccount: () -> Unit,
-	onClickAccount: (id: Long) -> Unit,
-	onDragStarted: () -> Unit,
-	onDragCompleted: (from: Int, to: Int) -> Unit,
-	onDragReverted: () -> Unit,
-	onDragMoved: (from: Int, to: Int) -> Unit,
-) {
-	Scaffold(
-		modifier = Modifier.fillMaxSize(),
-		topBar = {
-			if (state.content is Content.Data) {
-				ActionBar(onClickAddNewAccount)
-			}
-		},
-		content = { innerPadding ->
-			val modifier = Modifier.padding(innerPadding)
-			
-			when (val content = state.content) {
-				is Content.Loading -> BoxLoading(
-					modifier = modifier
-				)
-				
-				is Content.Data -> ContentData(
-					modifier = modifier,
-					content = content,
-					draggedList = draggedList,
-					onClickAccount = onClickAccount,
-					onDragStarted = onDragStarted,
-					onDragCompleted = onDragCompleted,
-					onDragReverted = onDragReverted,
-					onDragMoved = onDragMoved,
-				)
-				
-				is Content.DataEmpty -> ContentDataEmpty(
-					modifier = modifier,
-					onClickAddNewAccount = onClickAddNewAccount
-				)
-			}
-			
+		listener = object : AccountListListener {
+			override fun onResultHandled() {}
+			override fun onClickAddNewAccount() {}
+			override fun onClickAccount(id: Long) {}
+			override fun onDragStarted() {}
+			override fun onDragCompleted(from: Int, to: Int) {}
+			override fun onDragReverted() {}
+			override fun onDragMoved(from: Int, to: Int) {}
 		}
 	)
 }
 
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA_EMPTY
-//--------------------------------------------------------------------------------------------------
+@Composable
+private fun Page(
+	page: AccountListStateHolder.Page,
+	listener: AccountListListener,
+) {
+	when (page) {
+		is AccountListStateHolder.Page.Data -> PageData(page, listener)
+		AccountListStateHolder.Page.Loading -> PageLoading()
+	}
+}
 
 @Composable
-private fun ContentDataEmpty(
+private fun PageData(
+	page: AccountListStateHolder.Page.Data,
+	listener: AccountListListener,
+) {
+	ScaffoldBox(
+		topBar = {
+			SimpleActionBar(
+				title = stringResource(R.string.main_nav_account_list),
+				actions = {
+					IconButton(
+						onClick = listener::onClickAddNewAccount,
+						imageVector = Icons.Filled.Add,
+						contentDescription = stringResource(R.string.add_new_account)
+					)
+				}
+			)
+			
+		}
+	) {
+		if (page.accounts.isEmpty()) {
+			PageDataEmpty(
+				onClickAddNewAccount = listener::onClickAddNewAccount
+			)
+			return@ScaffoldBox
+		}
+		
+		val accounts = page.accountsDragged ?: page.accounts
+		DraggableVerticalGrid(
+			modifier = Modifier.fillMaxSize(),
+			columns = GridCells.Adaptive(128.dp),
+			horizontalArrangement = Arrangement.spacedBy(8.dp),
+			verticalArrangement = Arrangement.spacedBy(8.dp),
+			contentPadding = PaddingValues(8.dp),
+			onDragStarted = { listener.onDragStarted() },
+			onDragCompleted = listener::onDragCompleted,
+			onDragReverted = listener::onDragReverted,
+			onDragMoved = listener::onDragMoved,
+		) {
+			items(
+				count = accounts.size,
+				key = { accounts[it].account.id },
+				itemContent = { index, isDragged ->
+					val accountBalance = accounts[index]
+					val account = accountBalance.account
+					CardBalance(
+						modifier = Modifier
+							.applyIf({ isDragged }) {
+								this.shadow(
+									elevation = 4.dp,
+									shape = MaterialTheme.shapes.small
+								)
+							},
+						onClick = { listener.onClickAccount(account.id) },
+						title = account.name,
+						primaryValue = account.balance,
+						secondaryValue = accountBalance.primaryValue,
+						leadingIcon = CardBalanceLeadingIcon(account.currency),
+						color = account.color,
+					)
+				}
+			)
+		}
+		
+	}
+}
+
+@Composable
+private fun PageDataEmpty(
 	modifier: Modifier = Modifier,
 	onClickAddNewAccount: () -> Unit,
 ) {
@@ -198,80 +215,3 @@ private fun ContentDataEmpty(
 		)
 	}
 }
-
-//--------------------------------------------------------------------------------------------------
-//  CONTENT.DATA
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun ContentData(
-	modifier: Modifier = Modifier,
-	content: Content.Data,
-	draggedList: List<AccountBalance>? = null,
-	onClickAccount: (id: Long) -> Unit,
-	onDragStarted: () -> Unit,
-	onDragCompleted: (from: Int, to: Int) -> Unit,
-	onDragReverted: () -> Unit,
-	onDragMoved: (from: Int, to: Int) -> Unit,
-) {
-	val accounts = draggedList ?: content.accounts
-	
-	DraggableVerticalGrid(
-		modifier = modifier.fillMaxSize(),
-		columns = GridCells.Adaptive(128.dp),
-		horizontalArrangement = Arrangement.spacedBy(8.dp),
-		verticalArrangement = Arrangement.spacedBy(8.dp),
-		contentPadding = PaddingValues(8.dp),
-		onDragStarted = { onDragStarted() },
-		onDragCompleted = onDragCompleted,
-		onDragReverted = onDragReverted,
-		onDragMoved = onDragMoved,
-	) {
-		items(
-			count = accounts.size,
-			key = { accounts[it].account.id },
-			itemContent = { index, isDragged ->
-				val accountBalance = accounts[index]
-				val account = accountBalance.account
-				CardBalance(
-					modifier = Modifier
-						.applyIf({ isDragged }) {
-							this.shadow(
-								elevation = 4.dp,
-								shape = MaterialTheme.shapes.small
-							)
-						},
-					onClick = { onClickAccount(account.id) },
-					title = account.name,
-					primaryValue = account.balance,
-					secondaryValue = accountBalance.primaryValue,
-					leadingIcon = CardBalanceLeadingIcon(account.currency),
-					color = account.color,
-				)
-			}
-		)
-	}
-}
-
-//--------------------------------------------------------------------------------------------------
-//  ACTION BAR
-//--------------------------------------------------------------------------------------------------
-
-@Composable
-private fun ActionBar(
-	onClickAddNewAccount: () -> Unit,
-) = TopAppBar(
-	title = { Text(text = stringResource(R.string.main_nav_account_list)) },
-	actions = {
-		IconButton(
-			onClick = onClickAddNewAccount
-		) {
-			Icon(
-				imageVector = Icons.Filled.Add,
-				contentDescription = stringResource(R.string.add_new_account)
-			)
-		}
-	}
-)
-
-

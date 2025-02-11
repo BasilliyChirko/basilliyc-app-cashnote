@@ -844,63 +844,19 @@ class FinancialManager {
 	}
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-
-//		saveCategory(
-//			FinancialCategory(
-//				id = 4L,
-//				name = "Test Category 4",
-//				position = 0,
-//				icon = null,
-//			)
-//		)
-//
-//		transactionDao.getEarliestTransactionDate(1L, 3L).also {
-//			logcat.debug("Earliest date: ${it.format(TimestampStyle.YearMonthDayHourMinuteSeconds)}")
-//		}
-//
-//		transactionDao.getEarliestTransactionDate(1L, 4L).also {
-//			logcat.debug("Earliest date: ${it.format(TimestampStyle.YearMonthDayHourMinuteSeconds)}")
-//		}
-
-//		initTestData()
-//		measureTimeMillis {
-//			refreshStatistics(true)
-//		}.also { logcat.debug("Statistic built in $it millis") }
-
-//		val date = System.currentTimeMillis()
-//		val initialPeriod = PeriodValue(period = FinancialStatisticParams.Period.Day, date)
-//		val periodsCount =
-//			FinancialStatisticParams.Calculation.AveragePreviousPeriodsForMonth6.getPeriodsCount(
-//				initialPeriod.previous
-//			)
-//		logcat.debug("Periods count: $periodsCount")
-
-
-//		FinancialStatisticParams.Period.entries.forEach { period ->
-//			val periodValue1 = PeriodValue(period, date).also {
-//				logcat.debug(
-//					it.period,
-//					it.start.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//					it.end.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//				)
+		
+//		databaseTransaction {
+//			logcat.debug("Start")
+//			measureTimeMillis {
+//				TestData.getTransactions(
+//					categoryId = 1L,
+//				).let {
+//					transactionDao.save(it)
+//				}
+//				refreshStatistics(force = true)
+//			}.also {
+//				logcat.debug("Time: $it")
 //			}
-//
-//			val periodValue2 = periodValue1.getPreviousPeriodValue().also {
-//				logcat.debug(
-//					it.period,
-//					it.start.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//					it.end.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//				)
-//			}
-//
-//			val periodValue3 = periodValue2.getPreviousPeriodValue().also {
-//				logcat.debug(
-//					it.period,
-//					it.start.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//					it.end.format(TimestampStyle.YearMonthDayHourMinuteSeconds),
-//				)
-//			}
-//
 //		}
 	
 	

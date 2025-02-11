@@ -7,12 +7,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import basilliyc.cashnote.AppNavigation
-import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialCategory
-import basilliyc.cashnote.data.FinancialStatistic
-import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.ui.account.details.AccountDetailsState.Page
 import basilliyc.cashnote.ui.base.BaseViewModel
+import basilliyc.cashnote.utils.flowZip
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -43,29 +40,17 @@ class AccountDetailsViewModel(
 			state = state.copy(result = value)
 		}
 	
-	lateinit var account: FinancialAccount
-	lateinit var categories: List<FinancialCategory>
-	lateinit var statistics: List<FinancialStatistic>
-	lateinit var statisticsParams: FinancialStatisticParams
-	
 	init {
 		state = state.copy(page = Page.Loading)
 		viewModelScope.launch {
-			val account = financialManager.requireAccountById(route.accountId)
-				.also { account = it }
-			
-			val categories = financialManager.getCategoryListVisibleInAccount(route.accountId)
-				.also { categories = it }
-			
-			val statistics = financialManager.getStatisticsListForAccount(route.accountId)
-				.also { statistics = it }
-			
-			val statisticsParams = financialManager.getStatisticParams()
-				.also { statisticsParams = it }
-			
-			state = state.copy(
-				page = Page.Data(
-					account = account,
+			flowZip(
+				financialManager.getAccountByIdAsFlow(route.accountId),
+				financialManager.getCategoryListVisibleInAccountAsFlow(route.accountId),
+				financialManager.getStatisticsListForAccountAsFlow(route.accountId),
+				financialManager.getStatisticsParamsAsFlow(),
+			) { account, categories, statistics, statisticsParams ->
+				Page.Data(
+					account = account!!,
 					balancePrimaryPositive = statistics.sumOf { it.primaryValuePositive },
 					balancePrimaryNegative = statistics.sumOf { it.primaryValueNegative },
 					balanceSecondaryPositive = statistics.sumOf { it.secondaryValuePositive },
@@ -81,77 +66,13 @@ class AccountDetailsViewModel(
 					},
 					statisticParams = statisticsParams,
 				)
-			)
-			
-			listenForUpdates()
-		}
-	}
-	
-	private fun listenForUpdates() {
-		//ACCOUNT
-		viewModelScope.launch {
-			financialManager.getAccountByIdAsFlow(route.accountId).collectLatest { account ->
-				if (account == null) return@collectLatest
-				statePageData = statePageData?.copy(
-					account = account,
+			}.collectLatest {
+				logcat.debug("update")
+				state = state.copy(
+					page = it,
 				)
-				this@AccountDetailsViewModel.account = account
 			}
 		}
-		
-		//CATEGORIES
-		viewModelScope.launch {
-			financialManager.getCategoryListVisibleInAccountAsFlow(route.accountId).collectLatest { categories ->
-				statePageData = statePageData?.copy(
-					categories = categories.map { category ->
-						val stats = statistics.find { it.categoryId == category.id }
-						AccountDetailsState.CategoryWithBalance(
-							category = category,
-							primaryValue = stats?.let { it.primaryValuePositive + it.primaryValueNegative }
-								?: 0.0,
-							secondaryValue = stats?.let { it.secondaryValuePositive + it.secondaryValueNegative }
-						)
-					}
-				)
-				this@AccountDetailsViewModel.categories = categories
-			}
-		}
-		
-		//STATISTIC PARAMS
-		viewModelScope.launch {
-			financialManager.getStatisticsParamsAsFlow()
-				.collectLatest { statisticsParams ->
-					statePageData = statePageData?.copy(
-						statisticParams = statisticsParams,
-					)
-					this@AccountDetailsViewModel.statisticsParams = statisticsParams
-				}
-		}
-		
-		//STATISTIC VALUES
-		viewModelScope.launch {
-			financialManager.getStatisticsListForAccountAsFlow(route.accountId)
-				.collectLatest { statistics ->
-					statePageData = statePageData?.copy(
-						balancePrimaryPositive = statistics.sumOf { it.primaryValuePositive },
-						balancePrimaryNegative = statistics.sumOf { it.primaryValueNegative },
-						balanceSecondaryPositive = statistics.sumOf { it.secondaryValuePositive },
-						balanceSecondaryNegative = statistics.sumOf { it.secondaryValueNegative },
-						categories = categories.map { category ->
-							val stats = statistics.find { it.categoryId == category.id }
-							AccountDetailsState.CategoryWithBalance(
-								category = category,
-								primaryValue = stats?.let { it.primaryValuePositive + it.primaryValueNegative }
-									?: 0.0,
-								secondaryValue = stats?.let { it.secondaryValuePositive + it.secondaryValueNegative }
-							)
-						}
-					)
-					this@AccountDetailsViewModel.statistics = statistics
-				}
-		}
-		
-		
 	}
 	
 	override fun onResultConsumed() {
@@ -160,7 +81,7 @@ class AccountDetailsViewModel(
 	
 	override fun onCategoryClicked(id: Long) {
 		stateResult = AccountDetailsState.Result.NavigateTransactionForm(
-			accountId = account.id,
+			accountId = route.accountId,
 			categoryId = id,
 		)
 	}
@@ -172,19 +93,19 @@ class AccountDetailsViewModel(
 	
 	override fun onAccountEditClicked() {
 		stateResult = AccountDetailsState.Result.NavigateAccountForm(
-			accountId = account.id
+			accountId = route.accountId
 		)
 	}
 	
 	override fun onAccountHistoryClicked() {
 		stateResult = AccountDetailsState.Result.NavigateAccountHistory(
-			accountId = account.id
+			accountId = route.accountId
 		)
 	}
 	
 	override fun onAccountParamsClicked() {
 		stateResult = AccountDetailsState.Result.NavigateAccountParams(
-			accountId = account.id
+			accountId = route.accountId
 		)
 	}
 	
@@ -196,7 +117,7 @@ class AccountDetailsViewModel(
 		schedule {
 			try {
 				stateDialog = null
-				financialManager.deleteAccount(account.id)
+				financialManager.deleteAccount(route.accountId)
 				stateResult = AccountDetailsState.Result.AccountDeletionSuccess
 			} catch (t: Throwable) {
 				stateResult = AccountDetailsState.Result.AccountDeletionError

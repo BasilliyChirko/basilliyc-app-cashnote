@@ -382,8 +382,10 @@ class FinancialManager {
 	suspend fun getStatisticParams() = statisticDao.getParams()
 		?: FinancialStatisticParams().also { statisticDao.saveParams(it) }
 	
-	suspend fun saveStatisticParams(params: FinancialStatisticParams) =
+	suspend fun saveStatisticParams(params: FinancialStatisticParams) {
 		statisticDao.saveParams(params)
+		refreshStatistics(force = true)
+	}
 	
 	suspend fun updateStatisticCalculationDate() {
 		val currentParams = getStatisticParams()

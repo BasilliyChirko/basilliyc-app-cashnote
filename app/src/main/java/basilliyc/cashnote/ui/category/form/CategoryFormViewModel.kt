@@ -66,7 +66,7 @@ class CategoryFormViewModel(
 						account = it,
 						using = categoryToAccountParamsList.find { params ->
 							params.accountId == it.id && params.categoryId == route.categoryId
-						}?.visible == true
+						}?.visible != false
 					)
 				}
 			}.collectLatest {

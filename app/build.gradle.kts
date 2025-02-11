@@ -12,8 +12,8 @@ plugins {
 
 val versionMajor = 0
 val versionMinor = 1
-val versionPatch = 4
-val versionBuild = 6
+val versionPatch = 5
+val versionBuild = 7
 
 var versionBuildName = "$versionMajor.$versionMinor.$versionPatch"
 

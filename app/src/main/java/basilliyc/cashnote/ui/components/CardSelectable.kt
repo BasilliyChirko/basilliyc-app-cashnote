@@ -36,6 +36,11 @@ fun CardSelectable(
 				selectedColor
 			} else {
 				unselectedColor
+			},
+			contentColor = if (isSelected) {
+				MaterialTheme.colorScheme.onPrimaryContainer
+			} else {
+				CardDefaults.cardColors().contentColor
 			}
 		),
 		border = BorderStroke(

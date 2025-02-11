@@ -23,6 +23,7 @@ import basilliyc.cashnote.utils.CalendarInstance
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.getListJsonObject
+import basilliyc.cashnote.utils.getListJsonObjectOrNull
 import basilliyc.cashnote.utils.getStringOrNull
 import basilliyc.cashnote.utils.inject
 import basilliyc.cashnote.utils.monthInMillis
@@ -634,7 +635,6 @@ class FinancialManager {
 				})
 			}
 			
-			
 			categoryDao.getList().let { categories ->
 				rootObject.put("categories", JSONArray().apply {
 					categories.forEach { category ->
@@ -648,7 +648,6 @@ class FinancialManager {
 					}
 				})
 			}
-			
 			
 			transactionDao.getList().let { transactions ->
 				rootObject.put("transactions", JSONArray().apply {
@@ -665,6 +664,17 @@ class FinancialManager {
 				})
 			}
 			
+			categoryToAccountParamsDao.getList().let { params ->
+				rootObject.put("categoryToAccountParams", JSONArray().apply {
+					params.forEach { param ->
+						put(JSONObject().apply {
+							put("accountId", param.accountId)
+							put("categoryId", param.categoryId)
+							put("visible", param.visible)
+						})
+					}
+				})
+			}
 			
 		}
 		return rootObject.toString()
@@ -729,8 +739,13 @@ class FinancialManager {
 						transactionDao.save(it)
 					}
 					
-					
-					accounts.map { account ->
+					val categoryToAccountParams = rootObject.getListJsonObjectOrNull("categoryToAccountParams")?.map {
+						CategoryToAccountParams(
+							accountId = it.getLong("accountId"),
+							categoryId = it.getLong("categoryId"),
+							visible = it.getBoolean("visible"),
+						)
+					}?.takeIf { it.size == accounts.size * categories.size } ?: accounts.map { account ->
 						categories.map { category ->
 							CategoryToAccountParams(
 								accountId = account.id,
@@ -738,10 +753,9 @@ class FinancialManager {
 								visible = true,
 							)
 						}
-					}.flatMap { it }.let {
-						categoryToAccountParamsDao.save(it)
-					}
+					}.flatMap { it }
 					
+					categoryToAccountParamsDao.save(categoryToAccountParams)
 				}
 				
 				else -> throw AppError.Database.BackupVersionNotSupported(version)

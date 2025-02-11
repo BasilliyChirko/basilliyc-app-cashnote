@@ -33,10 +33,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialCurrency
-import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.AppNavigation
+import basilliyc.cashnote.R
+import basilliyc.cashnote.ui.PreviewValues
+import basilliyc.cashnote.ui.account.list.AccountListState.*
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
@@ -91,36 +91,14 @@ fun AccountList() {
 private fun AccountListPreview() = DefaultPreview {
 	Content(
 		state = AccountListState(
-			content = AccountListState.Content.Data(
-				listOf(
-					FinancialAccount(
-						id = 1,
-						name = "Account 1",
-						balance = 100.0,
-						currency = FinancialCurrency.UAH,
-						color = null,
-						position = 0,
-					),
-					FinancialAccount(
-						id = 2,
-						name = "Account 2",
-						balance = 200.0,
-						currency = FinancialCurrency.UAH,
-						color = null,
-						position = 1,
-					),
-					FinancialAccount(
-						id = 3,
-						name = "Account 3",
-						balance = 300.0,
-						currency = FinancialCurrency.UAH,
-						color = null,
-						position = 2,
-					),
-				)
+			content = Content.Data(
+				PreviewValues.accounts.map {
+					AccountBalance(
+						account = it,
+						primaryValue = it.balance,
+					)
+				}
 			),
-//			content = AccountListState.Content.Loading,
-//			content = AccountListState.Content.DataEmpty,
 		),
 		draggedList = null,
 		onClickAddNewAccount = {},
@@ -139,7 +117,7 @@ private fun AccountListPreview() = DefaultPreview {
 @Composable
 private fun Content(
 	state: AccountListState,
-	draggedList: List<FinancialAccount>?,
+	draggedList: List<AccountBalance>?,
 	onClickAddNewAccount: () -> Unit,
 	onClickAccount: (id: Long) -> Unit,
 	onDragStarted: () -> Unit,
@@ -150,7 +128,7 @@ private fun Content(
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
 		topBar = {
-			if (state.content is AccountListState.Content.Data) {
+			if (state.content is Content.Data) {
 				ActionBar(onClickAddNewAccount)
 			}
 		},
@@ -158,11 +136,11 @@ private fun Content(
 			val modifier = Modifier.padding(innerPadding)
 			
 			when (val content = state.content) {
-				is AccountListState.Content.Loading -> BoxLoading(
+				is Content.Loading -> BoxLoading(
 					modifier = modifier
 				)
 				
-				is AccountListState.Content.Data -> ContentData(
+				is Content.Data -> ContentData(
 					modifier = modifier,
 					content = content,
 					draggedList = draggedList,
@@ -173,7 +151,7 @@ private fun Content(
 					onDragMoved = onDragMoved,
 				)
 				
-				is AccountListState.Content.DataEmpty -> ContentDataEmpty(
+				is Content.DataEmpty -> ContentDataEmpty(
 					modifier = modifier,
 					onClickAddNewAccount = onClickAddNewAccount
 				)
@@ -228,15 +206,15 @@ private fun ContentDataEmpty(
 @Composable
 private fun ContentData(
 	modifier: Modifier = Modifier,
-	content: AccountListState.Content.Data,
-	draggedList: List<FinancialAccount>? = null,
+	content: Content.Data,
+	draggedList: List<AccountBalance>? = null,
 	onClickAccount: (id: Long) -> Unit,
 	onDragStarted: () -> Unit,
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
 	onDragMoved: (from: Int, to: Int) -> Unit,
 ) {
-	val accounts = draggedList ?: content.financialAccounts
+	val accounts = draggedList ?: content.accounts
 	
 	DraggableVerticalGrid(
 		modifier = modifier.fillMaxSize(),
@@ -251,9 +229,10 @@ private fun ContentData(
 	) {
 		items(
 			count = accounts.size,
-			key = { accounts[it].id },
+			key = { accounts[it].account.id },
 			itemContent = { index, isDragged ->
-				val account = accounts[index]
+				val accountBalance = accounts[index]
+				val account = accountBalance.account
 				CardBalance(
 					modifier = Modifier
 						.applyIf({ isDragged }) {
@@ -265,7 +244,7 @@ private fun ContentData(
 					onClick = { onClickAccount(account.id) },
 					title = account.name,
 					primaryValue = account.balance,
-					secondaryValue = 50.0,
+					secondaryValue = accountBalance.primaryValue,
 					leadingIcon = CardBalanceLeadingIcon(account.currency),
 					color = account.color,
 				)

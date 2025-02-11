@@ -1,13 +1,20 @@
 package basilliyc.cashnote.ui
 
-import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.data.FinancialStatisticParams
 
 object PreviewValues {
+	
+	val accounts by lazy {
+		listOf(
+			accountTestUSD,
+			accountTestEUR,
+		)
+	}
 	
 	val accountTestUSD by lazy {
 		FinancialAccount(

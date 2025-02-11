@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +27,12 @@ interface FinancialStatisticDao {
 	//----------------------------------------------------------------------------------------------
 	//  STATISTIC
 	//----------------------------------------------------------------------------------------------
+	
+	@Query("SELECT * FROM FinancialStatistic")
+	fun getListAsFlow(): Flow<List<FinancialStatistic>>
+	
+	@Query("SELECT * FROM FinancialStatistic")
+	suspend fun getList(): List<FinancialStatistic>
 	
 	@Query("SELECT * FROM FinancialStatistic WHERE accountId=:accountId")
 	fun getListForAccountAsFlow(accountId: Long): Flow<List<FinancialStatistic>>

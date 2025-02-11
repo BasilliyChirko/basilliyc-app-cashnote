@@ -10,9 +10,13 @@ data class AccountListState(
 		data object Loading : Content
 		data object DataEmpty : Content
 		data class Data(
-			val financialAccounts: List<FinancialAccount>,
+			val accounts: List<AccountBalance>,
 		) : Content
 	}
 	
+	data class AccountBalance(
+		val account: FinancialAccount,
+		val primaryValue: Double?,
+	)
 	
 }

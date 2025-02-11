@@ -400,6 +400,8 @@ class FinancialManager {
 	fun getStatisticsListForAccountAsFlow(accountId: Long) =
 		statisticDao.getListForAccountAsFlow(accountId)
 	
+	fun getStatisticsListAsFlow() = statisticDao.getListAsFlow()
+	
 	suspend fun isStatisticValid(): Boolean {
 		return System.currentTimeMillis() <= getStatisticParams().calculationValidUntil
 	}

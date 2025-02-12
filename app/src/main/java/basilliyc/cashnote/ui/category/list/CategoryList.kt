@@ -27,7 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.AppNavigation.*
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.color
-import basilliyc.cashnote.ui.base.rememberResultHandler
+import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -47,7 +47,7 @@ private fun Result(
 	result: CategoryListStateHolder.Result?,
 	listener: CategoryListListener,
 ) {
-	rememberResultHandler().value.handle(result) {
+	rememberInteractionHelper().handle(result) {
 		listener.onResultHandled()
 		when (it) {
 			

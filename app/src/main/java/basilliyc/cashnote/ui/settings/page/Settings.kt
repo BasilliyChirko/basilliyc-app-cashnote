@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
@@ -23,8 +24,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
 import basilliyc.cashnote.ui.base.handleResult
+import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.components.ConfirmationDialog
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.RegisterActivityRequests
@@ -109,8 +112,8 @@ private fun PageData(
 		columnModifier = Modifier.verticalScroll(rememberScrollState())
 	) {
 		SettingsCommon(common = page.common, listener = listener)
-		SettingsBackup(listener = listener)
 		SettingsAccount()
+		SettingsBackup(listener = listener)
 	}
 }
 
@@ -139,6 +142,20 @@ private fun ColumnScope.SettingsCommon(
 ) {
 	Group(title = stringResource(R.string.settings_common_group_title)) {
 		
+		val interactionHelper = rememberInteractionHelper()
+		MenuRowText(
+			title = stringResource(R.string.settings_common_categories),
+			leadingIcon = {
+				Icon(
+					imageVector = Icons.Filled.Category,
+					contentDescription = stringResource(R.string.settings_common_categories)
+				)
+			},
+			onClick = {
+				interactionHelper.navigateForward(AppNavigation.CategoryList)
+			}
+		)
+		HorizontalDivider()
 		MenuRowPopup(
 			title = stringResource(R.string.settings_common_theme_mode),
 			value = common.themeMode.stringName,

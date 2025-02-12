@@ -1,24 +1,16 @@
 package basilliyc.cashnote.ui.base
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
-import basilliyc.cashnote.AppNavigation
-import basilliyc.cashnote.ui.base.StateResult.Handler
-import basilliyc.cashnote.utils.EventSingleRunner
 import basilliyc.cashnote.utils.LocalNavController
 import basilliyc.cashnote.utils.log
 import basilliyc.cashnote.utils.rememberSingleRunner
-import basilliyc.cashnote.utils.showToast
 import kotlin.reflect.KProperty
 
 class StateResult<T> : MutableState<T?> {
@@ -52,13 +44,13 @@ class StateResult<T> : MutableState<T?> {
 	
 	@SuppressLint("ComposableNaming")
 	@Composable
-	fun onResult(consume: Handler.(T) -> Unit) {
+	fun onResult(consume: InteractionHelper.(T) -> Unit) {
 		val context = LocalContext.current
 		val navController = LocalNavController.current
 		val singleRunner = rememberSingleRunner()
-		val handler by remember {
+		val interactionHelper by remember {
 			derivedStateOf {
-				Handler(context, navController, singleRunner)
+				InteractionHelper(context, navController, singleRunner)
 			}
 		}
 		
@@ -66,59 +58,11 @@ class StateResult<T> : MutableState<T?> {
 		
 		LaunchedEffect(result) {
 			if (result != null) {
-				handler.consume(result)
+				interactionHelper.consume(result)
 				onActionConsumed()
 			}
 		}
 	}
-	
-	@Suppress("unused")
-	class Handler(
-		val context: Context,
-		val navController: NavController,
-		val singleRunner: EventSingleRunner,
-	) {
-		fun navigateForward(route: AppNavigation) {
-			singleRunner.schedule {
-				navController.navigate(route)
-			}
-		}
-		
-		fun navigateBack() {
-			singleRunner.schedule {
-				navController.popBackStack()
-			}
-		}
-		
-		fun navigateBack(route: AppNavigation, inclusive: Boolean = false) {
-			singleRunner.schedule {
-				navController.popBackStack(route, inclusive)
-			}
-		}
-		
-		fun showToast(
-			message: String,
-			duration: Int = Toast.LENGTH_SHORT,
-		) {
-			context.showToast(message, duration)
-		}
-		
-		fun showToast(
-			message: Int,
-			duration: Int = Toast.LENGTH_SHORT,
-		) {
-			context.showToast(message, duration)
-		}
-		
-		@Composable
-		inline fun <reified T : Any> handle(result: T?, crossinline block: Handler.(T) -> Unit) {
-			LaunchedEffect(result) {
-				result?.let { block(it) }
-			}
-		}
-		
-	}
-	
 	
 }
 
@@ -128,14 +72,14 @@ interface ResultConsumed {
 
 
 @Composable
-fun <T> ResultEffect(state: StateResult<T>, consume: StateResult.Handler.(T) -> Unit) {
+fun <T> ResultEffect(state: StateResult<T>, consume: InteractionHelper.(T) -> Unit) {
 	
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val singleRunner = rememberSingleRunner()
-	val handler by remember {
+	val interactionHelper by remember {
 		derivedStateOf {
-			Handler(context, navController, singleRunner)
+			InteractionHelper(context, navController, singleRunner)
 		}
 	}
 	
@@ -144,7 +88,7 @@ fun <T> ResultEffect(state: StateResult<T>, consume: StateResult.Handler.(T) -> 
 	LaunchedEffect(result) {
 		log("result", result)
 		if (result != null) {
-			handler.consume(result)
+			interactionHelper.consume(result)
 		}
 		state.onActionConsumed()
 	}
@@ -153,26 +97,25 @@ fun <T> ResultEffect(state: StateResult<T>, consume: StateResult.Handler.(T) -> 
 
 
 @Composable
-fun rememberResultHandler(): State<Handler> {
+fun rememberInteractionHelper(): InteractionHelper {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val singleRunner = rememberSingleRunner()
 	return remember {
 		derivedStateOf {
-			Handler(context, navController, singleRunner)
+			InteractionHelper(context, navController, singleRunner)
 		}
-	}
+	}.value
 }
 
 
 @Composable
-inline fun <reified T : Any> handleResult(result: T?, crossinline block: Handler.(T) -> Unit) {
-	rememberResultHandler().value.handle(result, block)
-}
-
-@Composable
-inline fun <reified T : Any> handleResult(result: T?, listener: BaseListener, crossinline block: Handler.(T) -> Unit) {
-	rememberResultHandler().value.handle(result) {
+inline fun <reified T : Any> handleResult(
+	result: T?,
+	listener: BaseListener,
+	crossinline block: InteractionHelper.(T) -> Unit,
+) {
+	rememberInteractionHelper().handle(result) {
 		block(it)
 		listener.onResultHandled()
 	}

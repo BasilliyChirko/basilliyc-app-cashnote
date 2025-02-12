@@ -18,7 +18,7 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.ui.PreviewValues
-import basilliyc.cashnote.ui.base.rememberResultHandler
+import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletionStateHolder.DeletionStrategy
 import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.BoxLoading
@@ -42,7 +42,7 @@ private fun Result(
 	result: CategoryExtendedDeletionStateHolder.Result?,
 	listener: CategoryExtendedDeletionListener,
 ) {
-	rememberResultHandler().value.handle(result) {
+	rememberInteractionHelper().handle(result) {
 		listener.onResultConsumed()
 		when (result) {
 			null -> Unit

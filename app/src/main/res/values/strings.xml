@@ -144,6 +144,8 @@
     <string name="settings_backup_restore_success">Backup restored</string>
     <string name="settings_backup_restore_failure">Backup restoring failed</string>
     <string name="account_form_categories">Visible categories</string>
+    <string name="settings_pages_group_title">Pages</string>
+    <string name="settings_common_categories">Categories</string>
     <plurals name="category_list_item_used_in_accounts_count">
         <item quantity="one">In %d account</item>
         <item quantity="other">In %d accounts</item>

@@ -24,7 +24,7 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.PreviewValues
-import basilliyc.cashnote.ui.base.rememberResultHandler
+import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.ItemVisibilitySelectable
 import basilliyc.cashnote.ui.components.OutlinedTextField
@@ -53,7 +53,7 @@ private fun Result(
 	result: CategoryFormStateHolder.Result?,
 	listener: CategoryFormListener,
 ) {
-	rememberResultHandler().value.handle(result) {
+	rememberInteractionHelper().handle(result) {
 		listener.onResultConsumed()
 		when (result) {
 			

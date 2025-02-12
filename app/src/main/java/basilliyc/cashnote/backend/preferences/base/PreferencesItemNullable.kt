@@ -1,6 +1,8 @@
 package basilliyc.cashnote.backend.preferences.base
 
 import android.content.SharedPreferences
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.reflect.KProperty
@@ -58,5 +60,7 @@ class PreferencesItemNullable<T : Any>(
 	private val mutableStateFlow by lazy { MutableStateFlow(get()) }
 	val flow by lazy { mutableStateFlow.asStateFlow() }
 	
+	val collectValue
+		@Composable get() = flow.collectAsState().value
 	
 }

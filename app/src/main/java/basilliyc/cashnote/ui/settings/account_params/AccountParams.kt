@@ -3,7 +3,6 @@ package basilliyc.cashnote.ui.settings.account_params
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -136,7 +135,7 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 		val preferences = rememberInject<AppPreferences>()
 		MenuRowSwitch(
 			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
-			checked = preferences.accountListSingleLine.flow.collectAsState().value,
+			checked = preferences.accountListSingleLine.collectValue(),
 			onCheckedChange = {
 				preferences.accountListSingleLine.value = it
 			}

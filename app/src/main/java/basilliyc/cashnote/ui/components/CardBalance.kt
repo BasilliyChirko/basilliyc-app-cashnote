@@ -46,6 +46,7 @@ fun CardBalance(
 	secondaryValue: Double?,
 	leadingIcon: CardBalanceLeadingIcon?,
 	color: FinancialColor?,
+	isWide: Boolean = false,
 ) {
 	OutlinedCard(
 		modifier = modifier,
@@ -57,67 +58,108 @@ fun CardBalance(
 		border = color?.color?.let { BorderStroke(1.dp, it) }
 			?: CardDefaults.outlinedCardBorder(),
 	) {
-		Column(
-			modifier = Modifier.padding(8.dp)
-		) {
+		
+		if (isWide) {
+			Row(
+				modifier = Modifier.padding(8.dp),
+				content = {
+					Column {
+						Title(title = title)
+						Icon(icon = leadingIcon, title = title)
+					}
+					Spacer(
+						modifier = Modifier
+							.weight(1F)
+							.height(48.dp)
+					)
+					Values(primaryValue = primaryValue, secondaryValue = secondaryValue)
+				}
+			)
+		} else {
+			Column(
+				modifier = Modifier.padding(8.dp),
+				content = {
+					Title(title = title)
+					Row(
+						verticalAlignment = Alignment.CenterVertically,
+					) {
+						Icon(icon = leadingIcon, title = title)
+						Spacer(
+							modifier = Modifier
+								.weight(1F)
+								.height(48.dp)
+						)
+						Values(primaryValue = primaryValue, secondaryValue = secondaryValue)
+					}
+				}
+			)
+		}
+		
+		
+	}
+}
+
+@Composable
+private fun Title(
+	title: String,
+) {
+	Text(
+		modifier = Modifier,
+		text = title,
+		style = MaterialTheme.typography.titleMedium,
+	)
+}
+
+@Composable
+private fun Icon(
+	icon: CardBalanceLeadingIcon?,
+	title: String,
+) {
+	when (icon) {
+		is CardBalanceLeadingIcon.Currency -> {
+			Text(
+				text = icon.currency.symbol,
+				style = MaterialTheme.typography.headlineMedium,
+			)
+		}
+		
+		is CardBalanceLeadingIcon.Vector -> {
+			if (icon.imageVector != null) {
+				Icon(
+					imageVector = icon.imageVector,
+					contentDescription = title,
+				)
+			}
+		}
+		
+		null -> Unit
+	}
+}
+
+@Composable
+private fun Values(
+	primaryValue: Double,
+	secondaryValue: Double?,
+) {
+	Column(
+		horizontalAlignment = Alignment.End,
+		verticalArrangement = Arrangement.Center,
+	) {
+		
+		Text(
+			text = primaryValue.toPriceString(showPlus = false),
+			modifier = Modifier,
+			style = MaterialTheme.typography.titleLarge,
+		)
+		
+		if (secondaryValue != null) {
 			Text(
 				modifier = Modifier,
-				text = title,
-				style = MaterialTheme.typography.titleMedium,
+				text = secondaryValue.toPriceString(showPlus = true),
+				style = MaterialTheme.typography.bodyLarge,
 			)
-			
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-			) {
-				
-				when (val icon = leadingIcon) {
-					is CardBalanceLeadingIcon.Currency -> {
-						Text(
-							text = icon.currency.symbol,
-							style = MaterialTheme.typography.displaySmall,
-						)
-					}
-					is CardBalanceLeadingIcon.Vector -> {
-						if (icon.imageVector != null) {
-							Icon(
-								imageVector = icon.imageVector,
-								contentDescription = title,
-							)
-						}
-					}
-					null -> Unit
-				}
-				
-				Spacer(
-					modifier = Modifier.weight(1F)
-						.height(48.dp)
-				)
-				
-				Column(
-					horizontalAlignment = Alignment.End,
-					verticalArrangement = Arrangement.Center,
-				) {
-					
-					Text(
-						text = primaryValue.toPriceString(showPlus = false),
-						modifier = Modifier,
-						style = MaterialTheme.typography.titleLarge,
-					)
-					
-					if (secondaryValue != null) {
-						Text(
-							modifier = Modifier,
-							text = secondaryValue.toPriceString(showPlus = true),
-							style = MaterialTheme.typography.bodyLarge,
-						)
-					}
-					
-				}
-				
-			}
-			
-			
 		}
+		
 	}
 }
 
@@ -133,6 +175,7 @@ private fun CardBalancePreview() = DefaultPreview {
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(Icons.Default.Home),
 		color = FinancialColor.Green,
+		isWide = true,
 	)
 }
 
@@ -148,6 +191,7 @@ private fun CardBalancePreview2() = DefaultPreview {
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(FinancialCurrency.EUR),
 		color = FinancialColor.Green,
+		isWide = true,
 	)
 }
 

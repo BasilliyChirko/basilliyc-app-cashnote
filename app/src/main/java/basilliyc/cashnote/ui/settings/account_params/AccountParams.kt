@@ -3,10 +3,12 @@ package basilliyc.cashnote.ui.settings.account_params
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
+import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.data.getAllowedCalculations
 import basilliyc.cashnote.data.labelText
@@ -17,6 +19,7 @@ import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.menu.MenuRowPopup
 import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
 import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.utils.rememberInject
 
 @Composable
 fun AccountParams() {
@@ -126,6 +129,17 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 			title = stringResource(R.string.account_params_statistic_show_secondary_value_for_account),
 			checked = page.statisticParams.showSecondaryValueForAccount,
 			onCheckedChange = listener::onStatisticShowSecondaryValueForAccountChanged
+		)
+		
+		HorizontalDivider()
+		
+		val preferences = rememberInject<AppPreferences>()
+		MenuRowSwitch(
+			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
+			checked = preferences.accountListSingleLine.flow.collectAsState().value,
+			onCheckedChange = {
+				preferences.accountListSingleLine.value = it
+			}
 		)
 	}
 }

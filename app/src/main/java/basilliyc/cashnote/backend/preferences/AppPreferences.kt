@@ -9,4 +9,6 @@ class AppPreferences : BasePreferences() {
 	
 	val themeMode = enum("themeMode", ThemeMode.System)
 	
+	val accountListSingleLine = boolean("accountListSingleLine", true)
+	
 }

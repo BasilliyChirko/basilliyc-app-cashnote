@@ -24,6 +24,7 @@ class AccountListStateHolder(
 		data class Data(
 			val accounts: List<AccountBalance>,
 			val accountsDragged: List<AccountBalance>?,
+			val isSingleLine: Boolean = true,
 		) : Page
 	}
 	

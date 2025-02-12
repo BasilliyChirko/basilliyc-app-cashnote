@@ -146,7 +146,7 @@ private fun PageData(
 		val accounts = page.accountsDragged ?: page.accounts
 		DraggableVerticalGrid(
 			modifier = Modifier.fillMaxSize(),
-			columns = GridCells.Adaptive(128.dp),
+			columns = if (page.isSingleLine) GridCells.Fixed(1) else GridCells.Adaptive(128.dp),
 			horizontalArrangement = Arrangement.spacedBy(8.dp),
 			verticalArrangement = Arrangement.spacedBy(8.dp),
 			contentPadding = PaddingValues(8.dp),
@@ -175,6 +175,7 @@ private fun PageData(
 						secondaryValue = accountBalance.primaryValue,
 						leadingIcon = CardBalanceLeadingIcon(account.currency),
 						color = account.color,
+						isWide = page.isSingleLine,
 					)
 				}
 			)
@@ -215,3 +216,5 @@ private fun PageDataEmpty(
 		)
 	}
 }
+
+

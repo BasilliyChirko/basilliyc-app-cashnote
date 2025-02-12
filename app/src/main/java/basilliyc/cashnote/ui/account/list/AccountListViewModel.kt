@@ -19,8 +19,9 @@ class AccountListViewModel : BaseViewModel(), AccountListListener {
 		viewModelScope.launch {
 			flowZip(
 				financialManager.getAccountsListAsFlow(),
-				financialManager.getStatisticsListAsFlow()
-			) { accounts, statistics ->
+				financialManager.getStatisticsListAsFlow(),
+				preferences.accountListSingleLine.flow,
+			) { accounts, statistics, singleLine ->
 				val data = accounts.map { account ->
 					val primaryValue = statistics.filter { it.accountId == account.id }
 						.sumOf { it.primaryValuePositive + it.primaryValueNegative }
@@ -33,7 +34,8 @@ class AccountListViewModel : BaseViewModel(), AccountListListener {
 				
 				state.pageData = AccountListStateHolder.Page.Data(
 					accounts = data,
-					accountsDragged = null
+					accountsDragged = null,
+					isSingleLine = singleLine,
 				)
 			}
 		}

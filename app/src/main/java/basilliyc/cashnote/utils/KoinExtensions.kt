@@ -1,6 +1,8 @@
 package basilliyc.cashnote.utils
 
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import org.koin.core.qualifier.Qualifier
 import org.koin.java.KoinJavaComponent
 
@@ -29,4 +31,11 @@ inline fun <reified O> injectSystemService(
 	return inject<Context, O>(qualifier) {
 		getSystemService(O::class.java)
 	}
+}
+
+@Composable
+inline fun <reified T> rememberInject(
+	qualifier: Qualifier? = null,
+): T {
+	return remember { inject<T>() }.value
 }

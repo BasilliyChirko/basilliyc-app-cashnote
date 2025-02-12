@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.settings
+package basilliyc.cashnote.ui.settings.page
 
 import android.app.Activity
 import android.content.ContentResolver
@@ -9,7 +9,6 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewModelScope
 import basilliyc.cashnote.AppValues
 import basilliyc.cashnote.ui.base.BaseViewModel
-import basilliyc.cashnote.ui.settings.SettingsStateHolder.Common
 import basilliyc.cashnote.ui.theme.ThemeMode
 import basilliyc.cashnote.utils.anyTry
 import basilliyc.cashnote.utils.flowZip
@@ -31,7 +30,7 @@ class SettingsViewModel : BaseViewModel(), SettingsListener {
 	
 	val state = SettingsStateHolder(
 		page = SettingsStateHolder.Page.Data(
-			common = Common(
+			common = SettingsStateHolder.Common(
 				themeMode = preferences.themeMode.value,
 			)
 		)
@@ -42,7 +41,7 @@ class SettingsViewModel : BaseViewModel(), SettingsListener {
 			flowZip(
 				preferences.themeMode.flow,
 			) { themeMode ->
-				Common(
+				SettingsStateHolder.Common(
 					themeMode = themeMode,
 				)
 			}.collectLatest {

@@ -103,12 +103,6 @@ class AccountDetailsViewModel(
 		)
 	}
 	
-	override fun onAccountParamsClicked() {
-		stateResult = AccountDetailsState.Result.NavigateAccountParams(
-			accountId = route.accountId
-		)
-	}
-	
 	override fun onAccountDeleteClicked() {
 		stateDialog = AccountDetailsState.Dialog.AccountDeleteConfirmation
 	}

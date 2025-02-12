@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.settings
+package basilliyc.cashnote.ui.settings.page
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.HomeRepairService
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -101,10 +100,6 @@ private fun Result(
 				AppNavigation.AccountHistory(accountId = it.accountId)
 			)
 			
-			is AccountDetailsState.Result.NavigateAccountParams -> navigateForward(
-				AppNavigation.AccountParams(accountId = it.accountId)
-			)
-			
 			AccountDetailsState.Result.AccountDeletionSuccess -> {
 				showToast(R.string.account_details_toast_account_deletion_success)
 				navigateBack()
@@ -147,7 +142,6 @@ private fun PageDataPreview() = DefaultPreview {
 			override fun onAccountCategoriesClicked() = Unit
 			override fun onAccountEditClicked() = Unit
 			override fun onAccountHistoryClicked() = Unit
-			override fun onAccountParamsClicked() = Unit
 			override fun onAccountDeleteClicked() = Unit
 			override fun onDeleteAccountConfirmed() = Unit
 			override fun onDeleteAccountCanceled() = Unit
@@ -227,11 +221,6 @@ private fun PopupMenuState.PageDataOptionsMenu(
 	page: AccountDetailsState.Page.Data,
 	listener: AccountDetailsListener,
 ) {
-	PopupMenuItem(
-		onClick = listener::onAccountParamsClicked,
-		text = stringResource(R.string.account_details_menu_params),
-		leadingIcon = Icons.Filled.HomeRepairService,
-	)
 	PopupMenuItem(
 		onClick = listener::onAccountCategoriesClicked,
 		text = stringResource(R.string.account_details_menu_categories),

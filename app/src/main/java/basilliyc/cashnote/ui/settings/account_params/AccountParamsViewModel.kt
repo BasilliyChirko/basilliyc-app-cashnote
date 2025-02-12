@@ -1,63 +1,32 @@
-package basilliyc.cashnote.ui.account.params
+package basilliyc.cashnote.ui.settings.account_params
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import basilliyc.cashnote.data.FinancialStatisticParams.*
 import basilliyc.cashnote.data.getAllowedCalculations
-import basilliyc.cashnote.ui.account.params.AccountParamsStateHolder.Page
-import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
+import basilliyc.cashnote.ui.settings.account_params.AccountParamsStateHolder.Page
 import basilliyc.cashnote.utils.anyTry
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AccountParamsViewModel(
-	savedStateHandle: SavedStateHandle,
-) : BaseViewModel(), AccountParamsListener {
+class AccountParamsViewModel : BaseViewModel(), AccountParamsListener {
 	
 	init {
 		defaultEventPostDelay = false
 		defaultEventSkipIfBusy = false
 	}
 	
-	val route: AppNavigation.AccountParams = savedStateHandle.toRoute()
-	
-	/*	var state by mutableStateOf(AccountParamsState())
-			private set
-		
-		private var statePageData
-			get() = state.pageData
-			set(value) {
-				if (value != null) state = state.copy(page = value)
-			}
-		
-	//	private var stateDialog
-	//		get() = state.dialog
-	//		set(value) {
-	//			state = state.copy(dialog = value)
-	//		}
-		
-		private var stateResult
-			get() = state.result
-			set(value) {
-				state = state.copy(result = value)
-			}*/
-	
 	val stateHolder = AccountParamsStateHolder()
 	
 	init {
 		stateHolder.page = Page.Loading
 		viewModelScope.launch {
-//			val account = financialManager.requireAccountById(route.accountId)
-			
-			val statisticParams = financialManager.getStatisticParams()
-			
-			val allowedCalculations = statisticParams.period.getAllowedCalculations()
-			
-			stateHolder.page = Page.Data(
-				statisticParams = statisticParams,
-				allowedCalculations = allowedCalculations,
-			)
+			financialManager.getStatisticsParamsAsFlow().collectLatest { statisticParams ->
+				stateHolder.page = Page.Data(
+					statisticParams = statisticParams,
+					allowedCalculations = statisticParams.period.getAllowedCalculations(),
+				)
+			}
 		}
 	}
 	

@@ -28,7 +28,7 @@ fun MenuTitle(
 			text = title,
 			style = MaterialTheme.typography.titleMedium,
 			color = MaterialTheme.colorScheme.onSurfaceVariant,
-			maxLines = 1,
+			maxLines = 2,
 		)
 		if (subtitle != null) {
 			Text(

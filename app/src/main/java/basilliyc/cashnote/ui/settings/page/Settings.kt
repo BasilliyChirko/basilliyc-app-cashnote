@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.settings
+package basilliyc.cashnote.ui.settings.page
 
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FileDownload
@@ -29,7 +31,7 @@ import basilliyc.cashnote.ui.components.RegisterActivityRequests
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.menu.MenuRowPopup
 import basilliyc.cashnote.ui.components.menu.MenuRowText
-import basilliyc.cashnote.ui.settings.SettingsStateHolder.Page
+import basilliyc.cashnote.ui.settings.account_params.AccountParams
 import basilliyc.cashnote.ui.stringName
 import basilliyc.cashnote.ui.theme.ThemeMode
 import basilliyc.cashnote.utils.DefaultPreview
@@ -66,7 +68,7 @@ private fun Result(
 @Composable
 private fun PageDataPreview() = DefaultPreview {
 	PageData(
-		page = Page.Data(
+		page = SettingsStateHolder.Page.Data(
 			common = SettingsStateHolder.Common(
 				themeMode = ThemeMode.System,
 			)
@@ -84,17 +86,17 @@ private fun PageDataPreview() = DefaultPreview {
 
 @Composable
 private fun Page(
-	page: Page,
+	page: SettingsStateHolder.Page,
 	listener: SettingsListener,
 ) {
 	when (page) {
-		is Page.Data -> PageData(page, listener)
+		is SettingsStateHolder.Page.Data -> PageData(page, listener)
 	}
 }
 
 @Composable
 private fun PageData(
-	page: Page.Data,
+	page: SettingsStateHolder.Page.Data,
 	listener: SettingsListener,
 ) {
 	ScaffoldColumn(
@@ -103,10 +105,12 @@ private fun PageData(
 				title = stringResource(R.string.settings_title),
 				navigationIcon = {}
 			)
-		}
+		},
+		columnModifier = Modifier.verticalScroll(rememberScrollState())
 	) {
 		SettingsCommon(common = page.common, listener = listener)
 		SettingsBackup(listener = listener)
+		SettingsAccount()
 	}
 }
 
@@ -191,6 +195,13 @@ private fun ColumnScope.SettingsBackup(
 			onClick = listener::onBackupRestoreClicked,
 		)
 		
+	}
+}
+
+@Composable
+private fun ColumnScope.SettingsAccount() {
+	Group(title = stringResource(R.string.account_params_title)) {
+		AccountParams()
 	}
 }
 

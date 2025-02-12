@@ -1,4 +1,4 @@
-package basilliyc.cashnote.ui.settings
+package basilliyc.cashnote.ui.settings.page
 
 import android.app.Activity
 import basilliyc.cashnote.ui.base.BaseListener

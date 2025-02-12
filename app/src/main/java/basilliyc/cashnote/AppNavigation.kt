@@ -14,13 +14,13 @@ import basilliyc.cashnote.ui.account.details.AccountDetails
 import basilliyc.cashnote.ui.account.form.AccountForm
 import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
-import basilliyc.cashnote.ui.account.params.AccountParams
+import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletion
 import basilliyc.cashnote.ui.category.form.CategoryForm
 import basilliyc.cashnote.ui.category.list.CategoryList
-import basilliyc.cashnote.ui.transaction.form.TransactionForm
-import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletion
-import basilliyc.cashnote.ui.settings.AppSettings
+import basilliyc.cashnote.ui.settings.account_params.AccountParams
+import basilliyc.cashnote.ui.settings.page.AppSettings
 import basilliyc.cashnote.ui.statistic.AccountStatistic
+import basilliyc.cashnote.ui.transaction.form.TransactionForm
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
@@ -37,9 +37,6 @@ sealed interface AppNavigation {
 		val isFromNavigation: Boolean,
 		val accountId: Long,
 	) : AppNavigation
-	
-	@Serializable
-	data class AccountParams(val accountId: Long) : AppNavigation
 	
 	@Serializable
 	data class AccountHistory(val accountId: Long) : AppNavigation
@@ -78,7 +75,6 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountHistory> { AccountHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 	composable<AppNavigation.TransactionForm> { TransactionForm() }
-	composable<AppNavigation.AccountParams> { AccountParams() }
 	dialog<AppNavigation.CategoryExtendedDeletion> { CategoryExtendedDeletion() }
 }
 

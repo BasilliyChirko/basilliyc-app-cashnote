@@ -1,8 +1,6 @@
 package basilliyc.cashnote.ui.category.form
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,7 +12,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -24,13 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
-import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.base.rememberResultHandler
-import basilliyc.cashnote.ui.components.CardSelectable
 import basilliyc.cashnote.ui.components.IconButton
+import basilliyc.cashnote.ui.components.ItemVisibilitySelectable
 import basilliyc.cashnote.ui.components.OutlinedTextField
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -195,73 +191,38 @@ private fun PageData(
 				onColorSelected = listener::onColorChanged,
 			)
 			
-			HorizontalDivider()
-			
-			Text(
-				text = stringResource(R.string.transaction_category_form_accounts),
-				style = MaterialTheme.typography.titleMedium,
-				modifier = Modifier.padding(16.dp)
-			)
-			VerticalGrid(
-				columns = VerticalGridCells.Adaptive(140.dp),
-				modifier = Modifier.padding(horizontal = 16.dp),
-				itemsCount = page.accounts.size,
-				horizontalSpace = 8.dp,
-				verticalSpace = 8.dp,
-			) { index ->
-				val accountWithUsing = page.accounts[index]
-				AccountItem(
-					account = accountWithUsing.account,
-					using = accountWithUsing.using,
-					onClick = { listener.onAccountClicked(accountWithUsing.account.id) },
-				)
-			}
-
-			
-		}
-	}
-}
-
-@Composable
-private fun AccountItem(
-	account: FinancialAccount,
-	using: Boolean,
-	onClick: () -> Unit,
-) {
-	CardSelectable(
-		onClick = onClick,
-		isSelected = using,
-	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(8.dp),
-			verticalAlignment = Alignment.CenterVertically,
-		) {
-			Text(
-				text = account.currency.symbol,
-				style = MaterialTheme.typography.displaySmall,
-			)
-			Column(
-				modifier = Modifier.padding(8.dp),
-			) {
+			if (page.accounts.isNotEmpty()) {
+				HorizontalDivider()
 				Text(
-					text = account.name,
-					style = MaterialTheme.typography.titleMedium
+					text = stringResource(R.string.transaction_category_form_accounts),
+					style = MaterialTheme.typography.titleMedium,
+					modifier = Modifier.padding(16.dp)
 				)
-				Text(
-					text = stringResource(
-						if (using) R.string.category_form_account_using_true
-						else R.string.category_form_account_using_false,
-					),
-				)
+				VerticalGrid(
+					columns = VerticalGridCells.Adaptive(140.dp),
+					modifier = Modifier.padding(horizontal = 16.dp),
+					itemsCount = page.accounts.size,
+					horizontalSpace = 8.dp,
+					verticalSpace = 8.dp,
+				) { index ->
+					val accountWithUsing = page.accounts[index]
+					ItemVisibilitySelectable(
+						title = accountWithUsing.account.name,
+						icon = {
+							Text(
+								text = accountWithUsing.account.currency.symbol,
+								style = MaterialTheme.typography.displaySmall,
+							)
+						},
+						isSelected = accountWithUsing.using,
+						onClick = { listener.onAccountClicked(accountWithUsing.account.id) },
+					)
+				}
 			}
 			
 		}
 	}
 }
-
-
 
 
 

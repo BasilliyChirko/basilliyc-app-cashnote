@@ -26,7 +26,6 @@ import basilliyc.cashnote.utils.getListJsonObject
 import basilliyc.cashnote.utils.getListJsonObjectOrNull
 import basilliyc.cashnote.utils.getStringOrNull
 import basilliyc.cashnote.utils.inject
-import basilliyc.cashnote.utils.monthInMillis
 import basilliyc.cashnote.utils.reordered
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,8 +34,6 @@ import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
-import kotlin.random.Random
-import kotlin.system.measureTimeMillis
 
 class FinancialManager {
 	
@@ -73,25 +70,20 @@ class FinancialManager {
 	
 	fun getAccountByIdAsFlow(id: Long) = accountDao.getByIdAsFlow(id)
 	
-	suspend fun saveAccount(financialAccount: FinancialAccount) = databaseTransaction {
+	suspend fun saveAccount(
+		financialAccount: FinancialAccount,
+		params: List<CategoryToAccountParams>,
+	) = databaseTransaction {
 		val account = financialAccount
 			.applyIf({ id == 0L }) {
 				copy(position = accountDao.getNextPosition())
 			}
 		
-		val isNeedCreateParams = account.id == 0L
+		val accountId = accountDao.save(account).takeIf { it > 0 } ?: account.id
 		
-		val accountId = accountDao.save(account)
-		
-		if (isNeedCreateParams) {
-			val params = categoryDao.getList().map { category ->
-				CategoryToAccountParams(
-					accountId = accountId,
-					categoryId = category.id,
-				)
-			}
-			categoryToAccountParamsDao.save(params)
-		}
+		categoryToAccountParamsDao.save(params.map {
+			it.copy(accountId = accountId)
+		})
 		
 		refreshStatistics(force = true)
 		
@@ -171,7 +163,7 @@ class FinancialManager {
 	
 	suspend fun saveCategory(
 		category: FinancialCategory,
-		usedInAccounts: List<Long>,
+		params: List<CategoryToAccountParams>,
 	) = databaseTransaction {
 		val category = category
 			.applyIf({ id == 0L }) {
@@ -180,31 +172,11 @@ class FinancialManager {
 				)
 			}
 		
-		val isNeedCreateParams = category.id == 0L
-		
 		val categoryId = categoryDao.save(category).takeIf { it > 0 } ?: category.id
 		
-		if (isNeedCreateParams) {
-			val params = accountDao.getList().map { account ->
-				CategoryToAccountParams(
-					accountId = account.id,
-					categoryId = categoryId,
-				)
-			}
-			categoryToAccountParamsDao.save(params)
-		}
-		
-		logcat.debug(usedInAccounts)
-		
-		categoryToAccountParamsDao.getListByCategoryId(categoryId)
-			.map {
-				it.copy(
-					visible = it.accountId in usedInAccounts
-				)
-			}
-			.let {
-				categoryToAccountParamsDao.save(it)
-			}
+		categoryToAccountParamsDao.save(params.map {
+			it.copy(categoryId = categoryId)
+		})
 		
 		refreshStatistics(force = true)
 	}
@@ -743,21 +715,23 @@ class FinancialManager {
 						transactionDao.save(it)
 					}
 					
-					val categoryToAccountParams = rootObject.getListJsonObjectOrNull("categoryToAccountParams")?.map {
-						CategoryToAccountParams(
-							accountId = it.getLong("accountId"),
-							categoryId = it.getLong("categoryId"),
-							visible = it.getBoolean("visible"),
-						)
-					}?.takeIf { it.size == accounts.size * categories.size } ?: accounts.map { account ->
-						categories.map { category ->
+					val categoryToAccountParams =
+						rootObject.getListJsonObjectOrNull("categoryToAccountParams")?.map {
 							CategoryToAccountParams(
-								accountId = account.id,
-								categoryId = category.id,
-								visible = true,
+								accountId = it.getLong("accountId"),
+								categoryId = it.getLong("categoryId"),
+								visible = it.getBoolean("visible"),
 							)
-						}
-					}.flatMap { it }
+						}?.takeIf { it.size == accounts.size * categories.size }
+							?: accounts.map { account ->
+								categories.map { category ->
+									CategoryToAccountParams(
+										accountId = account.id,
+										categoryId = category.id,
+										visible = true,
+									)
+								}
+							}.flatMap { it }
 					
 					categoryToAccountParamsDao.save(categoryToAccountParams)
 				}
@@ -846,7 +820,7 @@ class FinancialManager {
 	}
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-		
+
 //		databaseTransaction {
 //			logcat.debug("Start")
 //			measureTimeMillis {
@@ -865,67 +839,67 @@ class FinancialManager {
 	}
 	
 	private suspend fun initTestData() {
-		logcat.debug("Create initial data")
-		val t = measureTimeMillis {
-			saveAccount(
-				FinancialAccount(
-					id = 1L,
-					name = "Test Account",
-					currency = FinancialCurrency.EUR,
-					color = FinancialColor.Blue,
-					balance = 0.0,
-					position = 0,
-				)
-			)
-			
-			saveCategory(
-				FinancialCategory(
-					id = 1L,
-					name = "Test Category 1",
-					position = 0,
-					icon = null,
-					color = FinancialColor.Red,
-				),
-				usedInAccounts = listOf(1L),
-			)
-			
-			saveCategory(
-				FinancialCategory(
-					id = 2L,
-					name = "Test Category 2",
-					position = 0,
-					icon = null,
-					color = FinancialColor.Blue
-				),
-				usedInAccounts = listOf(1L),
-			)
-			
-			saveCategory(
-				FinancialCategory(
-					id = 3L,
-					name = "Test Category 3",
-					position = 0,
-					icon = null,
-					color = null,
-				),
-				usedInAccounts = listOf(1L),
-			)
-			
-			val timestamp = System.currentTimeMillis()
-			val random = Random(System.currentTimeMillis())
-			repeat(8000) {
-				saveTransaction(
-					FinancialTransaction(
-						accountId = 1L,
-						value = random.nextDouble(-5.0, 40.0),
-						comment = null,
-						categoryId = random.nextLong(1L, 4L),
-						date = random.nextLong(timestamp - monthInMillis * 24, timestamp)
+		/*		logcat.debug("Create initial data")
+				val t = measureTimeMillis {
+					saveAccount(
+						FinancialAccount(
+							id = 1L,
+							name = "Test Account",
+							currency = FinancialCurrency.EUR,
+							color = FinancialColor.Blue,
+							balance = 0.0,
+							position = 0,
+						)
 					)
-				)
-			}
-		}
-		logcat.debug("Data created in $t millis")
+					
+					saveCategory(
+						FinancialCategory(
+							id = 1L,
+							name = "Test Category 1",
+							position = 0,
+							icon = null,
+							color = FinancialColor.Red,
+						),
+						usedInAccounts = listOf(1L),
+					)
+					
+					saveCategory(
+						FinancialCategory(
+							id = 2L,
+							name = "Test Category 2",
+							position = 0,
+							icon = null,
+							color = FinancialColor.Blue
+						),
+						usedInAccounts = listOf(1L),
+					)
+					
+					saveCategory(
+						FinancialCategory(
+							id = 3L,
+							name = "Test Category 3",
+							position = 0,
+							icon = null,
+							color = null,
+						),
+						usedInAccounts = listOf(1L),
+					)
+					
+					val timestamp = System.currentTimeMillis()
+					val random = Random(System.currentTimeMillis())
+					repeat(8000) {
+						saveTransaction(
+							FinancialTransaction(
+								accountId = 1L,
+								value = random.nextDouble(-5.0, 40.0),
+								comment = null,
+								categoryId = random.nextLong(1L, 4L),
+								date = random.nextLong(timestamp - monthInMillis * 24, timestamp)
+							)
+						)
+					}
+				}
+				logcat.debug("Data created in $t millis")*/
 	}
 	
 	

@@ -131,9 +131,9 @@ private fun PageData(
 						imageVector = Icons.Filled.Add,
 						contentDescription = stringResource(R.string.add_new_account)
 					)
-				}
+				},
+				navigationIcon = {}
 			)
-			
 		}
 	) {
 		if (page.accounts.isEmpty()) {

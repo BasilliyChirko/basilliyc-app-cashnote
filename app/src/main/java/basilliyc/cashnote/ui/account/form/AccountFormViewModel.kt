@@ -1,19 +1,18 @@
 package basilliyc.cashnote.ui.account.form
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import basilliyc.cashnote.data.FinancialCurrency
-import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.AppNavigation
+import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.data.FinancialCategoryToFinancialAccountParams
+import basilliyc.cashnote.data.FinancialColor
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.utils.letIf
+import basilliyc.cashnote.utils.updateIf
 import kotlinx.coroutines.launch
 
 class AccountFormViewModel(
@@ -21,78 +20,69 @@ class AccountFormViewModel(
 ) : BaseViewModel(), AccountFormListener {
 	
 	
-	var state by mutableStateOf(AccountFormState())
-		private set
-	private var statePageData
-		get() = state.page as? AccountFormState.Page.Data
-		set(value) {
-			if (value != null) state = state.copy(page = value)
-		}
-	
-	private fun updateStateContentData(call: AccountFormState.Page.Data.() -> AccountFormState.Page.Data) {
-		val content = statePageData
-		if (content is AccountFormState.Page.Data) {
-			statePageData = statePageData?.call()
-		}
-	}
+	val state = AccountFormStateHolder()
 	
 	private val route: AppNavigation.AccountForm = savedStateHandle.toRoute()
 	private var editedAccount: FinancialAccount? = null
 	
 	//Initialization of the state
 	init {
-		state = state.copy(page = AccountFormState.Page.Loading)
+		state.page = AccountFormStateHolder.Page.Loading
 		
 		val accountIdOnNavigation = preferences.accountIdOnNavigation.value
 		
-		if (route.accountId != null) {
-			viewModelScope.launch {
-				val account = (financialManager.getAccountById(route.accountId)
-					?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
-				editedAccount = account
-				state = state.copy(
-					page = AccountFormState.Page.Data(
-						account = account,
-						isShowOnNavigation = account.id == accountIdOnNavigation
-					),
+		viewModelScope.launch {
+			val account = if (route.accountId != null) {
+				financialManager.requireAccountById(route.accountId).also {
+					editedAccount = it
+				}
+			} else {
+				FinancialAccount(
+					name = "",
+					currency = FinancialCurrency.UAH,
+					color = null,
+					balance = 0.0,
+					position = 0,
 				)
 			}
-		} else {
-			val account = FinancialAccount(
-				name = "",
-				currency = FinancialCurrency.UAH,
-				color = null,
-				balance = 0.0,
-				position = 0,
+			
+			val categories = financialManager.getCategoryList()
+
+			val useCategoryIds = route.accountId
+				?.let { financialManager.getCategoryToAccountParamsListByAccountId(it) }
+				?.filter { it.visible }
+				?.map { it.categoryId }
+				?: categories.map { it.id }
+			
+			state.page = AccountFormStateHolder.Page.Data(
+				account = account,
+				isShowOnNavigation = account.id == accountIdOnNavigation,
+				categories = categories.map { category ->
+					AccountFormStateHolder.CategoryWithUsing(
+						category = category,
+						using = category.id in useCategoryIds
+					)
+				}
 			)
-			state = state.copy(
-				page = AccountFormState.Page.Data(
-					account = account,
-					isShowOnNavigation = account.id == accountIdOnNavigation
-				),
-			)
+			
 		}
 	}
 	
-	override fun onActionConsumed() {
-		state = state.copy(action = null)
+	override fun onResultHandled() {
+		state.result = null
 	}
 	
 	override fun onCurrencyChanged(currency: FinancialCurrency) {
-		updateStateContentData {
-			copy(currency = currency)
-		}
+		state.pageData = state.pageData?.copy(
+			currency = currency
+		)
 	}
 	
 	override fun onNameChanged(name: String) {
-		updateStateContentData {
-			copy(
-				name = TextFieldState(
-					value = name,
-					error = getNameTextError(name)
-				)
-			)
-		}
+		state.pageDataName = TextFieldState(
+			value = name,
+			error = getNameTextError(name)
+		)
 	}
 	
 	private fun getNameTextError(name: String): TextFieldError? {
@@ -102,14 +92,10 @@ class AccountFormViewModel(
 	
 	override fun onBalanceChanged(balance: String) {
 		val balance = balanceStringCorrection(balance)
-		updateStateContentData {
-			copy(
-				balance = TextFieldState(
-					value = balance,
-					error = getBalanceTextError(balance)
-				)
-			)
-		}
+		state.pageDataBalance = TextFieldState(
+			value = balance,
+			error = getBalanceTextError(balance)
+		)
 	}
 	
 	private fun balanceStringCorrection(balance: String): String {
@@ -136,29 +122,23 @@ class AccountFormViewModel(
 	}
 	
 	override fun onColorChanged(color: FinancialColor?) {
-		updateStateContentData {
-			copy(color = color.takeIf { color != this.color })
-		}
+		state.pageData = state.pageData?.copy(color = color)
 	}
 	
 	override fun onSaveClicked() {
-		val data = statePageData ?: return
+		val data = state.pageData ?: return
 		
 		val nameString = data.name.value.trim()
 		val nameTextError = getNameTextError(nameString)
 		if (nameTextError != null) {
-			updateStateContentData {
-				copy(name = name.copy(error = nameTextError))
-			}
+			state.pageDataName = data.name.copy(error = nameTextError)
 			return
 		}
 		
 		val balanceString = balanceStringCorrection(data.balance.value)
 		val balanceTextError = getBalanceTextError(balanceString)
 		if (balanceTextError != null) {
-			updateStateContentData {
-				copy(balance = balance.copy(error = balanceTextError))
-			}
+			state.pageDataBalance = data.balance.copy(error = balanceTextError)
 			return
 		}
 		
@@ -173,7 +153,15 @@ class AccountFormViewModel(
 		
 		schedule(skipIfBusy = true, postDelay = true) {
 			try {
-				val accountId = financialManager.saveAccount(account)
+				val params = data.categories.map {
+					FinancialCategoryToFinancialAccountParams(
+						accountId = account.id,
+						categoryId = it.category.id,
+						visible = it.using
+					)
+				}
+				
+				val accountId = financialManager.saveAccount(account, params)
 				var accountIdOnNavigation by preferences.accountIdOnNavigation
 				var isNeedRebuildApp = false
 				when {
@@ -188,23 +176,28 @@ class AccountFormViewModel(
 					}
 				}
 				
-				state = state.copy(
-					action = AccountFormState.Action.SaveSuccess(
-						isNew = data.isNew,
-						isNeedRebuildApp = isNeedRebuildApp
-					)
+				state.result = AccountFormStateHolder.Result.SaveSuccess(
+					isNew = data.isNew,
+					isNeedRebuildApp = isNeedRebuildApp
 				)
 			} catch (t: Throwable) {
 				logcat.error(t)
-				state = state.copy(action = AccountFormState.Action.SaveError)
+				state.result = AccountFormStateHolder.Result.SaveError
 			}
 		}
 		
 	}
 	
 	override fun onShowOnNavigationChanged(show: Boolean) {
-		statePageData = statePageData?.copy(
-			isShowOnNavigation = show
+		state.pageData = state.pageData?.copy(isShowOnNavigation = show)
+	}
+	
+	override fun onCategoryClicked(categoryId: Long) {
+		val data = state.pageData ?: return
+		state.pageData = data.copy(
+			categories = data.categories.updateIf({ it.category.id == categoryId }) {
+				it.copy(using = !it.using)
+			},
 		)
 	}
 	

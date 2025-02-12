@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.data.FinancialCategory
+import basilliyc.cashnote.data.FinancialCategoryToFinancialAccountParams
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.base.BaseViewModel
@@ -109,18 +110,25 @@ class CategoryFormViewModel(
 			return
 		}
 		
-		val category = FinancialCategory(
-			id = route.categoryId ?: 0L,
-			name = nameString,
-			icon = data.icon,
-			color = data.color,
-		)
-		
-		val usedInAccounts = data.accounts.filter { it.using }.map { it.account.id }
-		
 		schedule(skipIfBusy = true, postDelay = true) {
+			
+			val category = FinancialCategory(
+				id = route.categoryId ?: 0L,
+				name = nameString,
+				icon = data.icon,
+				color = data.color,
+			)
+			
+			val params = data.accounts.map {
+				FinancialCategoryToFinancialAccountParams(
+					accountId = it.account.id,
+					categoryId = category.id,
+					visible = it.using
+				)
+			}
+			
 			try {
-				financialManager.saveCategory(category, usedInAccounts)
+				financialManager.saveCategory(category, params)
 				state.result = Result.SaveSuccess(data.isNew)
 			} catch (t: Throwable) {
 				logcat.error(t)

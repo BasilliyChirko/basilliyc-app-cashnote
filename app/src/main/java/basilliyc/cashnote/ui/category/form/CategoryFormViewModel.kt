@@ -59,7 +59,7 @@ class CategoryFormViewModel(
 		
 		viewModelScope.launch {
 			flowZip(
-				financialManager.getAccountsListAsFlow(),
+				financialManager.getAccountListAsFlow(),
 				financialManager.getCategoryToAccountParamsListAsFlow(),
 			) { accounts, categoryToAccountParamsList ->
 				accounts.map {

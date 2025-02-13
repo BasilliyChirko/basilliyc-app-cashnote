@@ -1,6 +1,9 @@
 package basilliyc.cashnote.utils
 
 import android.annotation.SuppressLint
+import androidx.compose.ui.graphics.Color
+import basilliyc.cashnote.ui.theme.colorGreen500
+import basilliyc.cashnote.ui.theme.colorRed500
 import java.util.Locale
 import kotlin.math.absoluteValue
 
@@ -59,6 +62,14 @@ fun Double.toPriceWithCoins(withZeroCoins: Boolean = true): String {
 		return string.replace(".00", "")
 	}
 	return string
+}
+
+fun Double.toPriceColor(): Color {
+	return when {
+		this == 0.0 -> Color.Unspecified
+		this > 0 -> colorGreen500
+		else -> colorRed500
+	}
 }
 
 fun <T> List<T>.reordered(from: Int, to: Int): MutableList<T> {

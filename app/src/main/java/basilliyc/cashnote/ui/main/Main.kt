@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -139,6 +140,24 @@ private fun MainBottomNavigationBar(
 				Icon(
 					imageVector = Icons.Filled.AccountBalanceWallet,
 					contentDescription = stringResource(R.string.main_nav_account_list)
+				)
+			}
+		),
+		NavigationBarEntity(
+			page = AppNavigation.TransactionHistory(
+				accountId = null,
+				isFromNavigation = true,
+			),
+			label = {
+				Text(
+					text = stringResource(R.string.main_nav_transaction_history),
+					textAlign = TextAlign.Center,
+				)
+			},
+			icon = {
+				Icon(
+					imageVector = Icons.Filled.History,
+					contentDescription = stringResource(R.string.main_nav_transaction_history)
 				)
 			}
 		),

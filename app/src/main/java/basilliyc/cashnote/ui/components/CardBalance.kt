@@ -2,6 +2,7 @@ package basilliyc.cashnote.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,9 @@ import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.ui.symbol
+import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.utils.DefaultPreview
+import basilliyc.cashnote.utils.toPriceColor
 import basilliyc.cashnote.utils.toPriceString
 
 sealed interface CardBalanceLeadingIcon {
@@ -51,39 +54,23 @@ fun CardBalance(
 	OutlinedCard(
 		modifier = modifier,
 		onClick = onClick,
-		colors = CardDefaults.outlinedCardColors(
-			containerColor = color.color
-		),
 		shape = MaterialTheme.shapes.small,
 		border = color?.color?.let { BorderStroke(1.dp, it) }
 			?: CardDefaults.outlinedCardBorder(),
 	) {
-		
-		if (isWide) {
-			Row(
-				modifier = Modifier.padding(8.dp),
-				content = {
-					Column {
-						Title(title = title)
-						Icon(icon = leadingIcon, title = title)
-					}
-					Spacer(
-						modifier = Modifier
-							.weight(1F)
-							.height(48.dp)
-					)
-					Values(primaryValue = primaryValue, secondaryValue = secondaryValue)
-				}
-			)
-		} else {
-			Column(
-				modifier = Modifier.padding(8.dp),
-				content = {
-					Title(title = title)
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-					) {
-						Icon(icon = leadingIcon, title = title)
+		Box(
+			modifier = Modifier.backgroundCardGradient(color)
+		) {
+			
+			if (isWide) {
+				Row(
+					modifier = Modifier
+						.padding(8.dp),
+					content = {
+						Column {
+							Title(title = title)
+							Icon(icon = leadingIcon, title = title)
+						}
 						Spacer(
 							modifier = Modifier
 								.weight(1F)
@@ -91,11 +78,29 @@ fun CardBalance(
 						)
 						Values(primaryValue = primaryValue, secondaryValue = secondaryValue)
 					}
-				}
-			)
+				)
+			} else {
+				Column(
+					modifier = Modifier
+						.padding(8.dp),
+					content = {
+						Title(title = title)
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+						) {
+							Icon(icon = leadingIcon, title = title)
+							Spacer(
+								modifier = Modifier
+									.weight(1F)
+									.height(48.dp)
+							)
+							Values(primaryValue = primaryValue, secondaryValue = secondaryValue)
+						}
+					}
+				)
+			}
+			
 		}
-		
-		
 	}
 }
 
@@ -157,6 +162,7 @@ private fun Values(
 				modifier = Modifier,
 				text = secondaryValue.toPriceString(showPlus = true),
 				style = MaterialTheme.typography.bodyLarge,
+				color = secondaryValue.toPriceColor(),
 			)
 		}
 		

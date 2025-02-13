@@ -1,17 +1,13 @@
 package basilliyc.cashnote.ui.test
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.paging.PagingSource
-import basilliyc.cashnote.backend.manager.FinancialManager
-import basilliyc.cashnote.ui.account.history.AccountHistoryViewModel
-import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.ui.transaction.history.TransactionHistoryViewModel
 
 @Composable
 fun ListTest() {
 	
-	val viewModel = viewModel<AccountHistoryViewModel>()
+	val viewModel = viewModel<TransactionHistoryViewModel>()
 
 //	val financialManager by remember { inject<FinancialManager>() }
 	

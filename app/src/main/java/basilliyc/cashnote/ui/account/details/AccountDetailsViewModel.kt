@@ -46,8 +46,8 @@ class AccountDetailsViewModel(
 			flowZip(
 				financialManager.getAccountByIdAsFlow(route.accountId),
 				financialManager.getCategoryListVisibleInAccountAsFlow(route.accountId),
-				financialManager.getStatisticsListForAccountAsFlow(route.accountId),
-				financialManager.getStatisticsParamsAsFlow(),
+				financialManager.getStatisticListForAccountAsFlow(route.accountId),
+				financialManager.getStatisticParamsAsFlow(),
 			) { account, categories, statistics, statisticsParams ->
 				Page.Data(
 					account = account!!,

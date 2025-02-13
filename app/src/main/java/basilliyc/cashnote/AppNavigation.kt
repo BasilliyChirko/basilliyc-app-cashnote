@@ -12,15 +12,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.dialog
 import basilliyc.cashnote.ui.account.details.AccountDetails
 import basilliyc.cashnote.ui.account.form.AccountForm
-import basilliyc.cashnote.ui.account.history.AccountHistory
 import basilliyc.cashnote.ui.account.list.AccountList
 import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletion
 import basilliyc.cashnote.ui.category.form.CategoryForm
 import basilliyc.cashnote.ui.category.list.CategoryList
-import basilliyc.cashnote.ui.settings.account_params.AccountParams
 import basilliyc.cashnote.ui.settings.page.AppSettings
 import basilliyc.cashnote.ui.statistic.AccountStatistic
 import basilliyc.cashnote.ui.transaction.form.TransactionForm
+import basilliyc.cashnote.ui.transaction.history.TransactionHistory
 import basilliyc.cashnote.utils.LocalNavController
 import kotlinx.serialization.Serializable
 
@@ -39,7 +38,10 @@ sealed interface AppNavigation {
 	) : AppNavigation
 	
 	@Serializable
-	data class AccountHistory(val accountId: Long) : AppNavigation
+	data class TransactionHistory(
+		val isFromNavigation: Boolean,
+		val accountId: Long?,
+	) : AppNavigation
 	
 	@Serializable
 	data class TransactionForm(
@@ -72,7 +74,7 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountForm> { AccountForm() }
 	composable<AppNavigation.CategoryList> { CategoryList() }
 	composable<AppNavigation.CategoryForm> { CategoryForm() }
-	composable<AppNavigation.AccountHistory> { AccountHistory() }
+	composable<AppNavigation.TransactionHistory> { TransactionHistory() }
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 	composable<AppNavigation.TransactionForm> { TransactionForm() }
 	dialog<AppNavigation.CategoryExtendedDeletion> { CategoryExtendedDeletion() }
@@ -124,7 +126,6 @@ fun NavBackStackEntry.toAppNavigationPath(): String? {
 		if (path.contains('/')) {
 			path = path.replaceFirst('/', '(').replace("/", ", ") + ')'
 		}
-		
 	}
 	
 	return path

@@ -1,50 +1,60 @@
-package basilliyc.cashnote.ui.account.history
+package basilliyc.cashnote.ui.transaction.history
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.PagingSource
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.BaseViewModel
-import basilliyc.cashnote.AppNavigation
+import basilliyc.cashnote.utils.toMap
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AccountHistoryViewModel(
+class TransactionHistoryViewModel(
 	savedStateHandle: SavedStateHandle,
-) : BaseViewModel() {
+) : BaseViewModel(), TransactionHistoryListener {
 	
 	companion object {
 		const val PAGE_SIZE_INITIAL = 100
 		const val PAGE_SIZE_NEXT = 50
 	}
 	
-	var state by mutableStateOf(AccountHistoryState())
-		private set
+	val state = TransactionHistoryStateHolder()
 	
-	private val route: AppNavigation.AccountHistory = savedStateHandle.toRoute()
+	private val route: AppNavigation.TransactionHistory = savedStateHandle.toRoute()
 	private var pagingSource = financialManager.getTransactionListPagingSource(route.accountId)
 	private var nextPageKey: Int? = null
 	
 	//Initial loading account and data
 	init {
-		state = state.copy(initialLoading = true)
+		state.page = state.page.copy(initialLoading = true)
 		viewModelScope.launch {
-			val account = (financialManager.getAccountById(route.accountId)
-				?: throw IllegalStateException("Account with id ${route.accountId} is not present in database"))
-			state = state.copy(account = account)
+			val account = route.accountId?.let { financialManager.getAccountById(it) }
+			state.page = state.page.copy(
+				singleAccount = account,
+			)
 			refreshTransactions(requestedSize = PAGE_SIZE_INITIAL, isInitialLoading = true)
+		}
+		viewModelScope.launch {
+			financialManager.getAccountListAsFlow().collectLatest {
+				state.page = state.page.copy(accounts = it.toMap { it.id to it })
+			}
+		}
+		viewModelScope.launch {
+			financialManager.getCategoryListAsFlow().collectLatest {
+				state.page = state.page.copy(categories = it.toMap { it.id to it })
+			}
 		}
 	}
 	
 	private fun refreshTransactions(requestedSize: Int, isInitialLoading: Boolean) {
-		state = state.copy(
+		state.page = state.page.copy(
 			initialLoading = isInitialLoading,
-			transactions = if (isInitialLoading) emptyList() else state.transactions,
+			transactions = if (isInitialLoading) emptyList() else state.page.transactions,
 			transactionsLoadingMoreError = null,
 		)
+		
 		schedule {
 			val refreshLoadResult = pagingSource.load(
 				params = PagingSource.LoadParams.Refresh<Int>(
@@ -55,14 +65,14 @@ class AccountHistoryViewModel(
 			)
 			
 			if (refreshLoadResult is PagingSource.LoadResult.Error) {
-				state = state.copy(
+				state.page = state.page.copy(
 					initialLoadingError = refreshLoadResult.throwable
 				)
 			} else {
 				applyLoadingResult(refreshLoadResult, replaceTransactions = true)
 			}
 			
-			state = state.copy(
+			state.page = state.page.copy(
 				initialLoading = false
 			)
 		}
@@ -73,7 +83,7 @@ class AccountHistoryViewModel(
 		pagingSource = financialManager.getTransactionListPagingSource(route.accountId)
 		pagingSource.registerInvalidatedCallback(onInvalidatedCallback)
 		
-		val size = state.transactions.size.takeIf { it > 0 } ?: PAGE_SIZE_INITIAL
+		val size = state.page.transactions.size.takeIf { it > 0 } ?: PAGE_SIZE_INITIAL
 		refreshTransactions(requestedSize = size, isInitialLoading = false)
 	}
 	
@@ -81,8 +91,8 @@ class AccountHistoryViewModel(
 		pagingSource.registerInvalidatedCallback(onInvalidatedCallback)
 	}
 	
-	fun onActionConsumed() {
-		state = state.copy(action = null)
+	override fun onResultHandled() {
+		state.result = null
 	}
 	
 	private fun applyLoadingResult(
@@ -91,7 +101,7 @@ class AccountHistoryViewModel(
 	) {
 		when (result) {
 			is PagingSource.LoadResult.Error -> {
-				state = state.copy(
+				state.page = state.page.copy(
 					transactionsLoadingMoreError = result.throwable
 				)
 			}
@@ -100,32 +110,32 @@ class AccountHistoryViewModel(
 			is PagingSource.LoadResult.Page -> {
 				nextPageKey = result.nextKey
 				
-				state = state.copy(
+				state.page = state.page.copy(
 					transactions = if (replaceTransactions) {
 						result.data
 					} else {
-						state.transactions + result.data
+						state.page.transactions + result.data
 					},
 				)
 			}
 		}
 	}
 	
-	fun onInitialLoadingErrorSubmitted() {
+	override fun onInitialLoadingErrorSubmitted() {
 		//do initial loading again
 		refreshTransactions(requestedSize = PAGE_SIZE_INITIAL, isInitialLoading = true)
 	}
 	
-	fun onTransactionsLoadingMoreErrorSubmitted() {
+	override fun onTransactionsLoadingMoreErrorSubmitted() {
 		onTransactionsLoadingMore()
 	}
 	
-	fun onTransactionsLoadingMore() {
-		if (state.initialLoading || state.transactionsLoadingMore) return
+	override fun onTransactionsLoadingMore() {
+		if (state.page.initialLoading || state.page.transactionsLoadingMore) return
 		
 		val nextPageKey = nextPageKey ?: return
 		
-		state = state.copy(
+		state.page = state.page.copy(
 			transactionsLoadingMore = true,
 			transactionsLoadingMoreError = null,
 		)
@@ -140,24 +150,22 @@ class AccountHistoryViewModel(
 					)
 				)
 			)
-			state = state.copy(
+			state.page = state.page.copy(
 				transactionsLoadingMore = false,
 			)
 		}
 	}
 	
-	fun onTransactionEditClicked(id: Long) {
-		val transaction = state.transactions.find { it.id == id } ?: return
-		state = state.copy(
-			action = AccountHistoryState.Action.EditTransaction(
-				accountId = transaction.accountId,
-				categoryId = transaction.categoryId,
-				transactionId = transaction.id,
-			)
+	override fun onTransactionEditClicked(id: Long) {
+		val transaction = state.page.transactions.find { it.id == id } ?: return
+		state.result = TransactionHistoryStateHolder.Result.EditTransaction(
+			accountId = transaction.accountId,
+			categoryId = transaction.categoryId,
+			transactionId = transaction.id,
 		)
 	}
 	
-	fun onTransactionDeleteClicked(id: Long) = schedule(
+	override fun onTransactionDeleteClicked(id: Long) = schedule(
 		skipIfBusy = true,
 		postDelay = true,
 	) {

@@ -1,5 +1,6 @@
 package basilliyc.cashnote.backend.manager
 
+import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import basilliyc.cashnote.AppError
 import basilliyc.cashnote.AppValues
@@ -61,7 +62,7 @@ class FinancialManager {
 	//  Account
 	//----------------------------------------------------------------------------------------------
 	
-	fun getAccountsListAsFlow() = accountDao.getListAsFlow()
+	fun getAccountListAsFlow() = accountDao.getListAsFlow()
 	
 	suspend fun getAccountById(id: Long) = accountDao.getById(id)
 	
@@ -85,7 +86,7 @@ class FinancialManager {
 			it.copy(accountId = accountId)
 		})
 		
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 		
 		accountId.takeIf { it > 0 } ?: account.id
 	}
@@ -101,7 +102,7 @@ class FinancialManager {
 			}
 		accountDao.save(accounts)
 		
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 		
 		if (preferences.accountIdOnNavigation.value == accountId) {
 			preferences.accountIdOnNavigation.value = null
@@ -178,7 +179,7 @@ class FinancialManager {
 			it.copy(categoryId = categoryId)
 		})
 		
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 	}
 	
 	private suspend fun refreshCategoriesPositions() {
@@ -237,7 +238,7 @@ class FinancialManager {
 		
 		categoryDao.delete(categoryId)
 		refreshCategoriesPositions()
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 	}
 	
 	suspend fun changeCategoryPosition(from: Int, to: Int) = databaseTransaction {
@@ -319,10 +320,10 @@ class FinancialManager {
 			accountDao.save(account.copy(balance = account.balance + transaction.value))
 			
 			if (isAppend) {
-				refreshStatistics(force = false)
+				refreshStatistic(force = false)
 				appendStatisticForCurrentPeriod(transaction)
 			} else {
-				refreshStatistics(force = true)
+				refreshStatistic(force = true)
 			}
 		}
 		
@@ -334,8 +335,10 @@ class FinancialManager {
 		?: throw AppError.Database.TransactionNotFound(id)
 	
 	
-	fun getTransactionListPagingSource(accountId: Long) =
-		transactionDao.getPagingSourceByAccount(accountId)
+	fun getTransactionListPagingSource(accountId: Long?): PagingSource<Int, FinancialTransaction> {
+		return if (accountId != null) transactionDao.getPagingSourceByAccount(accountId)
+		else transactionDao.getPagingSource()
+	}
 	
 	suspend fun deleteTransaction(transactionId: Long) = databaseTransaction {
 		val transaction = transactionDao.getById(transactionId)!!
@@ -344,7 +347,7 @@ class FinancialManager {
 		accountDao.save(account.copy(balance = account.balance - transaction.value))
 		transactionDao.delete(transactionId)
 		
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 	}
 	
 	//----------------------------------------------------------------------------------------------
@@ -356,7 +359,7 @@ class FinancialManager {
 	
 	suspend fun saveStatisticParams(params: FinancialStatisticParams) {
 		statisticDao.saveParams(params)
-		refreshStatistics(force = true)
+		refreshStatistic(force = true)
 	}
 	
 	suspend fun updateStatisticCalculationDate() {
@@ -365,22 +368,22 @@ class FinancialManager {
 		statisticDao.saveParams(currentParams.copy(calculationValidUntil = periodEnd))
 	}
 	
-	fun getStatisticsParamsAsFlow() = statisticDao.getParamsAsFlow()
+	fun getStatisticParamsAsFlow() = statisticDao.getParamsAsFlow()
 		.mapNotNull { it ?: FinancialStatisticParams() }
 	
-	suspend fun getStatisticsListForAccount(accountId: Long) =
+	suspend fun getStatisticListForAccount(accountId: Long) =
 		statisticDao.getListForAccount(accountId)
 	
-	fun getStatisticsListForAccountAsFlow(accountId: Long) =
+	fun getStatisticListForAccountAsFlow(accountId: Long) =
 		statisticDao.getListForAccountAsFlow(accountId)
 	
-	fun getStatisticsListAsFlow() = statisticDao.getListAsFlow()
+	fun getStatisticListAsFlow() = statisticDao.getListAsFlow()
 	
 	suspend fun isStatisticValid(): Boolean {
 		return System.currentTimeMillis() <= getStatisticParams().calculationValidUntil
 	}
 	
-	suspend fun refreshStatistics(force: Boolean = false) {
+	suspend fun refreshStatistic(force: Boolean = false) {
 		if (!force && isStatisticValid()) return
 		
 		val date = System.currentTimeMillis()
@@ -739,7 +742,7 @@ class FinancialManager {
 				else -> throw AppError.Database.BackupVersionNotSupported(version)
 			}
 			
-			refreshStatistics(force = true)
+			refreshStatistic(force = true)
 			
 		}
 		
@@ -820,21 +823,22 @@ class FinancialManager {
 	}
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
-
+		
+//		val systime = System.currentTimeMillis()
 //		databaseTransaction {
-//			logcat.debug("Start")
-//			measureTimeMillis {
-//				TestData.getTransactions(
-//					categoryId = 1L,
-//				).let {
-//					transactionDao.save(it)
-//				}
-//				refreshStatistics(force = true)
-//			}.also {
-//				logcat.debug("Time: $it")
+//			transactionDao.getList().map {
+//				if (it.date > systime) {
+//					val calendar = CalendarInstance(it.date)
+//					calendar.add(Calendar.YEAR, -1)
+//					it.copy(
+//						date = calendar.timeInMillis
+//					)
+//				} else it
+//			}.let {
+//				transactionDao.save(it)
 //			}
 //		}
-	
+//		refreshStatistic()
 	
 	}
 	

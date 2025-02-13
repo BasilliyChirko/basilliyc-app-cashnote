@@ -6,3 +6,8 @@ inline fun <T> Iterable<T>.updateIf(condition: (T) -> Boolean, transform: (T) ->
 		else it
 	}
 }
+
+inline fun <T, Key, Value> Iterable<T>.toMap(transform: (T) -> Pair<Key, Value>): Map<Key, Value> {
+	return map(transform).toMap()
+}
+

@@ -48,10 +48,12 @@ import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.symbol
+import basilliyc.cashnote.ui.theme.backgroundPageGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.ScaffoldBox
+import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.toPriceString
 
 //--------------------------------------------------------------------------------------------------
@@ -97,7 +99,10 @@ private fun Result(
 			)
 			
 			is AccountDetailsState.Result.NavigateAccountHistory -> navigateForward(
-				AppNavigation.AccountHistory(accountId = it.accountId)
+				AppNavigation.TransactionHistory(
+					accountId = it.accountId,
+					isFromNavigation = false,
+				)
 			)
 			
 			AccountDetailsState.Result.AccountDeletionSuccess -> {
@@ -204,7 +209,11 @@ private fun PageData(
 		},
 		content = {
 			Column(
-				modifier = Modifier.verticalScroll(rememberScrollState())
+				modifier = Modifier
+					.verticalScroll(rememberScrollState())
+					.applyIf({ page.account.color != null }) {
+						backgroundPageGradient(page.account.color)
+					},
 			) {
 				PageDataBalance(page)
 				PageDataCategories(

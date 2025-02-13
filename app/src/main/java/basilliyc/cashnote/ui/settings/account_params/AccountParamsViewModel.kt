@@ -21,7 +21,7 @@ class AccountParamsViewModel : BaseViewModel(), AccountParamsListener {
 	init {
 		stateHolder.page = Page.Loading
 		viewModelScope.launch {
-			financialManager.getStatisticsParamsAsFlow().collectLatest { statisticParams ->
+			financialManager.getStatisticParamsAsFlow().collectLatest { statisticParams ->
 				stateHolder.page = Page.Data(
 					statisticParams = statisticParams,
 					allowedCalculations = statisticParams.period.getAllowedCalculations(),

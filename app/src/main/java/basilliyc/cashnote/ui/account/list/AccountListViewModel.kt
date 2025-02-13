@@ -18,8 +18,8 @@ class AccountListViewModel : BaseViewModel(), AccountListListener {
 		state.page = AccountListStateHolder.Page.Loading
 		viewModelScope.launch {
 			flowZip(
-				financialManager.getAccountsListAsFlow(),
-				financialManager.getStatisticsListAsFlow(),
+				financialManager.getAccountListAsFlow(),
+				financialManager.getStatisticListAsFlow(),
 				preferences.accountListSingleLine.flow,
 			) { accounts, statistics, singleLine ->
 				val data = accounts.map { account ->

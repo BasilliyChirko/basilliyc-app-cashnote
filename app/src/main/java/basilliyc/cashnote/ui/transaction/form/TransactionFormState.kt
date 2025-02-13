@@ -15,6 +15,8 @@ data class TransactionFormState(
 		data class Data(
 			val account: FinancialAccount,
 			val category: FinancialCategory,
+			val categoryOriginal: FinancialCategory,
+			val availableCategories: List<FinancialCategory>,
 			val isNew: Boolean,
 			val isInputDeviation: Boolean,
 			val timeInMillis: Long,

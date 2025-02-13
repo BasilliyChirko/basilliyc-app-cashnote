@@ -1,5 +1,7 @@
 package basilliyc.cashnote.ui.transaction.form
 
+import basilliyc.cashnote.data.FinancialCategory
+
 interface TransactionFormListener {
 	fun onActionConsumed() {}
 	fun onBalanceChanged(balanceString: String) {}
@@ -13,4 +15,5 @@ interface TransactionFormListener {
 	fun onDialogTimeSelected(hour: Int, minute: Int) {}
 	fun onDialogTimeDismiss() {}
 	fun onSaveClicked() {}
+	fun onCategoryChanged(category: FinancialCategory) {}
 }

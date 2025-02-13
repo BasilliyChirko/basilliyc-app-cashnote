@@ -7,14 +7,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialTransaction
-import basilliyc.cashnote.ui.transaction.form.TransactionFormState.Action
-import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.ui.base.BaseViewModel
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
+import basilliyc.cashnote.ui.transaction.form.TransactionFormState.Action
 import basilliyc.cashnote.utils.toPriceWithCoins
 import kotlinx.coroutines.launch
 
@@ -54,11 +54,9 @@ class TransactionFormViewModel(
 		
 		viewModelScope.launch {
 			
-			account = financialManager.getAccountById(route.accountId)
-				?: throw Throwable("Account with id ${route.accountId} not found")
-			
-			category = financialManager.getCategoryById(route.categoryId)
-				?: throw Throwable("Category with id ${route.categoryId} not found")
+			account = financialManager.requireAccountById(route.accountId)
+			category = financialManager.requireCategoryById(route.categoryId)
+			val categories = financialManager.getCategoryListVisibleInAccount(route.categoryId)
 			
 			val transaction = route.transactionId?.let {
 				financialManager.getTransactionById(it)
@@ -70,6 +68,8 @@ class TransactionFormViewModel(
 			statePageData = TransactionFormState.Page.Data(
 				account = account,
 				category = category,
+				categoryOriginal = category,
+				availableCategories = categories,
 				isNew = transaction == null,
 				isInputDeviation = true,
 				timeInMillis = timeInMillis,
@@ -86,7 +86,7 @@ class TransactionFormViewModel(
 					value = account.balance.toPriceWithCoins(false),
 					error = null,
 				),
-				balanceTextPlaceholder = account.balance.toPriceWithCoins(false)
+				balanceTextPlaceholder = account.balance.toPriceWithCoins(false),
 			)
 			
 		}
@@ -231,6 +231,12 @@ class TransactionFormViewModel(
 		stateDialog = null
 	}
 	
+	override fun onCategoryChanged(category: FinancialCategory) {
+		statePageData = statePageData?.copy(
+			category = category,
+		)
+	}
+	
 	override fun onSaveClicked() {
 		val data = statePageData ?: return
 		val account = data.account
@@ -272,7 +278,7 @@ class TransactionFormViewModel(
 						accountId = account.id,
 						value = data.deviation,
 						comment = data.comment.value.takeIf { it.isNotBlank() },
-						categoryId = category.id,
+						categoryId = data.category.id,
 						date = data.timeInMillis,
 					),
 					isAppend = route.transactionId == null && data.timeInMillis == data.timeInMillisOriginal

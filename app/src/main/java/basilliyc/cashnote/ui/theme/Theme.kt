@@ -265,8 +265,12 @@ fun AppTheme(
 			if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 		}
 		
-		darkTheme -> darkScheme
-		else -> lightScheme
+//		darkTheme -> darkScheme
+//		else -> lightScheme
+//		darkTheme -> mediumContrastDarkColorScheme
+//		else -> mediumContrastLightColorScheme
+		darkTheme -> highContrastDarkColorScheme
+		else -> highContrastLightColorScheme
 	}
 	
 	MaterialTheme(

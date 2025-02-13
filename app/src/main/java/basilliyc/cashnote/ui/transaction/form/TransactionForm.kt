@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,7 +41,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -56,12 +57,17 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
+import basilliyc.cashnote.ui.components.PopupMenu
+import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.SimpleDatePickerDialog
 import basilliyc.cashnote.ui.components.SimpleTimePickerDialog
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
+import basilliyc.cashnote.ui.components.rememberPopupMenuState
 import basilliyc.cashnote.ui.symbol
+import basilliyc.cashnote.ui.theme.backgroundCardGradient
+import basilliyc.cashnote.ui.theme.backgroundPageGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.LocalNavController
@@ -136,16 +142,18 @@ fun PagePreview() = DefaultPreview {
 		page = TransactionFormState.Page.Data(
 			account = PreviewValues.accountTestUSD,
 			category = PreviewValues.categoryHome,
+			categoryOriginal = PreviewValues.categoryHome,
 			isNew = true,
 			isInputDeviation = true,
 			timeInMillis = System.currentTimeMillis(),
 			balanceWithoutDeviation = 0.0,
 			comment = TextFieldState(""),
 			deviation = 500.0,
-			deviationTextState = TextFieldState("500.00",),
+			deviationTextState = TextFieldState("500.00"),
 			balanceTextState = TextFieldState("500.00"),
 			deviationTextPlaceholder = "0",
 			balanceTextPlaceholder = "0",
+			availableCategories = PreviewValues.categories,
 		),
 		listener = object : TransactionFormListener {}
 	)
@@ -168,14 +176,16 @@ private fun PageData(
 	ScaffoldBox(
 		topBar = {
 			SimpleActionBar(
-				title = page.category.name,
+				modifier = Modifier.backgroundPageGradient(page.account.color),
+				title = stringResource(R.string.transaction_form_account, page.account.name),
 				actions = {
 					IconButton(
 						onClick = listener::onSaveClicked,
 						imageVector = Icons.Filled.Done,
 						contentDescription = stringResource(R.string.transaction_form_action_save)
 					)
-				}
+				},
+				containerColor = Color.Transparent
 			)
 		},
 		content = {
@@ -192,36 +202,17 @@ private fun PageData(
 				Spacer(modifier = Modifier.height(48.dp))
 				
 				PageDataInputComment(page = page, listener = listener)
-				PageDataTimestamp(page = page, listener = listener)
+				PageDataOther(page = page, listener = listener)
 			}
 		}
 	)
 }
 
 @Composable
-private fun ColumnScope.PageDataTimestamp(
+private fun ColumnScope.PageDataOther(
 	page: TransactionFormState.Page.Data,
 	listener: TransactionFormListener,
 ) {
-	
-	val dateString = page.timeInMillis.format(TimestampStyle.YearMonthDay)
-	val isDateChanged =
-		dateString != (page.timeInMillisOriginal.format(TimestampStyle.YearMonthDay))
-	
-	val timeString = page.timeInMillis.format(TimestampStyle.HourMinute)
-	val isTimeChanged = timeString != (page.timeInMillisOriginal.format(TimestampStyle.HourMinute))
-	
-	val colorsChanged = ButtonDefaults.outlinedButtonColors()
-	
-	val colorsNotChanged = ButtonDefaults.outlinedButtonColors(
-		contentColor = colorGrey99
-	)
-	
-	val borderChanged = ButtonDefaults.outlinedButtonBorder()
-	
-	val borderNotChanged = ButtonDefaults.outlinedButtonBorder().copy(
-		brush = SolidColor(Color.Transparent)
-	)
 	
 	val contentPadding = PaddingValues(
 		top = ButtonDefaults.ContentPadding.calculateTopPadding(),
@@ -236,13 +227,13 @@ private fun ColumnScope.PageDataTimestamp(
 		horizontalArrangement = Arrangement.Center,
 	) {
 		OutlinedButton(
-			modifier = Modifier,
+			modifier = Modifier
+				.height(ButtonDefaults.MinHeight),
 			onClick = listener::onDateClicked,
-			colors = if (isDateChanged) colorsChanged else colorsNotChanged,
-			border = if (isDateChanged) borderChanged else borderNotChanged,
 			content = {
 				Text(
-					text = dateString,
+					modifier = Modifier.padding(horizontal = 8.dp),
+					text = page.timeInMillis.format(TimestampStyle.YearMonthDay),
 					textAlign = TextAlign.Center,
 					style = MaterialTheme.typography.bodySmall,
 				)
@@ -251,18 +242,66 @@ private fun ColumnScope.PageDataTimestamp(
 		)
 		Spacer(modifier = Modifier.width(16.dp))
 		OutlinedButton(
-			modifier = Modifier,
+			modifier = Modifier
+				.height(ButtonDefaults.MinHeight),
 			onClick = listener::onTimeClicked,
-			colors = if (isTimeChanged) colorsChanged else colorsNotChanged,
-			border = if (isTimeChanged) borderChanged else borderNotChanged,
 			content = {
 				Text(
-					text = timeString,
+					modifier = Modifier.padding(horizontal = 8.dp),
+					text = page.timeInMillis.format(TimestampStyle.HourMinute),
 					textAlign = TextAlign.Center,
 					style = MaterialTheme.typography.bodySmall,
 				)
 			},
 			contentPadding = contentPadding,
+		)
+		Spacer(modifier = Modifier.width(16.dp))
+		val popupMenuState = rememberPopupMenuState()
+		PopupMenu(
+			state = popupMenuState,
+			anchor = {
+				OutlinedButton(
+					modifier = Modifier
+						.backgroundCardGradient(
+							color = page.category.color,
+							shape = CircleShape,
+						)
+						.height(ButtonDefaults.MinHeight),
+					onClick = { popupMenuState.expand() },
+					content = {
+						Row(
+							modifier = Modifier.padding(horizontal = 8.dp),
+							verticalAlignment = Alignment.CenterVertically,
+						) {
+							page.category.icon?.let {
+								Icon(
+									modifier = Modifier.padding(end = 8.dp),
+									imageVector = it.imageVector,
+									contentDescription = page.category.name
+								)
+							}
+							Text(
+								text = page.category.name,
+								textAlign = TextAlign.Center,
+								style = MaterialTheme.typography.bodySmall,
+							)
+						}
+					},
+					contentPadding = contentPadding,
+				)
+			},
+			items = {
+				page.availableCategories.forEach { category ->
+					PopupMenuItem(
+						onClick = {
+							popupMenuState.collapse()
+							listener.onCategoryChanged(category)
+						},
+						text = category.name,
+						leadingIcon = category.icon?.imageVector
+					)
+				}
+			}
 		)
 	}
 }
@@ -289,8 +328,7 @@ private fun ColumnScope.PageDataInputDeviation(
 							listener.onFocusChanged(TransactionFormState.Focus.Deviation)
 						}
 					)
-				}
-			,
+				},
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Spacer(modifier = Modifier.height(16.dp))
@@ -345,8 +383,7 @@ private fun ColumnScope.PageDataInputBalance(
 							listener.onFocusChanged(TransactionFormState.Focus.Balance)
 						}
 					)
-				}
-			,
+				},
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Spacer(modifier = Modifier.height(16.dp))

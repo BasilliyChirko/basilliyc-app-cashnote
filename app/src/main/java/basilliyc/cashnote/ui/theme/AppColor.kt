@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.color
 
@@ -41,9 +43,12 @@ fun FinancialColor.backgroundCardGradient(): Brush {
 }
 
 @Composable
-fun Modifier.backgroundCardGradient(color: FinancialColor?): Modifier {
+fun Modifier.backgroundCardGradient(
+	color: FinancialColor?,
+	shape: Shape = RectangleShape,
+): Modifier {
 	if (color == null) return this
-	return this.background(brush = color.backgroundCardGradient())
+	return this.background(brush = color.backgroundCardGradient(), shape = shape)
 }
 
 @Composable
@@ -60,7 +65,10 @@ fun FinancialColor.backgroundPageGradient(): Brush {
 }
 
 @Composable
-fun Modifier.backgroundPageGradient(color: FinancialColor?): Modifier {
+fun Modifier.backgroundPageGradient(
+	color: FinancialColor?,
+	shape: Shape = RectangleShape,
+): Modifier {
 	if (color == null) return this
-	return this.background(brush = color.backgroundPageGradient())
+	return this.background(brush = color.backgroundPageGradient(), shape = shape)
 }

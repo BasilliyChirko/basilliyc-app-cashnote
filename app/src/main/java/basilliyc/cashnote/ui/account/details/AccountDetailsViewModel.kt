@@ -67,7 +67,6 @@ class AccountDetailsViewModel(
 					statisticParams = statisticsParams,
 				)
 			}.collectLatest {
-				logcat.debug("update")
 				state = state.copy(
 					page = it,
 				)
@@ -87,7 +86,6 @@ class AccountDetailsViewModel(
 	}
 	
 	override fun onAccountCategoriesClicked() {
-		logcat.debug("onAccountCategoriesClicked")
 		stateResult = AccountDetailsState.Result.NavigateCategoryList
 	}
 	

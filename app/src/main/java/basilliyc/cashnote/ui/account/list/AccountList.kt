@@ -2,21 +2,27 @@
 
 package basilliyc.cashnote.ui.account.list
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Kayaking
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,25 +30,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
+import basilliyc.cashnote.data.color
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.account.list.AccountListStateHolder.AccountBalance
 import basilliyc.cashnote.ui.base.handleResult
+import basilliyc.cashnote.ui.components.BalanceText
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
+import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableVerticalGrid
 import basilliyc.cashnote.utils.OutlinedButton
 import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.applyIf
+import basilliyc.cashnote.utils.toPriceColor
+import basilliyc.cashnote.utils.toPriceString
 
 
 //--------------------------------------------------------------------------------------------------
@@ -161,26 +173,109 @@ private fun PageData(
 				itemContent = { index, isDragged ->
 					val accountBalance = accounts[index]
 					val account = accountBalance.account
-					CardBalance(
-						modifier = Modifier
-							.applyIf({ isDragged }) {
-								this.shadow(
-									elevation = 4.dp,
-									shape = MaterialTheme.shapes.small
-								)
-							},
-						onClick = { listener.onClickAccount(account.id) },
-						title = account.name,
-						primaryValue = account.balance,
-						secondaryValue = accountBalance.primaryValue,
-						leadingIcon = CardBalanceLeadingIcon(account.currency),
-						color = account.color,
-						isWide = page.isSingleLine,
-					)
+					if (page.isSingleLine) {
+						AccountCardItem(
+							modifier = Modifier
+								.applyIf({ isDragged }) {
+									this.shadow(
+										elevation = 4.dp,
+										shape = MaterialTheme.shapes.small
+									)
+								},
+							onClick = { listener.onClickAccount(account.id) },
+							balance = accountBalance,
+						)
+					} else {
+						CardBalance(
+							modifier = Modifier
+								.applyIf({ isDragged }) {
+									this.shadow(
+										elevation = 4.dp,
+										shape = MaterialTheme.shapes.small
+									)
+								},
+							onClick = { listener.onClickAccount(account.id) },
+							title = account.name,
+							primaryValue = account.balance,
+							secondaryValue = accountBalance.primaryValue,
+							leadingIcon = CardBalanceLeadingIcon(account.currency),
+							color = account.color,
+							isWide = page.isSingleLine,
+						)
+					}
 				}
 			)
 		}
 		
+	}
+}
+
+@Composable
+private fun AccountCardItem(
+	modifier: Modifier = Modifier,
+	onClick: () -> Unit,
+	balance: AccountBalance,
+) {
+	val account = balance.account
+	OutlinedCard(
+		modifier = modifier,
+		onClick = onClick,
+		shape = MaterialTheme.shapes.small,
+		border = account.color?.color?.let { BorderStroke(1.dp, it) }
+			?: CardDefaults.outlinedCardBorder(),
+	) {
+		Box(
+			modifier = Modifier.backgroundCardGradient(account.color)
+		) {
+			Row(
+				modifier = Modifier.padding(8.dp),
+				verticalAlignment = Alignment.CenterVertically,
+				content = {
+					
+					Text(
+						modifier = Modifier,
+						text = account.currency.name,
+						style = MaterialTheme.typography.titleLarge,
+						fontFamily = FontFamily.Monospace,
+					)
+					Spacer(modifier = Modifier.width(8.dp))
+					Text(
+						modifier = Modifier,
+						text = account.name,
+						style = MaterialTheme.typography.titleLarge,
+					)
+					
+					Spacer(
+						modifier = Modifier
+							.weight(1F)
+							.height(48.dp)
+					)
+					Column(
+						horizontalAlignment = Alignment.End,
+						verticalArrangement = Arrangement.Center,
+					) {
+						
+						BalanceText(
+							text = account.balance.toPriceString(showPlus = false),
+							modifier = Modifier,
+							style = MaterialTheme.typography.titleLarge,
+							coinsTextStyle = MaterialTheme.typography.titleMedium,
+						)
+						
+						if (balance.primaryValue != null) {
+							BalanceText(
+								modifier = Modifier,
+								text = balance.primaryValue.toPriceString(showPlus = true),
+								style = MaterialTheme.typography.bodyMedium,
+								color = balance.primaryValue.toPriceColor(),
+								coinsTextStyle = MaterialTheme.typography.bodyMedium
+							)
+						}
+						
+					}
+				}
+			)
+		}
 	}
 }
 

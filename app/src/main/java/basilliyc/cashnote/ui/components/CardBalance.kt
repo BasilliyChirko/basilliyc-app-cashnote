@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -111,7 +113,7 @@ private fun Title(
 	Text(
 		modifier = Modifier,
 		text = title,
-		style = MaterialTheme.typography.titleMedium,
+		style = MaterialTheme.typography.titleLarge,
 	)
 }
 
@@ -131,6 +133,7 @@ private fun Icon(
 		is CardBalanceLeadingIcon.Vector -> {
 			if (icon.imageVector != null) {
 				Icon(
+					modifier = Modifier.size(40.dp).offset(x = (-2).dp),
 					imageVector = icon.imageVector,
 					contentDescription = title,
 				)
@@ -151,18 +154,20 @@ private fun Values(
 		verticalArrangement = Arrangement.Center,
 	) {
 		
-		Text(
+		BalanceText(
 			text = primaryValue.toPriceString(showPlus = false),
 			modifier = Modifier,
 			style = MaterialTheme.typography.titleLarge,
+			coinsTextStyle = MaterialTheme.typography.titleMedium,
 		)
 		
 		if (secondaryValue != null) {
-			Text(
+			BalanceText(
 				modifier = Modifier,
 				text = secondaryValue.toPriceString(showPlus = true),
-				style = MaterialTheme.typography.bodyLarge,
+				style = MaterialTheme.typography.bodyMedium,
 				color = secondaryValue.toPriceColor(),
+				coinsTextStyle = MaterialTheme.typography.bodyMedium
 			)
 		}
 		
@@ -181,7 +186,7 @@ private fun CardBalancePreview() = DefaultPreview {
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(Icons.Default.Home),
 		color = FinancialColor.Green,
-		isWide = true,
+		isWide = false,
 	)
 }
 
@@ -197,7 +202,7 @@ private fun CardBalancePreview2() = DefaultPreview {
 		secondaryValue = 50.0,
 		leadingIcon = CardBalanceLeadingIcon(FinancialCurrency.EUR),
 		color = FinancialColor.Green,
-		isWide = true,
+		isWide = false,
 	)
 }
 

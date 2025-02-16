@@ -1,5 +1,6 @@
 package basilliyc.cashnote.ui.account.details
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import basilliyc.cashnote.data.labelText
 import basilliyc.cashnote.ui.PreviewValues
 import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.components.BackButton
+import basilliyc.cashnote.ui.components.BalanceText
 import basilliyc.cashnote.ui.components.CardBalance
 import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.DeleteConfirmationDialog
@@ -358,14 +360,14 @@ private fun BalanceRow(
 			maxLines = 1,
 			style = MaterialTheme.typography.titleLarge,
 		)
-		Text(
+		BalanceText(
 			text = buildString {
 				append(currency.symbol)
 				append(" ")
 				append(value.toPriceString(false))
 			},
-			maxLines = 1,
 			style = MaterialTheme.typography.titleLarge,
+			coinsTextStyle = MaterialTheme.typography.titleMedium,
 		)
 	}
 }
@@ -388,13 +390,16 @@ private fun RowScope.BalanceStatsValue(
 	value: Double,
 	showPlus: Boolean = false,
 ) {
-	Text(
-		text = value.toPriceString(showPlus),
+	Box(
 		modifier = Modifier.weight(1.5F),
-		maxLines = 1,
-		style = MaterialTheme.typography.titleMedium,
-		textAlign = TextAlign.End,
-	)
+		contentAlignment = Alignment.CenterEnd,
+	) {
+		BalanceText(
+			text = value.toPriceString(showPlus),
+			style = MaterialTheme.typography.titleMedium,
+			coinsTextStyle = MaterialTheme.typography.bodyLarge,
+		)
+	}
 }
 
 @Composable

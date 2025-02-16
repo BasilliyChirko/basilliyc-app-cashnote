@@ -824,21 +824,21 @@ class FinancialManager {
 	
 	fun test() = CoroutineScope(Dispatchers.Default).launch {
 		
-		val systime = System.currentTimeMillis()
-		databaseTransaction {
-			transactionDao.getList().map {
-				if (it.date > systime) {
-					val calendar = CalendarInstance(it.date)
-					calendar.add(Calendar.YEAR, -1)
-					it.copy(
-						date = calendar.timeInMillis
-					)
-				} else it
-			}.let {
-				transactionDao.save(it)
-			}
-		}
-		refreshStatistic()
+//		val systime = System.currentTimeMillis()
+//		databaseTransaction {
+//			transactionDao.getList().map {
+//				if (it.date > systime) {
+//					val calendar = CalendarInstance(it.date)
+//					calendar.add(Calendar.YEAR, -1)
+//					it.copy(
+//						date = calendar.timeInMillis
+//					)
+//				} else it
+//			}.let {
+//				transactionDao.save(it)
+//			}
+//		}
+//		refreshStatistic()
 	
 	}
 	

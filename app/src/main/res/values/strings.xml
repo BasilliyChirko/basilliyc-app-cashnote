@@ -149,6 +149,7 @@
     <string name="account_params_show_accounts_list_in_single_line">Account list wide item</string>
     <string name="main_nav_transaction_history">History</string>
     <string name="transaction_form_account">Transaction in %s</string>
+    <string name="account_params_quick_transaction">Account list item tapping procide to new transaction</string>
     <plurals name="category_list_item_used_in_accounts_count">
         <item quantity="one">In %d account</item>
         <item quantity="other">In %d accounts</item>

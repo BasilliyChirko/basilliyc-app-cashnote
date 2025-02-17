@@ -1,8 +1,5 @@
 package basilliyc.cashnote.utils
 
-import android.os.VibrationEffect
-import android.os.Vibrator
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -32,15 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.zIndex
-import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -53,7 +46,7 @@ val LocalDraggableLazyVerticalGridState = compositionLocalOf<DraggableLazyVertic
 fun DraggableVerticalGrid(
 	modifier: Modifier = Modifier,
 	columns: GridCells,
-	onDragStarted: (index: Int) -> Unit,
+	onDragStarted: () -> Unit,
 	onDragMoved: (from: Int, to: Int) -> Unit,
 	onDragCompleted: (from: Int, to: Int) -> Unit,
 	onDragReverted: () -> Unit,
@@ -66,11 +59,13 @@ fun DraggableVerticalGrid(
 	horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
 	flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
 	userScrollEnabled: Boolean = true,
+	onLongClick: (index: Int) -> Unit = {},
 	content: DraggableLazyVerticalGridScope.() -> Unit,
 ) {
 	
 	var totalDraggedFrom by remember { mutableIntStateOf(-1) }
 	var totalDraggedTo by remember { mutableIntStateOf(-1) }
+	var longClickIndex by remember { mutableIntStateOf(-1) }
 	
 	val lazyGridState = rememberLazyGridState()
 	val draggableListState = rememberDraggableLazyVerticalGridState(
@@ -81,6 +76,7 @@ fun DraggableVerticalGrid(
 			}
 			totalDraggedTo = to
 			onDragMoved(from, to)
+			longClickIndex = -1
 		},
 	)
 	
@@ -96,6 +92,7 @@ fun DraggableVerticalGrid(
 	
 	val vibrator = if (vibrate) { rememberVibrator() } else null
 	
+	
 	CompositionLocalProvider(
 		LocalDraggableLazyVerticalGridState provides draggableListState,
 	) {
@@ -108,7 +105,8 @@ fun DraggableVerticalGrid(
 							draggableListState.onDragStart(offset)
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
-							onDragStarted(draggableListState.currentIndexOfDraggedItem!!)
+							onDragStarted()
+							longClickIndex = draggableListState.currentIndexOfDraggedItem!!
 							vibrator.vibrate(Vibration.Short)
 						},
 						onDragEnd = {
@@ -116,12 +114,17 @@ fun DraggableVerticalGrid(
 							onDragCompleted(totalDraggedFrom, totalDraggedTo)
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
+							if (longClickIndex != -1) {
+								onLongClick(longClickIndex)
+							}
+							longClickIndex = -1
 						},
 						onDragCancel = {
 							draggableListState.onDragInterrupted()
 							onDragReverted()
 							totalDraggedFrom = -1
 							totalDraggedTo = -1
+							longClickIndex = -1
 						},
 						onDrag = { change, dragAmount ->
 							change.consume()

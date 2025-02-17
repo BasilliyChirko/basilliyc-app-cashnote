@@ -130,14 +130,23 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 			onCheckedChange = listener::onStatisticShowSecondaryValueForAccountChanged
 		)
 		
-		HorizontalDivider()
-		
 		val preferences = rememberInject<AppPreferences>()
+		
+		HorizontalDivider()
 		MenuRowSwitch(
 			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
 			checked = preferences.accountListSingleLine.collectValue(),
 			onCheckedChange = {
 				preferences.accountListSingleLine.value = it
+			}
+		)
+	
+		HorizontalDivider()
+		MenuRowSwitch(
+			title = stringResource(R.string.account_params_quick_transaction),
+			checked = preferences.accountListQuickTransaction.collectValue(),
+			onCheckedChange = {
+				preferences.accountListQuickTransaction.value = it
 			}
 		)
 	}

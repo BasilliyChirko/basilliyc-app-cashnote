@@ -11,4 +11,6 @@ class AppPreferences : BasePreferences() {
 	
 	val accountListSingleLine = boolean("accountListSingleLine", true)
 	
+	val accountListQuickTransaction = boolean("accountListQuickTransaction", false)
+	
 }

@@ -77,12 +77,42 @@ class AccountListViewModel : BaseViewModel(), AccountListListener {
 		)
 	}
 	
-	override fun onClickAddNewAccount() {
+	override fun onAddNewAccountClicked() {
 		state.result = AccountListStateHolder.Result.NavigateAccountForm
 	}
 	
-	override fun onClickAccount(id: Long) {
-		state.result = AccountListStateHolder.Result.NavigateAccountDetails(id)
+	override fun onAccountClicked(id: Long) {
+		if (preferences.accountListQuickTransaction.value) {
+			navigateAccountTransaction(id)
+		} else {
+			navigateAccountDetails(id)
+		}
+	}
+	
+	override fun onAccountLongClicked(id: Long) {
+		if (!preferences.accountListQuickTransaction.value) {
+			navigateAccountTransaction(id)
+		} else {
+			navigateAccountDetails(id)
+		}
+	}
+	
+	private fun navigateAccountDetails(accountId: Long) {
+		state.result = AccountListStateHolder.Result.NavigateAccountDetails(accountId)
+	}
+	
+	private fun navigateAccountTransaction(accountId: Long) {
+		schedule {
+			val categories = financialManager.getCategoryListVisibleInAccount(accountId)
+			if (categories.isEmpty()) {
+				navigateAccountDetails(accountId)
+			} else {
+				state.result = AccountListStateHolder.Result.NavigateAccountTransaction(
+					accountId = accountId,
+					categoryId = categories.first().id,
+				)
+			}
+		}
 	}
 	
 }

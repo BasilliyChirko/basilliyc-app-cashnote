@@ -35,7 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import basilliyc.cashnote.AppNavigation
+import basilliyc.cashnote.AppNavigation.*
 import basilliyc.cashnote.R
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.ui.PreviewValues
@@ -55,7 +55,6 @@ import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.toPriceColor
 import basilliyc.cashnote.utils.toPriceString
-
 
 //--------------------------------------------------------------------------------------------------
 //  ROOT
@@ -77,16 +76,27 @@ private fun Result(
 		when (it) {
 			is AccountListStateHolder.Result.NavigateAccountDetails -> {
 				navigateForward(
-					AppNavigation.AccountDetails(
-						accountId = it.id,
+					AccountDetails(
+						accountId = it.accountId,
 						isFromNavigation = false
 					)
 				)
 			}
 			
 			is AccountListStateHolder.Result.NavigateAccountForm -> {
-				navigateForward(AppNavigation.AccountForm(accountId = null))
+				navigateForward(AccountForm(accountId = null))
 			}
+			
+			is AccountListStateHolder.Result.NavigateAccountTransaction -> {
+				navigateForward(
+					TransactionForm(
+						accountId = it.accountId,
+						categoryId = it.categoryId,
+						transactionId = null,
+					)
+				)
+			}
+			
 		}
 	}
 }
@@ -107,8 +117,9 @@ private fun AccountListPreview() = DefaultPreview {
 		),
 		listener = object : AccountListListener {
 			override fun onResultHandled() {}
-			override fun onClickAddNewAccount() {}
-			override fun onClickAccount(id: Long) {}
+			override fun onAddNewAccountClicked() {}
+			override fun onAccountClicked(id: Long) {}
+			override fun onAccountLongClicked(id: Long) {}
 			override fun onDragStarted() {}
 			override fun onDragCompleted(from: Int, to: Int) {}
 			override fun onDragReverted() {}
@@ -139,7 +150,7 @@ private fun PageData(
 				title = stringResource(R.string.main_nav_account_list),
 				actions = {
 					IconButton(
-						onClick = listener::onClickAddNewAccount,
+						onClick = listener::onAddNewAccountClicked,
 						imageVector = Icons.Filled.Add,
 						contentDescription = stringResource(R.string.add_new_account)
 					)
@@ -150,10 +161,11 @@ private fun PageData(
 	) {
 		if (page.accounts.isEmpty()) {
 			PageDataEmpty(
-				onClickAddNewAccount = listener::onClickAddNewAccount
+				onClickAddNewAccount = listener::onAddNewAccountClicked
 			)
 			return@ScaffoldBox
 		}
+		
 		
 		val accounts = page.accountsDragged ?: page.accounts
 		DraggableVerticalGrid(
@@ -162,10 +174,11 @@ private fun PageData(
 			horizontalArrangement = Arrangement.spacedBy(8.dp),
 			verticalArrangement = Arrangement.spacedBy(8.dp),
 			contentPadding = PaddingValues(8.dp),
-			onDragStarted = { listener.onDragStarted() },
+			onDragStarted = listener::onDragStarted,
 			onDragCompleted = listener::onDragCompleted,
 			onDragReverted = listener::onDragReverted,
 			onDragMoved = listener::onDragMoved,
+			onLongClick = { listener.onAccountLongClicked(accounts[it].account.id) }
 		) {
 			items(
 				count = accounts.size,
@@ -182,7 +195,7 @@ private fun PageData(
 										shape = MaterialTheme.shapes.small
 									)
 								},
-							onClick = { listener.onClickAccount(account.id) },
+							onClick = { listener.onAccountClicked(account.id) },
 							balance = accountBalance,
 						)
 					} else {
@@ -194,7 +207,7 @@ private fun PageData(
 										shape = MaterialTheme.shapes.small
 									)
 								},
-							onClick = { listener.onClickAccount(account.id) },
+							onClick = { listener.onAccountClicked(account.id) },
 							title = account.name,
 							primaryValue = account.balance,
 							secondaryValue = accountBalance.primaryValue,

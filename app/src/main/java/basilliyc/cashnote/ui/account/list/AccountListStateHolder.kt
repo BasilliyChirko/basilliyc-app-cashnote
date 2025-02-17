@@ -34,7 +34,8 @@ class AccountListStateHolder(
 	)
 	
 	sealed interface Result {
-		data class NavigateAccountDetails(val id: Long) : Result
+		data class NavigateAccountDetails(val accountId: Long) : Result
+		data class NavigateAccountTransaction(val accountId: Long, val categoryId: Long) : Result
 		data object NavigateAccountForm : Result
 	}
 	

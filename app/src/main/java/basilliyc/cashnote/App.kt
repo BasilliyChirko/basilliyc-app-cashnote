@@ -29,7 +29,7 @@ class App : Application() {
 		}
 		
 		CoroutineScope(Dispatchers.IO).launch {
-			financialManager.getStatisticParams()
+			financialManager.refreshStatistic(force = false)
 		}
 		
 		financialManager.test()

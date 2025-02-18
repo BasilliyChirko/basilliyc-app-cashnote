@@ -6,12 +6,7 @@ import basilliyc.cashnote.R
 import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.theme.ThemeMode
 
-val FinancialCurrency.symbol: String
-	get() = when (this) {
-		FinancialCurrency.UAH -> "₴"
-		FinancialCurrency.USD -> "$"
-		FinancialCurrency.EUR -> "€"
-	}
+
 
 
 val ThemeMode.stringName

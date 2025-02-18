@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.color
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.toPriceColor

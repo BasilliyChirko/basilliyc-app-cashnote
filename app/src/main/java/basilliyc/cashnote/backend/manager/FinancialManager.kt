@@ -672,7 +672,7 @@ class FinancialManager {
 		val header = rootObject.getJSONObject("header")
 		val version = header.getInt("version")
 		
-		if (version < AppValues.BackupMinVersion || version > AppValues.BackupMaxVersion) {
+		if (version < AppValues.BACKUP_MIN_VERSION || version > AppValues.BACKUP_MAX_VERSION) {
 			throw AppError.Database.BackupVersionNotSupported(version)
 		}
 		
@@ -829,7 +829,19 @@ class FinancialManager {
 		
 	}
 	
-	fun test() = CoroutineScope(Dispatchers.Default).launch {
+	fun test() = CoroutineScope(Dispatchers.IO).launch {
+		
+//		val rm = inject<FinancialCurrencyRateManager>().value
+//		logcat.debug("""
+//			1 UAH = ${rm.getRate(FinancialCurrency.UAH, FinancialCurrency.USD)} USD
+//			1 USD = ${rm.getRate(FinancialCurrency.USD, FinancialCurrency.UAH)} UAH
+//
+//			1 UAH = ${rm.getRate(FinancialCurrency.UAH, FinancialCurrency.EUR)} EUR
+//			1 EUR = ${rm.getRate(FinancialCurrency.EUR, FinancialCurrency.UAH)} UAH
+//
+//			1 EUR = ${rm.getRate(FinancialCurrency.EUR, FinancialCurrency.USD)} USD
+//			1 USD = ${rm.getRate(FinancialCurrency.USD, FinancialCurrency.EUR)} EUR
+//		""".trimIndent())
 		
 //		val systime = System.currentTimeMillis()
 //		databaseTransaction {
@@ -850,6 +862,10 @@ class FinancialManager {
 	}
 	
 	private suspend fun initTestData() {
+		
+		
+		
+		
 		/*		logcat.debug("Create initial data")
 				val t = measureTimeMillis {
 					saveAccount(

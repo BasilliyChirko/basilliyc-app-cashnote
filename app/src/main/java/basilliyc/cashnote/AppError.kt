@@ -15,8 +15,8 @@ sealed class AppError(message: String, cause: Throwable? = null) : Throwable(mes
 		
 		data class BackupVersionNotSupported(
 			val currentVersion: Int,
-			val minVersion: Int = AppValues.BackupMinVersion,
-			val maxVersion: Int = AppValues.BackupMaxVersion,
+			val minVersion: Int = AppValues.BACKUP_MIN_VERSION,
+			val maxVersion: Int = AppValues.BACKUP_MAX_VERSION,
 		) : Database("Backup version $currentVersion is not supported. Supported from $minVersion to $maxVersion")
 		
 	}

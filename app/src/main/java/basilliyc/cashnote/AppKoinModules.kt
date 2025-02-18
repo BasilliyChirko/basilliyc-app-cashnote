@@ -4,17 +4,31 @@ import android.content.Context
 import androidx.room.Room
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.AppDatabaseMigrations
+import basilliyc.cashnote.backend.manager.FinancialCurrencyRateManager
+import basilliyc.cashnote.backend.manager.FinancialCurrencyRateRepositoryMonobank
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.backend.preferences.AppPreferences
+import basilliyc.cashnote.utils.FullPrintHttpLogging
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 fun AppValues.koinModules() = module {
 	
+	//MANAGERS
+	
 	single { FinancialManager() }
+	single { FinancialCurrencyRateManager() }
 	single { AppPreferences() }
 	
 	factory { get<Context>().contentResolver }
+	
+	
+	//LOCAL DATABASE
 	
 	single {
 		Room.databaseBuilder(androidContext(), AppDatabase::class.java, "AppDatabase")
@@ -34,4 +48,22 @@ fun AppValues.koinModules() = module {
 	single { get<AppDatabase>().statisticDao() }
 	single { get<AppDatabase>().categoryToAccountParamsDao() }
 	
+	//INTERNET RETROFIT
+	
+	factory {
+		val client = OkHttpClient.Builder()
+			.addInterceptor(HttpLoggingInterceptor(FullPrintHttpLogging()))
+			.build()
+		Retrofit.Builder()
+			.addCallAdapterFactory(CoroutineCallAdapterFactory())
+			.addConverterFactory(GsonConverterFactory.create())
+			.client(client)
+	}
+	
+	single {
+		get<Retrofit.Builder>()
+			.baseUrl(MONOBANK_BASE_URL)
+			.build()
+			.create(FinancialCurrencyRateRepositoryMonobank::class.java)
+	}
 }

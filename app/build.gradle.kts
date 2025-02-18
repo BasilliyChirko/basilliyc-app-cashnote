@@ -86,6 +86,8 @@ dependencies {
 	implementation(libs.bundles.room)
 	ksp(libs.room.compiler)
 	
+	implementation(libs.bundles.retrofit)
+	
 	implementation(platform(libs.firebase.bom))
 	implementation(libs.firebase.analytics)
 	implementation(libs.firebase.crashlytics)

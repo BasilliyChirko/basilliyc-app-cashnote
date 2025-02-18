@@ -65,7 +65,6 @@ import basilliyc.cashnote.ui.components.SimpleTimePickerDialog
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
 import basilliyc.cashnote.ui.components.rememberPopupMenuState
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.ui.theme.backgroundPageGradient
 import basilliyc.cashnote.ui.theme.colorGrey99

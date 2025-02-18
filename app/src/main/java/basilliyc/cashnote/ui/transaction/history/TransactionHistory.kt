@@ -44,7 +44,6 @@ import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.Button

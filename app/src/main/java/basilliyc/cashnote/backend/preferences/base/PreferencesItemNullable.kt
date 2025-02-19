@@ -13,6 +13,7 @@ class PreferencesItemNullable<T : Any>(
 	val defaultValue: T?,
 	val onWrite: SharedPreferences.Editor.(value: T) -> Unit,
 	val onRead: SharedPreferences.() -> T,
+	val onRemove: SharedPreferences.Editor.() -> Unit = { remove(key) },
 ) {
 	
 	var value: T?
@@ -45,7 +46,7 @@ class PreferencesItemNullable<T : Any>(
 	}
 	
 	fun remove() {
-		preferences.edit().remove(key).apply()
+		preferences.edit().apply { onRemove() }.apply()
 		mutableStateFlow.tryEmit(defaultValue)
 	}
 	

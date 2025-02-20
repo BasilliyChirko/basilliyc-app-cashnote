@@ -1,19 +1,11 @@
 package basilliyc.cashnote.ui.components.menu
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import basilliyc.cashnote.ui.components.CardText
 import basilliyc.cashnote.utils.DefaultPreview
 
 @Composable
@@ -42,19 +34,10 @@ fun MenuRowText(
 		leadingIcon = leadingIcon,
 		text = { MenuTitle(title = title, subtitle = subtitle) },
 		trailingIcon = {
-			Box(
-				modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-				contentAlignment = Alignment.Center
-			) {
-				Text(
-					modifier = Modifier
-						.padding(vertical = 8.dp, horizontal = 16.dp),
-					text = value,
-					textAlign = TextAlign.Center,
-					style = MaterialTheme.typography.bodyMedium,
-					fontWeight = FontWeight.Bold,
-				)
-			}
+			CardText(
+				text = value,
+				onClick = onClick
+			)
 		},
 		onClick = { onClick?.invoke() },
 		enabled = enabled,

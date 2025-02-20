@@ -16,6 +16,8 @@ class PreferencesItem<T : Any>(
 	val onRemove: SharedPreferences.Editor.() -> Unit = { remove(key) },
 ) {
 	
+	private var valueField: T? = null
+	
 	var value: T
 		get() = get()
 		set(value) = set(value)
@@ -33,6 +35,7 @@ class PreferencesItem<T : Any>(
 	}
 	
 	fun set(value: T) {
+		valueField = value
 		
 		preferences.edit().apply {
 			onWrite(value)
@@ -42,16 +45,23 @@ class PreferencesItem<T : Any>(
 	}
 	
 	fun remove() {
+		valueField = null
 		preferences.edit().apply { onRemove() }.apply()
 		mutableStateFlow.tryEmit(defaultValue)
 	}
 	
 	fun get(): T {
+		valueField?.let { return it }
+		
 		if (!preferences.contains(key)) {
-			return defaultValue
+			return defaultValue.also { valueField = it }
 		}
 		
-		return preferences.onRead()
+		return preferences.onRead().also { valueField = it }
+	}
+	
+	inline fun update(transform: (T) -> T) {
+		set(transform(get()))
 	}
 	
 	private val mutableStateFlow by lazy { MutableStateFlow(get()) }

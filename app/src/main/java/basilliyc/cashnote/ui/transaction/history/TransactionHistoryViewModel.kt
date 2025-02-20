@@ -20,9 +20,14 @@ class TransactionHistoryViewModel(
 		const val PAGE_SIZE_NEXT = 50
 	}
 	
-	val state = TransactionHistoryStateHolder()
-	
 	private val route: AppNavigation.TransactionHistory = savedStateHandle.toRoute()
+
+	val state = TransactionHistoryStateHolder(
+		page = TransactionHistoryStateHolder.Page(
+			showBackButton = !route.isFromNavigation,
+		)
+	)
+	
 	private var pagingSource = financialManager.getTransactionListPagingSource(route.accountId)
 	private var nextPageKey: Int? = null
 	

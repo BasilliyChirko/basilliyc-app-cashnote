@@ -26,6 +26,7 @@ class TransactionHistoryStateHolder(
 		val transactions: List<FinancialTransaction> = emptyList(),
 		val transactionsLoadingMore: Boolean = false,
 		val transactionsLoadingMoreError: Throwable? = null,
+		val showBackButton: Boolean = false,
 	)
 	
 	sealed interface Result {
@@ -35,5 +36,5 @@ class TransactionHistoryStateHolder(
 			val transactionId: Long,
 		) : Result
 	}
-
+	
 }

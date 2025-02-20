@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import basilliyc.cashnote.data.FinancialIcon
 import basilliyc.cashnote.ui.components.PopupMenu
+import basilliyc.cashnote.ui.components.PopupMenuState
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.rememberPopupMenuState
@@ -58,8 +59,8 @@ fun MenuRowPopupIcon(
 	onIconSelected: (FinancialIcon?) -> Unit,
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
+	popupMenuState: PopupMenuState = rememberPopupMenuState(),
 ) {
-	val popupMenuState = rememberPopupMenuState()
 	
 	DropdownMenuItem(
 		modifier = Modifier,

@@ -2,6 +2,7 @@ package basilliyc.cashnote.backend.preferences
 
 import basilliyc.cashnote.backend.preferences.base.BasePreferences
 import basilliyc.cashnote.data.FinancialCurrency
+import basilliyc.cashnote.data.StatisticSelectedPeriod
 
 class StatisticPreferences : BasePreferences() {
 	
@@ -9,8 +10,11 @@ class StatisticPreferences : BasePreferences() {
 	
 	val accountIds = longList("accountIds", emptyList())
 	
-	val showMonthCount = int("showMonthCount", 3) //Zero means all
-	
-	val showCurrentMonth = boolean("showCurrentMonth", true)
+	val selectedPeriod = enum("selectedPeriod", StatisticSelectedPeriod.ThreeMonths)
+
+//	val showMonthCount = int("showMonthCount", 3) //Zero means all
+
+//	val showCurrentMonth = boolean("showCurrentMonth", true)
+
 	
 }

@@ -80,6 +80,10 @@ class PopupMenuState(expanded: Boolean = false) {
 	fun collapse() {
 		expanded.value = false
 	}
+	
+	fun toggle() {
+		expanded.value = !expanded.value
+	}
 }
 
 @Composable

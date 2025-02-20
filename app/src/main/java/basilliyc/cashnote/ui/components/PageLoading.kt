@@ -5,6 +5,7 @@ import basilliyc.cashnote.utils.ScaffoldBox
 
 @Composable
 fun PageLoading(
+	title: String = "",
 	showBackButton: Boolean = true,
 ) {
 	ScaffoldBox(
@@ -14,7 +15,8 @@ fun PageLoading(
 					if (showBackButton) {
 						BackButton()
 					}
-				}
+				},
+				title = title,
 			)
 		},
 		content = { BoxLoading() }

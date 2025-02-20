@@ -18,6 +18,7 @@ import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.text
 import basilliyc.cashnote.ui.components.PopupMenu
+import basilliyc.cashnote.ui.components.PopupMenuState
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.rememberPopupMenuState
@@ -62,8 +63,9 @@ fun MenuRowPopupColor(
 	onColorSelected: (FinancialColor?) -> Unit,
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
+	popupMenuState: PopupMenuState = rememberPopupMenuState(),
 ) {
-	val popupMenuState = rememberPopupMenuState()
+	
 	DropdownMenuItem(
 		modifier = Modifier,
 		text = { MenuTitle(title = title, subtitle = subtitle) },

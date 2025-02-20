@@ -1,17 +1,11 @@
 package basilliyc.cashnote.ui.components.menu
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import basilliyc.cashnote.ui.components.CardText
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuState
 import basilliyc.cashnote.ui.components.rememberPopupMenuState
@@ -37,9 +31,9 @@ fun MenuRowPopup(
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
 	leadingIcon: @Composable (() -> Unit)? = null,
+	popupMenuState: PopupMenuState = rememberPopupMenuState(),
 	items: @Composable PopupMenuState.() -> Unit,
 ) {
-	val popupMenuState = rememberPopupMenuState()
 	DropdownMenuItem(
 		modifier = Modifier,
 		leadingIcon = leadingIcon,
@@ -48,7 +42,7 @@ fun MenuRowPopup(
 			PopupMenu(
 				state = popupMenuState,
 				anchor = {
-					ValueCard(
+					CardText(
 						onClick = { popupMenuState.expand() },
 						text = value
 					)
@@ -61,27 +55,5 @@ fun MenuRowPopup(
 		contentPadding = contentPadding,
 	)
 }
-
-
-@Composable
-private fun ValueCard(
-	modifier: Modifier = Modifier,
-	text: String,
-	onClick: () -> Unit,
-) {
-	OutlinedCard(
-		modifier = modifier,
-		onClick = onClick,
-	) {
-		Text(
-			modifier = modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-			text = text,
-			textAlign = TextAlign.Center,
-			style = MaterialTheme.typography.bodyMedium,
-			fontWeight = FontWeight.Bold,
-		)
-	}
-}
-
 
 

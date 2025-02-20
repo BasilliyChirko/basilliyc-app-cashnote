@@ -15,6 +15,8 @@ class PreferencesItemNullable<T : Any>(
 	val onRead: SharedPreferences.() -> T,
 	val onRemove: SharedPreferences.Editor.() -> Unit = { remove(key) },
 ) {
+	private var valueField: T? = null
+	private var valueFiledInitialized = false
 	
 	var value: T?
 		get() = get()
@@ -38,6 +40,9 @@ class PreferencesItemNullable<T : Any>(
 			return
 		}
 		
+		valueField = value
+		valueFiledInitialized = true
+		
 		preferences.edit().apply {
 			onWrite(value)
 		}.apply()
@@ -46,16 +51,33 @@ class PreferencesItemNullable<T : Any>(
 	}
 	
 	fun remove() {
+		valueField = null
+		valueFiledInitialized = false
 		preferences.edit().apply { onRemove() }.apply()
 		mutableStateFlow.tryEmit(defaultValue)
 	}
 	
 	fun get(): T? {
-		if (!preferences.contains(key)) {
-			return defaultValue
+		
+		if (valueFiledInitialized) {
+			return valueField
 		}
 		
-		return preferences.onRead() as T?
+		if (!preferences.contains(key)) {
+			return defaultValue.also {
+				valueField = it
+				valueFiledInitialized = true
+			}
+		}
+		
+		return (preferences.onRead() as T?).also {
+			valueField = it
+			valueFiledInitialized = true
+		}
+	}
+	
+	inline fun update(transform: (T?) -> T?) {
+		set(transform(get()))
 	}
 	
 	private val mutableStateFlow by lazy { MutableStateFlow(get()) }

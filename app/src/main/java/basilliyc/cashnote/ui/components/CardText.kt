@@ -18,6 +18,8 @@ fun CardText(
 	onClick: (() -> Unit)? = null,
 ) {
 	
+	if (text.isEmpty()) return
+	
 	@Composable
 	fun card(content: @Composable ColumnScope.() -> Unit) {
 		if (onClick != null) {

@@ -3,12 +3,19 @@ package basilliyc.cashnote.ui.statistic
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import basilliyc.cashnote.data.FinancialAccount
+import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialCurrency
+import basilliyc.cashnote.data.StatisticMonth
+import basilliyc.cashnote.data.StatisticSelectedPeriod
+import basilliyc.cashnote.ui.statistic.StatisticStateHolder.StatisticValue
+
+
+typealias StatisticValues = HashMap<StatisticMonth, HashMap<FinancialCategory, StatisticValue>>
 
 class StatisticStateHolder(
 	page: Page = Page.Loading,
 	params: Params,
-	pageType: PageType = PageType.Balance,
 ) {
 	
 	var page by mutableStateOf(page)
@@ -18,8 +25,6 @@ class StatisticStateHolder(
 		set(value) =
 			if (value != null) page = value
 			else Unit
-	
-	var pageType by mutableStateOf(pageType)
 	
 	var params by mutableStateOf(params)
 	
@@ -31,21 +36,22 @@ class StatisticStateHolder(
 	
 	sealed interface Page {
 		data object Loading : Page
-		data object DataEmpty : Page
+		data class LoadingError(val throwable: Throwable) : Page
 		data class Data(
-			val stub: Int = 0
+			val totalBalance: Double,
+			val values: StatisticValues,
 		) : Page
 	}
 	
-	enum class PageType {
-		Balance, Spend, Income
-	}
+	data class StatisticValue(
+		val income: Double = 0.0,
+		val expense: Double = 0.0,
+	)
 	
 	data class Params(
-		val showMonthCount: Int,
-		val showCurrentMonth: Boolean,
+		val selectedPeriod: StatisticSelectedPeriod,
 		val currency: FinancialCurrency,
-		val accountIds: List<Long>,
+		val accounts: List<FinancialAccount>,
 	)
 	
 	sealed interface Result {

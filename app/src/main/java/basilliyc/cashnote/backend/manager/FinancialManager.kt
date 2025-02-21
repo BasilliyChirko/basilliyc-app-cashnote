@@ -341,6 +341,22 @@ class FinancialManager {
 	suspend fun requireTransactionById(id: Long) = transactionDao.getById(id)
 		?: throw AppError.Database.TransactionNotFound(id)
 	
+	fun getTransactionListByStartDateAsFlow(startDate: Long) = transactionDao.getListByStartDateAsFlow(startDate)
+	
+//	suspend fun getTransactionListForStatistic(
+//		accountId: Long,
+//		categoryId: Long,
+//		periodStart: Long,
+//		periodEnd: Long,
+//	) = transactionDao.getListForStatistic(
+//		accountId = accountId,
+//		categoryId = categoryId,
+//		periodStart = periodStart,
+//		periodEnd = periodEnd,
+//	)
+
+//	suspend fun getTransactionListByAccountUntilDate(accountId: Long, date: Long) = transactionDao.getListByAccountUntilDate(accountId, date)
+	
 	
 	fun getTransactionListPagingSource(accountId: Long?): PagingSource<Int, FinancialTransaction> {
 		return if (accountId != null) transactionDao.getPagingSourceByAccount(accountId)

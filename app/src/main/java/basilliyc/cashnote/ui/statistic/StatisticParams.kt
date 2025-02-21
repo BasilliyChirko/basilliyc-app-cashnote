@@ -1,6 +1,8 @@
 package basilliyc.cashnote.ui.statistic
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -102,7 +104,7 @@ fun StatisticParams() {
 		if (accountsPopupMenuState.expanded.value) {
 			VerticalGrid(
 				modifier = Modifier
-//						.verticalScroll(rememberScrollState())
+					.verticalScroll(rememberScrollState())
 					.padding(8.dp),
 				columns = VerticalGridCells.Fixed(2),
 				itemsCount = accounts.size,
@@ -131,7 +133,6 @@ fun StatisticParams() {
 							}
 						}
 					)
-					
 				}
 			)
 		}

@@ -84,6 +84,7 @@ class FinancialCurrencyRateManager {
 	
 	
 	suspend fun getRate(from: FinancialCurrency, to: FinancialCurrency): Double? {
+		if (from == to) return 1.0
 		return getRates().find {
 			it.from == from && it.to == to
 		}?.rate

@@ -222,7 +222,10 @@ abstract class BasePreferences(
 		key = key,
 		defaultValue = defaultValue,
 		convertToString = { it.joinToString(",") },
-		convertFromString = { it.split(",").map { it.toInt() } }
+		convertFromString = {
+			if (it.isEmpty()) return@custom emptyList()
+			it.split(",").map { it.toInt() }
+		}
 	).also { fields.add(it) }
 	
 	protected fun intListOrNull(
@@ -232,7 +235,10 @@ abstract class BasePreferences(
 		key = key,
 		defaultValue = defaultValue,
 		convertToString = { it.joinToString(",") },
-		convertFromString = { it.split(",").map { it.toInt() } }
+		convertFromString = {
+			if (it.isEmpty()) return@customOrNull emptyList()
+			it.split(",").map { it.toInt() }
+		}
 	).also { fieldsNullable.add(it) }
 	
 	protected fun longList(
@@ -242,7 +248,10 @@ abstract class BasePreferences(
 		key = key,
 		defaultValue = defaultValue,
 		convertToString = { it.joinToString(",") },
-		convertFromString = { it.split(",").map { it.toLong() } }
+		convertFromString = {
+			if (it.isEmpty()) return@custom emptyList()
+			it.split(",").map { it.toLong() }
+		}
 	).also { fields.add(it) }
 	
 	protected fun longListOrNull(
@@ -252,7 +261,10 @@ abstract class BasePreferences(
 		key = key,
 		defaultValue = defaultValue,
 		convertToString = { it.joinToString(",") },
-		convertFromString = { it.split(",").map { it.toLong() } }
+		convertFromString = {
+			if (it.isEmpty()) return@customOrNull emptyList()
+			it.split(",").map { it.toLong() }
+		}
 	).also { fieldsNullable.add(it) }
 	
 	

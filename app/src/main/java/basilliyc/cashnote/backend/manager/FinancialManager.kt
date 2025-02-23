@@ -316,16 +316,13 @@ class FinancialManager {
 			?: throw IllegalStateException("Can`t create transaction. Category with id ${transaction.categoryId} is not present in database")
 		
 		databaseTransaction {
-			val isNewTransaction = transaction.id == 0L
 			
-			if (isNewTransaction) {
-				transactionDao.save(transaction)
-				accountDao.save(account.copy(balance = account.balance + transaction.value))
-			} else {
-				val previousValue = transactionDao.getById(transaction.id)!!.value
-				accountDao.save(account.copy(balance = account.balance - previousValue + transaction.value))
-			}
+			//Save transaction and update account balance
+			transactionDao.save(transaction)
+			val previousValue = transactionDao.getById(transaction.id)?.value ?: 0.0
+			accountDao.save(account.copy(balance = account.balance - previousValue + transaction.value))
 			
+			//Update periodic statistic
 			if (isAppend) {
 				refreshStatistic(force = false)
 				appendStatisticForCurrentPeriod(transaction)

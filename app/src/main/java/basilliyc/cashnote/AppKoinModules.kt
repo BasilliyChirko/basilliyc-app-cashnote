@@ -8,6 +8,7 @@ import basilliyc.cashnote.backend.manager.FinancialCurrencyRateManager
 import basilliyc.cashnote.backend.manager.FinancialCurrencyRateRepositoryMonobank
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.backend.preferences.AppPreferences
+import basilliyc.cashnote.backend.preferences.FinancialCurrencyRatePreferences
 import basilliyc.cashnote.backend.preferences.StatisticPreferences
 import basilliyc.cashnote.utils.FullPrintHttpLogging
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -26,6 +27,7 @@ fun AppValues.koinModules() = module {
 	single { FinancialCurrencyRateManager() }
 	single { AppPreferences() }
 	single { StatisticPreferences() }
+	single { FinancialCurrencyRatePreferences() }
 	
 	factory { get<Context>().contentResolver }
 	

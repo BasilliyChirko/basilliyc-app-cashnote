@@ -1,5 +1,6 @@
 package basilliyc.cashnote.backend.manager
 
+import basilliyc.cashnote.backend.preferences.FinancialCurrencyRatePreferences
 import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.utils.inject
 import kotlinx.coroutines.delay
@@ -9,6 +10,16 @@ import retrofit2.HttpException
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
+data class FinancialCurrencyRates(
+	val updatedAt: Long,
+	val rates: List<FinancialCurrencyRate>,
+)
+
+fun FinancialCurrencyRates?.isValid(): Boolean {
+	if (this == null) return false
+	return updatedAt + 1000 * 60 * 10 > System.currentTimeMillis()
+}
+
 data class FinancialCurrencyRate(
 	val from: FinancialCurrency,
 	val to: FinancialCurrency,
@@ -17,13 +28,32 @@ data class FinancialCurrencyRate(
 
 class FinancialCurrencyRateManager {
 	
-	private val rateSource: FinancialCurrencyRateRepositoryMonobank by inject()
+	private val ratePreferences: FinancialCurrencyRatePreferences by inject()
 	
+	suspend fun getRates(): FinancialCurrencyRates? {
+		ratePreferences.rates.get()?.takeIf { it.isValid() }?.let { return it }
+		
+		val rates = FinancialCurrencyRates(
+			System.currentTimeMillis(),
+			requestRateSource()
+		)
+		ratePreferences.rates.set(rates)
+		return rates
+	}
+	
+	suspend fun getRate(from: FinancialCurrency, to: FinancialCurrency): Double? {
+		if (from == to) return 1.0
+		return getRates()?.rates?.find {
+			it.from == from && it.to == to
+		}?.rate
+	}
+	
+	
+	private val rateSource: FinancialCurrencyRateRepositoryMonobank by inject()
 	private val previousResults = AtomicReference<List<FinancialCurrencyRate>>()
 	private val previousResultsDate = AtomicLong(0L)
 	private val requestsMutex = Mutex()
-	
-	private suspend fun getRates(): List<FinancialCurrencyRate> {
+	private suspend fun requestRateSource(): List<FinancialCurrencyRate> {
 		requestsMutex.withLock {
 			// Results valid for 5 minutes
 			if (previousResultsDate.get() + 1000 * 60 * 5 > System.currentTimeMillis()) {
@@ -36,7 +66,7 @@ class FinancialCurrencyRateManager {
 				rateSource.getExchangeRates()
 			} catch (e: HttpException) {
 				if (e.code() == 429) { //To many requests
-					delay(25000)
+					delay(31000)
 					rateSource.getExchangeRates()
 				} else throw e
 			}.filter { it.currencyCodeA in currencyCodes && it.currencyCodeB in currencyCodes }
@@ -80,14 +110,6 @@ class FinancialCurrencyRateManager {
 			}
 			
 		}
-	}
-	
-	
-	suspend fun getRate(from: FinancialCurrency, to: FinancialCurrency): Double? {
-		if (from == to) return 1.0
-		return getRates().find {
-			it.from == from && it.to == to
-		}?.rate
 	}
 	
 	

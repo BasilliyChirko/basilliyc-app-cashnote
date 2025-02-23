@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -47,6 +46,7 @@ import basilliyc.cashnote.ui.components.CardBalanceLeadingIcon
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.SimpleActionBar
+import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.DraggableVerticalGrid
@@ -244,14 +244,6 @@ private fun AccountCardItem(
 				modifier = Modifier.padding(8.dp),
 				verticalAlignment = Alignment.CenterVertically,
 				content = {
-					
-					Text(
-						modifier = Modifier,
-						text = account.currency.name,
-						style = MaterialTheme.typography.titleLarge,
-						fontFamily = FontFamily.Monospace,
-					)
-					Spacer(modifier = Modifier.width(8.dp))
 					Text(
 						modifier = Modifier,
 						text = account.name,
@@ -286,6 +278,13 @@ private fun AccountCardItem(
 						}
 						
 					}
+					
+					Text(
+						modifier = Modifier.padding(start = 8.dp),
+						text = account.currency.symbol,
+						style = MaterialTheme.typography.headlineSmall,
+						fontFamily = FontFamily.Monospace,
+					)
 				}
 			)
 		}

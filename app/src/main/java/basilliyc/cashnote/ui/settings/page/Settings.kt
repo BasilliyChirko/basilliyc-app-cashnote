@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.AppNavigation
 import basilliyc.cashnote.R
+import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.ui.base.handleResult
 import basilliyc.cashnote.ui.base.rememberInteractionHelper
 import basilliyc.cashnote.ui.components.ConfirmationDialog
@@ -33,12 +34,14 @@ import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.RegisterActivityRequests
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.menu.MenuRowPopup
+import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
 import basilliyc.cashnote.ui.components.menu.MenuRowText
 import basilliyc.cashnote.ui.settings.account_params.AccountParams
 import basilliyc.cashnote.ui.stringName
 import basilliyc.cashnote.ui.theme.ThemeMode
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.ScaffoldColumn
+import basilliyc.cashnote.utils.rememberInject
 
 @Composable
 fun AppSettings() {
@@ -112,7 +115,8 @@ private fun PageData(
 		columnModifier = Modifier.verticalScroll(rememberScrollState())
 	) {
 		SettingsCommon(common = page.common, listener = listener)
-		SettingsAccount()
+		SettingsPeriodicStatistic()
+		SettingsAccountList()
 		SettingsBackup(listener = listener)
 	}
 }
@@ -216,9 +220,31 @@ private fun ColumnScope.SettingsBackup(
 }
 
 @Composable
-private fun ColumnScope.SettingsAccount() {
+private fun ColumnScope.SettingsPeriodicStatistic() {
 	Group(title = stringResource(R.string.account_params_title)) {
 		AccountParams()
+	}
+}
+
+@Composable
+private fun ColumnScope.SettingsAccountList() {
+	Group(title = stringResource(R.string.settings_account_list_title)) {
+		val preferences = rememberInject<AppPreferences>()
+		MenuRowSwitch(
+			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
+			checked = preferences.accountListSingleLine.collectValue(),
+			onCheckedChange = {
+				preferences.accountListSingleLine.value = it
+			}
+		)
+		HorizontalDivider()
+		MenuRowSwitch(
+			title = stringResource(R.string.account_params_quick_transaction),
+			checked = preferences.accountListQuickTransaction.collectValue(),
+			onCheckedChange = {
+				preferences.accountListQuickTransaction.value = it
+			}
+		)
 	}
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -241,20 +242,19 @@ private fun AccountCardItem(
 			modifier = Modifier.backgroundCardGradient(account.color)
 		) {
 			Row(
-				modifier = Modifier.padding(8.dp),
+				modifier = Modifier
+					.padding(8.dp)
+					.defaultMinSize(minHeight = 48.dp),
 				verticalAlignment = Alignment.CenterVertically,
 				content = {
+					
 					Text(
-						modifier = Modifier,
+						modifier = Modifier.weight(1F),
 						text = account.name,
 						style = MaterialTheme.typography.titleLarge,
+						maxLines = 2,
 					)
 					
-					Spacer(
-						modifier = Modifier
-							.weight(1F)
-							.height(48.dp)
-					)
 					Column(
 						horizontalAlignment = Alignment.End,
 						verticalArrangement = Arrangement.Center,

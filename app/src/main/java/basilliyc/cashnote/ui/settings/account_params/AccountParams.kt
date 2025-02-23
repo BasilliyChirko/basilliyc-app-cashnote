@@ -7,7 +7,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
-import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.data.FinancialStatisticParams
 import basilliyc.cashnote.data.getAllowedCalculations
 import basilliyc.cashnote.data.labelText
@@ -18,7 +17,6 @@ import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.menu.MenuRowPopup
 import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
 import basilliyc.cashnote.utils.DefaultPreview
-import basilliyc.cashnote.utils.rememberInject
 
 @Composable
 fun AccountParams() {
@@ -90,7 +88,7 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 		
 		MenuRowPopup(
 			title = stringResource(R.string.account_params_statistic_primary_value_calculation),
-			value = page.statisticParams.primaryValueCalculation.labelText(),
+			value = page.statisticParams.primaryValueCalculation.nameText(),
 		) {
 			page.allowedCalculations.forEach { calculation ->
 				PopupMenuItem(
@@ -128,26 +126,6 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 			title = stringResource(R.string.account_params_statistic_show_secondary_value_for_account),
 			checked = page.statisticParams.showSecondaryValueForAccount,
 			onCheckedChange = listener::onStatisticShowSecondaryValueForAccountChanged
-		)
-		
-		val preferences = rememberInject<AppPreferences>()
-		
-		HorizontalDivider()
-		MenuRowSwitch(
-			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
-			checked = preferences.accountListSingleLine.collectValue(),
-			onCheckedChange = {
-				preferences.accountListSingleLine.value = it
-			}
-		)
-	
-		HorizontalDivider()
-		MenuRowSwitch(
-			title = stringResource(R.string.account_params_quick_transaction),
-			checked = preferences.accountListQuickTransaction.collectValue(),
-			onCheckedChange = {
-				preferences.accountListQuickTransaction.value = it
-			}
 		)
 	}
 }

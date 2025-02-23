@@ -181,6 +181,11 @@
     <string name="statistic_month_october">Oct</string>
     <string name="statistic_month_november">Nov</string>
     <string name="statistic_month_december">Dec</string>
+    <string name="statistic_current_balance">Current balance</string>
+    <string name="statistic_balance">Balance</string>
+    <string name="statistic_income">Income</string>
+    <string name="statistic_expense">Expense</string>
+    <string name="statistic_profit">Profit</string>
     <plurals name="category_list_item_used_in_accounts_count">
         <item quantity="one">In %d account</item>
         <item quantity="other">In %d accounts</item>

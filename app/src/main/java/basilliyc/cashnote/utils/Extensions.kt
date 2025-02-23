@@ -35,7 +35,7 @@ inline fun <reified T> Any?.castOrNull(): T? {
 private val locale = Locale("en", "US")
 
 @SuppressLint("DefaultLocale")
-fun Double.toPriceString(showPlus: Boolean): String {
+fun Double.toPriceString(showPlus: Boolean, withCoins: Boolean = true): String {
 	val splitDot = String.format(locale, "%.2f", this.absoluteValue).split('.')
 	
 	val coins = splitDot[1]
@@ -53,7 +53,11 @@ fun Double.toPriceString(showPlus: Boolean): String {
 		else -> ""
 	}
 	
-	return "$symbol $decimal.$coins".trim()
+	return if (withCoins) {
+		"$symbol $decimal.$coins".trim()
+	} else {
+		"$symbol $decimal".trim()
+	}
 }
 
 fun Double.toPriceWithCoins(withZeroCoins: Boolean = true): String {

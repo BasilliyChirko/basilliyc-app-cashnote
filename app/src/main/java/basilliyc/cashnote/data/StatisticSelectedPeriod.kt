@@ -27,7 +27,12 @@ enum class StatisticSelectedPeriod(val monthCount: Int) {
 data class StatisticMonth(
 	val month: Int,
 	val year: Int,
-)
+) : Comparable<StatisticMonth> {
+	override fun compareTo(other: StatisticMonth): Int {
+		if (year != other.year) return year - other.year
+		return month - other.month
+	}
+}
 
 fun StatisticMonth(calender: Calendar) = StatisticMonth(
 	month = calender.get(Calendar.MONTH),

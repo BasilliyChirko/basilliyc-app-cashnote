@@ -3,6 +3,7 @@
 package basilliyc.cashnote.ui.statistic
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -13,13 +14,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,8 +36,10 @@ import basilliyc.cashnote.ui.components.CardText
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.stringName
+import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.ScaffoldColumn
+import basilliyc.cashnote.utils.toPriceString
 
 @Composable
 fun Statistic() {
@@ -118,9 +125,9 @@ fun Page(
 			) {
 				when (page) {
 					is StatisticStateHolder.Page.Data -> when (it) {
-//						0 -> PageDataBalance(page.balance, listener)
-//						1 -> PageDataIncome(page.income, listener)
-//						2 -> PageDataExpense(page.expense, listener)
+						0 -> PageDataBalance(page, params, listener)
+//						1 -> PageDataIncome(page,params, listener)
+//						2 -> PageDataExpense(page, params,listener)
 						else -> Unit
 					}
 					
@@ -156,19 +163,101 @@ private fun PageLoadingError(
 		}
 	}
 }
-//
-//
-//@Composable
-//private fun PageDataBalance(
-//	page: StatisticStateHolder.Page.Data.Balance,
-//	listener: StatisticListener,
-//) {
-//
-//}
-//
+
+
+@Composable
+private fun PageDataBalance(
+	page: StatisticStateHolder.Page.Data,
+	params: StatisticStateHolder.Params,
+	listener: StatisticListener,
+) {
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.verticalScroll(rememberScrollState())
+	) {
+		Row(modifier = Modifier.padding(16.dp)) {
+			Text(
+				text = stringResource(R.string.statistic_current_balance),
+				modifier = Modifier.weight(1F),
+				style = MaterialTheme.typography.titleLarge,
+			)
+			Text(
+				text = page.totalBalance.toPriceString(false) + " " + params.currency.symbol,
+				modifier = Modifier.padding(start = 8.dp),
+				style = MaterialTheme.typography.titleLarge,
+			)
+		}
+		
+		
+		//Titles
+		RowTitles(
+			titles = arrayOf(
+				"",
+				stringResource(R.string.statistic_balance),
+				stringResource(R.string.statistic_profit),
+			)
+		)
+		var balance = page.totalBalance
+			//Values
+		page.values.entries.sortedByDescending { it.key }.forEach { (month, categoryMap) ->
+			val profit = categoryMap.values.sumOf { it.income + it.expense }
+			RowValues(
+				values = arrayOf(
+					month.stringName.invoke(),
+					balance.toPriceString(false, false),
+					profit.toPriceString(true, false),
+				)
+			)
+			balance -= profit
+		}
+		
+	}
+}
+
+
+@Composable
+private fun RowTitles(
+	modifier: Modifier = Modifier,
+	titles: Array<String>,
+) {
+	Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+		titles.forEach {
+			Text(
+				text = it,
+				modifier = Modifier.weight(1F),
+				textAlign = TextAlign.End,
+				color = colorGrey99,
+			)
+		}
+	}
+}
+
+@Composable
+private fun RowValues(
+	modifier: Modifier = Modifier,
+	values: Array<String>,
+	endingIcon: @Composable (() -> Unit)? = null,
+) {
+	Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+		values.forEachIndexed { index, it ->
+			Text(
+				text = it,
+				modifier = Modifier.weight(1F),
+				textAlign = if (index == 0) TextAlign.Start else TextAlign.End,
+			)
+		}
+		endingIcon?.let {
+			Box(modifier = Modifier.weight(1F)) {
+				endingIcon()
+			}
+		}
+	}
+}
+
 //@Composable
 //private fun PageDataIncome(
-//	page: StatisticStateHolder.Page.Data.Income,
+//	page: StatisticStateHolder.Page.Data,
 //	listener: StatisticListener,
 //) {
 //
@@ -176,7 +265,7 @@ private fun PageLoadingError(
 //
 //@Composable
 //private fun PageDataExpense(
-//	page: StatisticStateHolder.Page.Data.Expense,
+//	page: StatisticStateHolder.Page.Data,
 //	listener: StatisticListener,
 //) {
 //

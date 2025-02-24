@@ -7,7 +7,6 @@ import basilliyc.cashnote.backend.database.AppDatabaseMigrations
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateManager
 import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryFixer
-import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryFixerTest
 import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryMonobank
 import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.backend.preferences.FinancialCurrencyRatePreferences
@@ -59,7 +58,10 @@ fun AppValues.koinModules() = module {
 	
 	factory {
 		val client = OkHttpClient.Builder()
-			.addInterceptor(HttpLoggingInterceptor(FullPrintHttpLogging()))
+			.addInterceptor(HttpLoggingInterceptor(FullPrintHttpLogging())
+				.apply {
+					setLevel(HttpLoggingInterceptor.Level.BODY)
+				})
 			.build()
 		Retrofit.Builder()
 			.addCallAdapterFactory(CoroutineCallAdapterFactory())
@@ -73,13 +75,11 @@ fun AppValues.koinModules() = module {
 			.build()
 			.create(FinancialCurrencyRateRepositoryMonobank::class.java)
 	}
-//	single {
-//		get<Retrofit.Builder>()
-//			.baseUrl(FIXER_BASE_URL)
-//			.build()
-//			.create(FinancialCurrencyRateRepositoryFixer::class.java)
-//	}
 	single {
-		FinancialCurrencyRateRepositoryFixerTest() as FinancialCurrencyRateRepositoryFixer
+		get<Retrofit.Builder>()
+			.baseUrl(FIXER_BASE_URL)
+			.build()
+			.create(FinancialCurrencyRateRepositoryFixer::class.java)
 	}
+//	single { FinancialCurrencyRateRepositoryFixerTest() as FinancialCurrencyRateRepositoryFixer }
 }

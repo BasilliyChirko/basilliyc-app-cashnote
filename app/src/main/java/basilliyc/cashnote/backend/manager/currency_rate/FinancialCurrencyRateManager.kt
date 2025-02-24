@@ -175,10 +175,12 @@ class FinancialCurrencyRateManager {
 	private suspend fun requestFixerRate(date: Long): List<FinancialCurrencyRate> {
 		
 		val fixerResponse = fixerRateRepository.getExchangeRates(
-			date = date.formatTime("YYYY-MM-DD"),
+			date = date.formatTime("YYYY-MM-dd"),
 			symbols = FinancialCurrency.entries.map { it.name }.joinToString(","),
 			accessKey = AppValues.FIXER_API_KEY,
 		)
+		
+		logcat.debug(fixerResponse)
 		
 		val base = FinancialCurrency.valueOf(fixerResponse.base.uppercase())
 		

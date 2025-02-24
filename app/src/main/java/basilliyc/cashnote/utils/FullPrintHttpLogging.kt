@@ -24,6 +24,7 @@ class FullPrintHttpLogging : HttpLoggingInterceptor.Logger {
 		}
 		
 		addToBuffer(message)
+		flush()
 	}
 	
 	private fun addToBuffer(message: String, isJson: Boolean = false) {

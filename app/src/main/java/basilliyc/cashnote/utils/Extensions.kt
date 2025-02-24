@@ -30,6 +30,7 @@ inline fun <T> tryOrNull(block: () -> T): T? {
 	return try {
 		block()
 	} catch (ignore: Throwable) {
+//		Logcat("TEST").error(ignore)
 		null
 	}
 }

@@ -8,8 +8,10 @@ import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.StatisticMonth
 import basilliyc.cashnote.ui.base.BaseViewModel
+import basilliyc.cashnote.utils.CalendarInstance
 import basilliyc.cashnote.utils.flowZip
 import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.utils.moveToFirstDayOfMonth
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -49,14 +51,8 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 		}
 	}
 	
-	private suspend fun FinancialCurrency.convertFrom(
-		value: Double,
-		sourceCurrency: FinancialCurrency,
-	): Double {
-		val rate = financialCurrencyRateManager.getRate(sourceCurrency, this)
-			?: throw Throwable("Can`t get currency rates")
-		return value * rate
-	}
+	
+
 	
 	private var pageUpdatingJob: Job? = null
 		set(value) {
@@ -98,19 +94,11 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 	): StatisticStateHolder.Page.Data {
 		//transactions were already ordered descending by date
 		
-		val (period, currency, accounts) = params
-		val calendar = Calendar.getInstance().apply {
-			timeInMillis = System.currentTimeMillis()
-			set(Calendar.DAY_OF_MONTH, 1)
-			set(Calendar.HOUR_OF_DAY, 0)
-			set(Calendar.MINUTE, 0)
-			set(Calendar.SECOND, 0)
-			set(Calendar.MILLISECOND, 0)
-		}
+		val (period, outputCurrency, accounts) = params
+		val calendar = CalendarInstance().moveToFirstDayOfMonth()
 		
 		val accountMap = accounts.associateBy { it.id }
 		val categoryMap = categories.associateBy { it.id }
-
 		
 		val values = StatisticValues()
 		
@@ -123,15 +111,18 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 			if (transactions[tIndex].date >= startDate) {
 				while (tIndex < transactions.size && transactions[tIndex].date >= startDate) {
 					val transaction = transactions[tIndex++]
-					val transactionCurrency =
+					val accountCurrency =
 						accountMap[transaction.accountId]?.currency ?: continue
 					val transactionCategory = categoryMap[transaction.categoryId]!!
 					
 					val value = categoryToValue[transactionCategory]
 						?: StatisticStateHolder.StatisticValue()
 					
-					val transactionValue =
-						currency.convertFrom(transaction.value, transactionCurrency)
+					val transactionValue = transaction.value.convertValue(
+						from = accountCurrency,
+						to = outputCurrency,
+						date = transaction.date,
+					)
 					if (transactionValue > 0) {
 						categoryToValue[transactionCategory] = value.copy(
 							income = value.income + transactionValue
@@ -149,7 +140,7 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 		}
 
 		val totalBalance = accounts.sumOf {
-			currency.convertFrom(it.balance, it.currency)
+			it.balance.convertValue(it.currency, outputCurrency, System.currentTimeMillis())
 		}
 		
 //		//Remove current month
@@ -159,6 +150,19 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 			totalBalance = totalBalance,
 			values = values,
 		)
+	}
+	
+	private suspend fun Double.convertValue(
+		from: FinancialCurrency,
+		to: FinancialCurrency,
+		date: Long,
+	): Double {
+		val rate = financialCurrencyRateManager.getRate(
+			from = from,
+			to = to,
+			date = date,
+		) ?: throw Throwable("Can`t get currency rates")
+		return this * rate
 	}
 	
 	override fun onResultHandled() {

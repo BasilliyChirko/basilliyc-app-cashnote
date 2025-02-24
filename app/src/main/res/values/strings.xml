@@ -182,6 +182,8 @@
     <string name="statistic_month_november">Nov</string>
     <string name="statistic_month_december">Dec</string>
     <string name="statistic_current_balance">Current balance</string>
+    <string name="statistic_current_profit">Current profit</string>
+    <string name="statistic_average_profit">Average profit</string>
     <string name="statistic_balance">Balance</string>
     <string name="statistic_income">Income</string>
     <string name="statistic_expense">Expense</string>

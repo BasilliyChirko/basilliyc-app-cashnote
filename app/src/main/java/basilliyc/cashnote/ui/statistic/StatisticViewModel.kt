@@ -152,6 +152,9 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 			currency.convertFrom(it.balance, it.currency)
 		}
 		
+//		//Remove current month
+//		values.remove(StatisticMonth(Calendar.getInstance()))
+		
 		return StatisticStateHolder.Page.Data(
 			totalBalance = totalBalance,
 			values = values,

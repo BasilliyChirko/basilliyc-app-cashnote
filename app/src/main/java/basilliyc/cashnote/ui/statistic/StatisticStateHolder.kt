@@ -46,7 +46,10 @@ class StatisticStateHolder(
 	data class StatisticValue(
 		val income: Double = 0.0,
 		val expense: Double = 0.0,
-	)
+	) {
+		val profit: Double
+			get() = income + expense
+	}
 	
 	data class Params(
 		val selectedPeriod: StatisticSelectedPeriod,

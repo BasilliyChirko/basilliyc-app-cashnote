@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import basilliyc.cashnote.backend.database.AppDatabase
 import basilliyc.cashnote.backend.database.AppDatabaseMigrations
-import basilliyc.cashnote.backend.manager.FinancialCurrencyRateManager
-import basilliyc.cashnote.backend.manager.FinancialCurrencyRateRepositoryMonobank
 import basilliyc.cashnote.backend.manager.FinancialManager
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateManager
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryFixer
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryFixerTest
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateRepositoryMonobank
 import basilliyc.cashnote.backend.preferences.AppPreferences
 import basilliyc.cashnote.backend.preferences.FinancialCurrencyRatePreferences
 import basilliyc.cashnote.backend.preferences.StatisticPreferences
@@ -51,6 +53,7 @@ fun AppValues.koinModules() = module {
 	single { get<AppDatabase>().categoryDao() }
 	single { get<AppDatabase>().statisticDao() }
 	single { get<AppDatabase>().categoryToAccountParamsDao() }
+	single { get<AppDatabase>().currencyRateDao() }
 	
 	//INTERNET RETROFIT
 	
@@ -69,5 +72,14 @@ fun AppValues.koinModules() = module {
 			.baseUrl(MONOBANK_BASE_URL)
 			.build()
 			.create(FinancialCurrencyRateRepositoryMonobank::class.java)
+	}
+//	single {
+//		get<Retrofit.Builder>()
+//			.baseUrl(FIXER_BASE_URL)
+//			.build()
+//			.create(FinancialCurrencyRateRepositoryFixer::class.java)
+//	}
+	single {
+		FinancialCurrencyRateRepositoryFixerTest() as FinancialCurrencyRateRepositoryFixer
 	}
 }

@@ -2,6 +2,7 @@ package basilliyc.cashnote
 
 import android.app.Application
 import basilliyc.cashnote.backend.manager.FinancialManager
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateManager
 import basilliyc.cashnote.utils.Logcat
 import basilliyc.cashnote.utils.takeIf
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -15,6 +16,7 @@ import org.koin.core.context.startKoin
 class App : Application() {
 	
 	private val financialManager: FinancialManager by inject()
+	private val financialCurrencyRateManager: FinancialCurrencyRateManager by inject()
 	
 	override fun onCreate() {
 		super.onCreate()
@@ -33,6 +35,7 @@ class App : Application() {
 		}
 		
 		financialManager.test()
+		financialCurrencyRateManager.test()
 		
 	}
 	

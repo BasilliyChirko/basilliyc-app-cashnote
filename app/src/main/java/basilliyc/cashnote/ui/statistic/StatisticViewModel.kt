@@ -1,7 +1,7 @@
 package basilliyc.cashnote.ui.statistic
 
 import androidx.lifecycle.viewModelScope
-import basilliyc.cashnote.backend.manager.FinancialCurrencyRateManager
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRateManager
 import basilliyc.cashnote.backend.preferences.StatisticPreferences
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialCurrency

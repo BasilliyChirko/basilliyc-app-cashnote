@@ -1,4 +1,4 @@
-package basilliyc.cashnote.backend.manager
+package basilliyc.cashnote.backend.manager.currency_rate
 
 import retrofit2.http.GET
 

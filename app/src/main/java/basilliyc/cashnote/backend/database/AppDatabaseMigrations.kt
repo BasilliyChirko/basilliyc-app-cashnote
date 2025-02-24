@@ -50,7 +50,13 @@ object AppDatabaseMigrations {
 					execSQL("INSERT INTO `${tableCategoryToAccount}` (`accountId`, `categoryId`, `visible`) VALUES ($accountId, $categoryId, 1)")
 				}
 			}
-		}
+		},
+		createMigration(2, 3) {
+			val tableName = "FinancialCurrencyRate"
+			execSQL("CREATE TABLE IF NOT EXISTS `${tableName}` (`date` INTEGER NOT NULL, `from` TEXT NOT NULL, `to` TEXT NOT NULL, `rate` REAL NOT NULL, PRIMARY KEY(`date`, `from`, `to`))")
+			execSQL("CREATE INDEX IF NOT EXISTS `index_FinancialCurrencyRate_from` ON `${tableName}` (`from`)")
+			execSQL("CREATE INDEX IF NOT EXISTS `index_FinancialCurrencyRate_to` ON `${tableName}` (`to`)")
+		},
 	)
 	
 }

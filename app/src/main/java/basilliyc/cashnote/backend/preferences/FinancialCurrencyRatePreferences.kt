@@ -1,6 +1,6 @@
 package basilliyc.cashnote.backend.preferences
 
-import basilliyc.cashnote.backend.manager.FinancialCurrencyRates
+import basilliyc.cashnote.backend.manager.currency_rate.FinancialCurrencyRates
 import basilliyc.cashnote.backend.preferences.base.BasePreferences
 import com.google.gson.GsonBuilder
 

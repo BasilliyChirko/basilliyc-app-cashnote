@@ -26,6 +26,14 @@ inline fun anyTry(block: () -> Unit) {
 	}
 }
 
+inline fun <T> tryOrNull(block: () -> T): T? {
+	return try {
+		block()
+	} catch (ignore: Throwable) {
+		null
+	}
+}
+
 inline fun <reified T> Any?.castOrNull(): T? {
 	if (this == null) return null
 	if (this is T) return this as T

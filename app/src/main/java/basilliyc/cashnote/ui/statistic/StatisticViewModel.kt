@@ -168,10 +168,4 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 	override fun onResultHandled() {
 		state.clearResult()
 	}
-	
-	override fun onParamsClicked() {
-		schedule {
-			state.result = StatisticStateHolder.Result.NavigateStatisticParams
-		}
-	}
 }

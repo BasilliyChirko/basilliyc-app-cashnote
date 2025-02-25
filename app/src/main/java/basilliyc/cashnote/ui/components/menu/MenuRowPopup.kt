@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import basilliyc.cashnote.ui.components.CardText
 import basilliyc.cashnote.ui.components.PopupMenu
-import basilliyc.cashnote.ui.components.PopupMenuState
-import basilliyc.cashnote.ui.components.rememberPopupMenuState
+import basilliyc.cashnote.ui.components.PopupState
+import basilliyc.cashnote.ui.components.rememberPopupState
 import basilliyc.cashnote.utils.DefaultPreview
 
 @Composable
@@ -31,8 +31,8 @@ fun MenuRowPopup(
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
 	leadingIcon: @Composable (() -> Unit)? = null,
-	popupMenuState: PopupMenuState = rememberPopupMenuState(),
-	items: @Composable PopupMenuState.() -> Unit,
+	popupState: PopupState = rememberPopupState(),
+	items: @Composable PopupState.() -> Unit,
 ) {
 	DropdownMenuItem(
 		modifier = Modifier,
@@ -40,17 +40,17 @@ fun MenuRowPopup(
 		text = { MenuTitle(title = title, subtitle = subtitle) },
 		trailingIcon = {
 			PopupMenu(
-				state = popupMenuState,
+				state = popupState,
 				anchor = {
 					CardText(
-						onClick = { popupMenuState.expand() },
+						onClick = { popupState.expand() },
 						text = value
 					)
 				},
 				items = items,
 			)
 		},
-		onClick = { popupMenuState.expand() },
+		onClick = { popupState.expand() },
 		enabled = enabled,
 		contentPadding = contentPadding,
 	)

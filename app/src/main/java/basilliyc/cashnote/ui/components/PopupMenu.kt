@@ -70,7 +70,7 @@ fun ColumnScope.PopupMenuItem(
 }
 
 
-class PopupMenuState(expanded: Boolean = false) {
+class PopupState(expanded: Boolean = false) {
 	val expanded = mutableStateOf(expanded)
 	
 	fun expand() {
@@ -87,16 +87,16 @@ class PopupMenuState(expanded: Boolean = false) {
 }
 
 @Composable
-fun rememberPopupMenuState(expanded: Boolean = false): PopupMenuState {
-	return remember { PopupMenuState(expanded) }
+fun rememberPopupState(expanded: Boolean = false): PopupState {
+	return remember { PopupState(expanded) }
 }
 
 @Composable
 fun PopupMenu(
 	modifier: Modifier = Modifier,
-	state: PopupMenuState = rememberPopupMenuState(),
-	anchor: @Composable PopupMenuState.() -> Unit,
-	items: @Composable PopupMenuState.() -> Unit,
+	state: PopupState = rememberPopupState(),
+	anchor: @Composable PopupState.() -> Unit,
+	items: @Composable PopupState.() -> Unit,
 ) {
 	Box(modifier = modifier) {
 		anchor(state)
@@ -113,7 +113,7 @@ fun PopupMenu(
 }
 
 @Composable
-fun PopupMenuState.PopupMenuItem(
+fun PopupState.PopupMenuItem(
 	onClick: () -> Unit,
 	text: String,
 	leadingIcon: ImageVector? = null,

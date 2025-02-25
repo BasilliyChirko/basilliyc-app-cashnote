@@ -58,7 +58,7 @@ class StatisticStateHolder(
 	)
 	
 	sealed interface Result {
-		data object NavigateStatisticParams : Result
+	
 	}
 	
 }

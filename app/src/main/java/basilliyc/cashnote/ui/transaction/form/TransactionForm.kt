@@ -64,7 +64,7 @@ import basilliyc.cashnote.ui.components.SimpleDatePickerDialog
 import basilliyc.cashnote.ui.components.SimpleTimePickerDialog
 import basilliyc.cashnote.ui.components.TextFieldError
 import basilliyc.cashnote.ui.components.TextFieldState
-import basilliyc.cashnote.ui.components.rememberPopupMenuState
+import basilliyc.cashnote.ui.components.rememberPopupState
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.ui.theme.backgroundPageGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
@@ -255,7 +255,7 @@ private fun ColumnScope.PageDataOther(
 			contentPadding = contentPadding,
 		)
 		Spacer(modifier = Modifier.width(16.dp))
-		val popupMenuState = rememberPopupMenuState()
+		val popupMenuState = rememberPopupState()
 		PopupMenu(
 			state = popupMenuState,
 			anchor = {

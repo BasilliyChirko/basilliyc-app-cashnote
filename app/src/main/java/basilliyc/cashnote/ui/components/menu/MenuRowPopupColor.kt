@@ -18,10 +18,10 @@ import basilliyc.cashnote.data.FinancialColor
 import basilliyc.cashnote.data.color
 import basilliyc.cashnote.data.text
 import basilliyc.cashnote.ui.components.PopupMenu
-import basilliyc.cashnote.ui.components.PopupMenuState
+import basilliyc.cashnote.ui.components.PopupState
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
-import basilliyc.cashnote.ui.components.rememberPopupMenuState
+import basilliyc.cashnote.ui.components.rememberPopupState
 import basilliyc.cashnote.utils.DefaultPreview
 
 @Composable
@@ -63,7 +63,7 @@ fun MenuRowPopupColor(
 	onColorSelected: (FinancialColor?) -> Unit,
 	enabled: Boolean = true,
 	contentPadding: PaddingValues = MenuRowDefaults.contentPadding,
-	popupMenuState: PopupMenuState = rememberPopupMenuState(),
+	popupState: PopupState = rememberPopupState(),
 ) {
 	
 	DropdownMenuItem(
@@ -71,11 +71,11 @@ fun MenuRowPopupColor(
 		text = { MenuTitle(title = title, subtitle = subtitle) },
 		trailingIcon = {
 			PopupMenu(
-				state = popupMenuState,
+				state = popupState,
 				anchor = {
 					ColorCard(
 						color = color,
-						onClick = { popupMenuState.expand() },
+						onClick = { popupState.expand() },
 					)
 				},
 				items = {
@@ -99,7 +99,7 @@ fun MenuRowPopupColor(
 				}
 			)
 		},
-		onClick = { popupMenuState.expand() },
+		onClick = { popupState.expand() },
 		enabled = enabled,
 		contentPadding = contentPadding,
 	)

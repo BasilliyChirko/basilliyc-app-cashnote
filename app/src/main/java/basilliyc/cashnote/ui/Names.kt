@@ -53,3 +53,4 @@ val StatisticMonth.stringName
 		
 		"$monthName ${this.year}"
 	}
+

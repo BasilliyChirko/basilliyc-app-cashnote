@@ -28,7 +28,7 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 			selectedPeriod = statisticPreferences.selectedPeriod.value,
 			currency = statisticPreferences.currency.value,
 			accounts = emptyList(),
-			categories = emptyList(),
+			categoryIds = emptyList(),
 		),
 	)
 	
@@ -40,13 +40,12 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 				statisticPreferences.accountIds.flow,
 				financialManager.getAccountListAsFlow(),
 				statisticPreferences.categoryIds.flow,
-				financialManager.getCategoryListAsFlow(),
-			) { selectedPeriod, currency, accountIds, accounts, categoryIds, categories ->
+			) { selectedPeriod, currency, accountIds, accounts, categoryIds ->
 				state.params.copy(
 					selectedPeriod = selectedPeriod,
 					currency = currency,
 					accounts = accounts.filter { it.id in accountIds },
-					categories = categories.filter { it.id in categoryIds },
+					categoryIds = categoryIds,
 				)
 			}.collectLatest {
 				state.params = it

@@ -68,7 +68,10 @@ class PreferencesItem<T : Any>(
 	val flow by lazy { mutableStateFlow.asStateFlow() }
 	
 	@Composable
-	fun collectValue() = flow.collectAsState().value
+	fun collectAsState() = flow.collectAsState().value
 	
-	
+}
+
+fun PreferencesItem<Boolean>.toggle() {
+	update { !it }
 }

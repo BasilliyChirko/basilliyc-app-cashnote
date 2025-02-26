@@ -2,6 +2,7 @@ package basilliyc.cashnote.utils
 
 import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.theme.colorGreen500
 import basilliyc.cashnote.ui.theme.colorRed500
 import java.util.Locale
@@ -44,7 +45,7 @@ inline fun <reified T> Any?.castOrNull(): T? {
 private val locale = Locale("en", "US")
 
 @SuppressLint("DefaultLocale")
-fun Double.toPriceString(showPlus: Boolean, withCoins: Boolean = true): String {
+fun Double.toPriceString(showPlus: Boolean, withCoins: Boolean = true, currency: FinancialCurrency? = null): String {
 	val splitDot = String.format(locale, "%.2f", this.absoluteValue).split('.')
 	
 	val coins = splitDot[1]
@@ -63,9 +64,9 @@ fun Double.toPriceString(showPlus: Boolean, withCoins: Boolean = true): String {
 	}
 	
 	return if (withCoins) {
-		"$symbol $decimal.$coins".trim()
+		"$symbol $decimal.$coins ${currency?.symbol ?: ""}".trim()
 	} else {
-		"$symbol $decimal".trim()
+		"$symbol $decimal ${currency?.symbol ?: ""}".trim()
 	}
 }
 
@@ -82,6 +83,14 @@ fun Double.toPriceColor(): Color {
 		this == 0.0 -> Color.Unspecified
 		this > 0 -> colorGreen500
 		else -> colorRed500
+	}
+}
+
+fun Double.toPercent(): String {
+	val percent = (this * 100).toInt()
+	return when {
+		percent == 0 && this > 0 -> "<1%"
+		else -> "$percent%"
 	}
 }
 

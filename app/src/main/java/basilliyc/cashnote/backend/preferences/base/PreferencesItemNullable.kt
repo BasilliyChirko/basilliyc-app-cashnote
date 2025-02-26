@@ -83,7 +83,7 @@ class PreferencesItemNullable<T : Any>(
 	private val mutableStateFlow by lazy { MutableStateFlow(get()) }
 	val flow by lazy { mutableStateFlow.asStateFlow() }
 	
-	val collectValue
-		@Composable get() = flow.collectAsState().value
+	@Composable
+	fun collectAsState() = flow.collectAsState().value
 	
 }

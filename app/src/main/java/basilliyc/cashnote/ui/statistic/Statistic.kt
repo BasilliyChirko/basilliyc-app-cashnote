@@ -2,6 +2,7 @@
 
 package basilliyc.cashnote.ui.statistic
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
@@ -19,6 +19,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,7 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,22 +43,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import basilliyc.cashnote.R
 import basilliyc.cashnote.backend.manager.FinancialManager
 import basilliyc.cashnote.backend.preferences.StatisticPreferences
+import basilliyc.cashnote.backend.preferences.base.toggle
+import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.data.StatisticMonth
 import basilliyc.cashnote.data.StatisticSelectedPeriod
 import basilliyc.cashnote.ui.base.handleResult
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardText
+import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.ItemVisibilitySelectable
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
+import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
+import basilliyc.cashnote.ui.components.rememberPopupState
 import basilliyc.cashnote.ui.stringName
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.ScaffoldColumn
+import basilliyc.cashnote.utils.applyIf
 import basilliyc.cashnote.utils.inject
+import basilliyc.cashnote.utils.toPercent
 import basilliyc.cashnote.utils.toPriceColor
 import basilliyc.cashnote.utils.toPriceString
 import java.util.Calendar
@@ -86,12 +99,20 @@ private fun Page(
 	params: StatisticStateHolder.Params,
 	listener: StatisticListener,
 ) {
+	val preferences by remember { inject<StatisticPreferences>() }
 	ScaffoldColumn(
 		topBar = {
-//			SimpleActionBar(
-//				navigationIcon = {},
-//				title = stringResource(R.string.statistic_title),
-//			)
+			SimpleActionBar(
+				navigationIcon = {},
+				title = stringResource(R.string.statistic_title),
+				actions = {
+					IconButton(
+						imageVector = Icons.Outlined.FilterAlt,
+						contentDescription = stringResource(R.string.statistic_filters),
+						onClick = { preferences.showFilters.toggle() }
+					)
+				}
+			)
 		},
 		content = {
 			
@@ -102,30 +123,27 @@ private fun Page(
 				pageCount = { 3 },
 			)
 			
-			Column(
-				modifier = Modifier
-					.fillMaxSize()
-					.verticalScroll(rememberScrollState())
-			) {
+			if (preferences.showFilters.collectAsState()) {
 				RowFilters()
-				HorizontalPager(
-					modifier = Modifier.fillMaxSize(),
-					state = pagerState,
-				) {
-					when (page) {
-						is StatisticStateHolder.Page.Data -> {
-							
-							when (it) {
-								0 -> PageDataBalance(page, params, listener)
-								1 -> PageDataIncome(page, params, listener)
-//						2 -> PageDataExpense(page, params,listener)
-								else -> Unit
-							}
-						}
+			}
+			
+			HorizontalPager(
+				modifier = Modifier.fillMaxSize(),
+				state = pagerState,
+			) {
+				when (page) {
+					is StatisticStateHolder.Page.Data -> {
 						
-						is StatisticStateHolder.Page.Loading -> BoxLoading()
-						is StatisticStateHolder.Page.LoadingError -> PageLoadingError(page)
+						when (it) {
+							0 -> PageDataBalance(page, params, listener)
+							1 -> PageDataIncome(page, params, listener)
+//						2 -> PageDataExpense(page, params,listener)
+							else -> Unit
+						}
 					}
+					
+					is StatisticStateHolder.Page.Loading -> BoxLoading()
+					is StatisticStateHolder.Page.LoadingError -> PageLoadingError(page)
 				}
 			}
 		}
@@ -137,9 +155,9 @@ private fun RowFilters() {
 	val preferences by remember { inject<StatisticPreferences>() }
 	val financialManager by remember { inject<FinancialManager>() }
 	val accounts by financialManager.getAccountListAsFlow().collectAsState(emptyList())
-	val selectedAccountIds = preferences.accountIds.collectValue()
+	val selectedAccountIds = preferences.accountIds.collectAsState()
 	val categories by financialManager.getCategoryListAsFlow().collectAsState(emptyList())
-	val selectedCategoryIds = preferences.categoryIds.collectValue()
+	val selectedCategoryIds = preferences.categoryIds.collectAsState()
 	
 	Row(
 		modifier = Modifier.fillMaxWidth(),
@@ -272,7 +290,7 @@ private fun RowFilters() {
 		PopupMenu(
 			anchor = {
 				CardText(
-					text = preferences.selectedPeriod.collectValue().stringName,
+					text = preferences.selectedPeriod.collectAsState().stringName,
 					onClick = { expand() },
 				)
 			},
@@ -291,7 +309,7 @@ private fun RowFilters() {
 		PopupMenu(
 			anchor = {
 				CardText(
-					text = preferences.currency.collectValue().name,
+					text = preferences.currency.collectAsState().name,
 					onClick = { expand() },
 				)
 			},
@@ -343,7 +361,7 @@ private fun ColumnScope.PageDataBalance(
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
-//			.verticalScroll(rememberScrollState())
+			.verticalScroll(rememberScrollState()),
 	) {
 		val currentMonth = StatisticMonth(Calendar.getInstance())
 		val entryCurrent = page.values[currentMonth]
@@ -351,54 +369,32 @@ private fun ColumnScope.PageDataBalance(
 			page.values.entries.sortedByDescending { it.key }.filter { it.key != currentMonth }
 		val profitCurrent = entryCurrent?.values?.sumOf { it.profit } ?: 0.0
 		
-		Spacer(modifier = Modifier.height(8.dp))
-		Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-			Text(
-				text = stringResource(R.string.statistic_current_balance),
-				modifier = Modifier.weight(1F),
-				style = MaterialTheme.typography.titleLarge,
-			)
-			Text(
-				text = page.totalBalance.toPriceString(false) + " " + params.currency.symbol,
-				modifier = Modifier.padding(start = 8.dp),
-				style = MaterialTheme.typography.titleLarge,
-			)
-		}
-		Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-			Text(
-				text = stringResource(R.string.statistic_current_profit),
-				modifier = Modifier.weight(1F),
-				style = MaterialTheme.typography.titleMedium,
-			)
-			Text(
-				text = profitCurrent.toPriceString(true) + " " + params.currency.symbol,
-				modifier = Modifier.padding(start = 8.dp),
-				style = MaterialTheme.typography.titleMedium,
-				color = profitCurrent.toPriceColor()
-			)
-		}
-		
 		val monthlyProfit = entriesAll.let {
 			it.sumOf { it.value.values.sumOf { it.profit } } / it.size
 		}
-		Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-			Text(
-				text = stringResource(R.string.statistic_average_profit),
-				modifier = Modifier.weight(1F),
-				style = MaterialTheme.typography.titleMedium,
-			)
-			Text(
-				text = monthlyProfit.toPriceString(true) + " " + params.currency.symbol,
-				modifier = Modifier.padding(start = 8.dp),
-				style = MaterialTheme.typography.titleMedium,
-				color = monthlyProfit.toPriceColor()
-			)
-		}
+		RowHeadline(
+			modifier = Modifier.padding(top = 8.dp),
+			title = stringResource(R.string.statistic_current_balance),
+			value = page.totalBalance.toPriceString(false, true, params.currency),
+			textStyle = MaterialTheme.typography.titleLarge,
+		)
+		RowHeadline(
+			title = stringResource(R.string.statistic_current_profit),
+			value = profitCurrent.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleMedium,
+		)
+		RowHeadline(
+			title = stringResource(R.string.statistic_average_profit),
+			value = monthlyProfit.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleMedium,
+			valueColor = monthlyProfit.toPriceColor()
+		)
 		
+		HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 		
-		RowTitles(
+		RowTableTitle(
 			titles = listOf(
-				"",
+				stringResource(R.string.statistic_month),
 				stringResource(R.string.statistic_balance),
 				stringResource(R.string.statistic_profit),
 			)
@@ -406,11 +402,11 @@ private fun ColumnScope.PageDataBalance(
 		var balance = page.totalBalance - profitCurrent
 		entriesAll.forEach { (month, categoryMap) ->
 			val profit = categoryMap.values.sumOf { it.profit }
-			RowValues(
+			RowTableValue(
 				values = listOf(
 					month.stringName.invoke(),
-					balance.toPriceString(false, false) + " ${params.currency.symbol}",
-					profit.toPriceString(true, false) + " ${params.currency.symbol}",
+					balance.toPriceString(false, false, params.currency),
+					profit.toPriceString(true, false, params.currency),
 				),
 				colors = listOf(
 					Color.Unspecified,
@@ -430,42 +426,129 @@ private fun ColumnScope.PageDataIncome(
 	params: StatisticStateHolder.Params,
 	listener: StatisticListener,
 ) {
-//	Row(modifier = Modifier.padding(16.dp)) {
-//		Text(
-//			text = stringResource(R.string.statistic_current_balance),
-//			modifier = Modifier.weight(1F),
-//			style = MaterialTheme.typography.titleLarge,
-//		)
-//		Text(
-//			text = page.totalBalance.toPriceString(false) + " " + params.currency.symbol,
-//			modifier = Modifier.padding(start = 8.dp),
-//			style = MaterialTheme.typography.titleLarge,
-//		)
-//	}
-//
-//
-//	//Titles
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.verticalScroll(rememberScrollState()),
+	) {
+		val entriesAll = page.values.entries.sortedByDescending { it.key }
+			.map { it.key to it.value.filter { it.key.id in params.categoryIds && it.value.income > 0.0 } }
+		
+		//Total values for all period
+		var totalIncome = 0.0
+		entriesAll.forEach { (month, categoryMap) ->
+			totalIncome += categoryMap.values.sumOf { it.income }
+		}
+		val averageIncome = totalIncome / entriesAll.size
+		RowHeadline(
+			modifier = Modifier.padding(top = 8.dp),
+			title = stringResource(R.string.statistic_total_income),
+			value = totalIncome.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleLarge,
+			valueColor = totalIncome.toPriceColor()
+		)
+		RowHeadline(
+			title = stringResource(R.string.statistic_average_income),
+			value = averageIncome.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleMedium,
+			valueColor = averageIncome.toPriceColor()
+		)
+		
+		//total values for each category for all period
+		val categoryTotal = HashMap<FinancialCategory, Double>()
+		entriesAll.forEach { (month, categoryMap) ->
+			categoryMap.forEach {
+				categoryTotal[it.key] = (categoryTotal[it.key] ?: 0.0) + it.value.income
+			}
+		}
+		RowTableTitle(
+			titles = listOf(
+				stringResource(R.string.statistic_category),
+				stringResource(R.string.statistic_total),
+				stringResource(R.string.statistic_percent),
+				stringResource(R.string.statistic_average),
+			)
+		)
+		categoryTotal.toList().sortedByDescending { it.second }.forEach { (category, total) ->
+			RowTableValue(
+				values = listOf(
+					category.name,
+					total.toPriceString(true, false, params.currency),
+					(total / totalIncome).toPercent(),
+					(total / entriesAll.size).toPriceString(
+						true,
+						false
+					) + " " + params.currency.symbol,
+				),
+			)
+		}
+		
+		HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+		
+		
+		//Values for each month
+		RowTableTitle(
+			titles = listOf(
+				stringResource(R.string.statistic_month),
+				stringResource(R.string.statistic_income),
+			),
+			endingIcon = true
+		)
+		entriesAll.forEach { (month, categoryMap) ->
+			val income = categoryMap.values.sumOf { it.income }
+			val popupState = rememberPopupState()
+			RowTableValue(
+				values = listOf(
+					month.stringName.invoke(),
+					income.toPriceString(true, false, params.currency),
+				),
+				endingIcon = Icons.Outlined.ArrowDropDown,
+				onClick = { popupState.toggle() }
+			)
+			
+			if (popupState.isExpanded) {
+				Column(
+					modifier = Modifier.padding(start = 16.dp)
+				) {
+					RowTableTitle(
+						titles = listOf(
+							stringResource(R.string.statistic_category),
+							stringResource(R.string.statistic_percent),
+							stringResource(R.string.statistic_income),
+						)
+					)
+					categoryMap.toList().sortedByDescending { it.second.income }
+						.forEach { (category, value) ->
+							RowTableValue(
+								values = listOf(
+									category.name,
+									(value.income / income).toPercent(),
+									value.income.toPriceString(
+										true,
+										false,
+										params.currency
+									)
+								),
+							)
+						}
+				}
+				HorizontalDivider(modifier = Modifier.padding(top = 8.dp, start = 16.dp))
+				
+			}
+			
+		}
+		
+		//Average values
+
 //	RowTitles(
-//		titles = arrayOf(
+//		titles = listOf(
 //			"",
-//			stringResource(R.string.statistic_balance),
-//			stringResource(R.string.statistic_profit),
+//			stringResource(R.string.statistic_income),
+//			stringResource(R.string.statistic_expense),
 //		)
 //	)
-//	var balance = page.totalBalance
-//	//Values
-//	page.values.entries.sortedByDescending { it.key }.forEach { (month, categoryMap) ->
-//		val profit = categoryMap.values.sumOf { it.income + it.expense }
-//		balance -= profit
-//		RowValues(
-//			values = arrayOf(
-//				month.stringName.invoke(),
-//				balance.toPriceString(false, false) + " ${params.currency.symbol}",
-//				profit.toPriceString(true, false) + " ${params.currency.symbol}",
-//			)
-//		)
-//	}
-//
+	}
+	
 }
 //
 //@Composable
@@ -477,43 +560,79 @@ private fun ColumnScope.PageDataIncome(
 //
 //}
 
-
 @Composable
-private fun RowTitles(
+private fun RowHeadline(
 	modifier: Modifier = Modifier,
-	titles: List<String>,
+	title: String,
+	value: String,
+	valueColor: Color = Color.Unspecified,
+	textStyle: TextStyle,
 ) {
 	Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-		titles.forEach {
+		Text(
+			text = title,
+			modifier = Modifier.weight(1F),
+			style = textStyle,
+		)
+		Text(
+			text = value,
+			modifier = Modifier.padding(start = 8.dp),
+			style = textStyle,
+			color = valueColor,
+		)
+	}
+}
+
+@Composable
+private fun RowTableTitle(
+	modifier: Modifier = Modifier,
+	titles: List<String>,
+	endingIcon: Boolean = false,
+) {
+	Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+		titles.forEachIndexed { index, it ->
 			Text(
 				text = it,
 				modifier = Modifier.weight(1F),
-				textAlign = TextAlign.End,
+				textAlign = if (index == 0) TextAlign.Start else TextAlign.End,
 				color = colorGrey99,
 			)
+		}
+		if (endingIcon) {
+			Spacer(Modifier.width(32.dp))
 		}
 	}
 }
 
 @Composable
-private fun RowValues(
+private fun RowTableValue(
 	modifier: Modifier = Modifier,
 	values: List<String>,
 	colors: List<Color> = values.map { Color.Unspecified },
-	endingIcon: @Composable (() -> Unit)? = null,
+	endingIcon: ImageVector? = null,
+	onClick: (() -> Unit)? = null,
 ) {
-	Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-		values.forEachIndexed { index, it ->
-			Text(
-				text = it,
-				modifier = Modifier.weight(1F),
-				textAlign = if (index == 0) TextAlign.Start else TextAlign.End,
-				color = colors[index],
-			)
-		}
-		endingIcon?.let {
-			Box(modifier = Modifier.weight(1F)) {
-				endingIcon()
+	Box(
+		modifier = Modifier.applyIf(onClick != null) { clickable { onClick?.invoke() } }
+	) {
+		Row(
+			modifier = modifier
+				.padding(horizontal = 16.dp, vertical = 4.dp)
+		) {
+			values.forEachIndexed { index, it ->
+				Text(
+					text = it,
+					modifier = Modifier.weight(1F),
+					textAlign = if (index == 0) TextAlign.Start else TextAlign.End,
+					color = colors[index],
+				)
+			}
+			endingIcon?.let {
+				Icon(
+					imageVector = it,
+					contentDescription = null,
+					modifier = Modifier.padding(start = 8.dp)
+				)
 			}
 		}
 	}

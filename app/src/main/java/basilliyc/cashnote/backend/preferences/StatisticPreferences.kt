@@ -14,4 +14,6 @@ class StatisticPreferences : BasePreferences() {
 	
 	val selectedPeriod = enum("selectedPeriod", StatisticSelectedPeriod.ThreeMonths)
 	
+	val showFilters = boolean("showFilters", true)
+	
 }

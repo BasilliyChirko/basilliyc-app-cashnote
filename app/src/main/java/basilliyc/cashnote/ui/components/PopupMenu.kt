@@ -73,6 +73,12 @@ fun ColumnScope.PopupMenuItem(
 class PopupState(expanded: Boolean = false) {
 	val expanded = mutableStateOf(expanded)
 	
+	val isExpanded: Boolean
+		get() = expanded.value
+	
+	val isCollapsed: Boolean
+		get() = !expanded.value
+	
 	fun expand() {
 		expanded.value = true
 	}

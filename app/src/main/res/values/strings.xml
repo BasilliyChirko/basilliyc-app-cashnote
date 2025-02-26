@@ -165,6 +165,11 @@
     <string name="statistic_params_account_one">1 account</string>
     <string name="statistic_params_account_many">%d accounts</string>
     <string name="statistic_params_account_all">All accounts</string>
+    <string name="statistic_params_category_none">None</string>
+    <string name="statistic_params_category_not_selected">Not selected</string>
+    <string name="statistic_params_category_one">1 category</string>
+    <string name="statistic_params_category_many">%d categories</string>
+    <string name="statistic_params_category_all">All categories</string>
     <string name="statistic_label_period">Period: %1$s</string>
     <string name="statistic_label_currency">Currency: %1$s</string>
     <string name="statistic_label_accounts_many">Accounts: %1$s</string>

@@ -28,6 +28,7 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 			selectedPeriod = statisticPreferences.selectedPeriod.value,
 			currency = statisticPreferences.currency.value,
 			accounts = emptyList(),
+			categories = emptyList(),
 		),
 	)
 	
@@ -38,11 +39,14 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 				statisticPreferences.currency.flow,
 				statisticPreferences.accountIds.flow,
 				financialManager.getAccountListAsFlow(),
-			) { selectedPeriod, currency, accountIds, accounts ->
+				statisticPreferences.categoryIds.flow,
+				financialManager.getCategoryListAsFlow(),
+			) { selectedPeriod, currency, accountIds, accounts, categoryIds, categories ->
 				state.params.copy(
 					selectedPeriod = selectedPeriod,
 					currency = currency,
 					accounts = accounts.filter { it.id in accountIds },
+					categories = categories.filter { it.id in categoryIds },
 				)
 			}.collectLatest {
 				state.params = it
@@ -51,8 +55,6 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 		}
 	}
 	
-	
-
 	
 	private var pageUpdatingJob: Job? = null
 		set(value) {
@@ -113,7 +115,7 @@ class StatisticViewModel : BaseViewModel(), StatisticListener {
 					val transaction = transactions[tIndex++]
 					val accountCurrency =
 						accountMap[transaction.accountId]?.currency ?: continue
-					val transactionCategory = categoryMap[transaction.categoryId]!!
+					val transactionCategory = categoryMap[transaction.categoryId] ?: continue
 					
 					val value = categoryToValue[transactionCategory]
 						?: StatisticStateHolder.StatisticValue()

@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +46,6 @@ import basilliyc.cashnote.ui.components.CardText
 import basilliyc.cashnote.ui.components.ItemVisibilitySelectable
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
-import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.stringName
@@ -88,33 +88,44 @@ private fun Page(
 ) {
 	ScaffoldColumn(
 		topBar = {
-			SimpleActionBar(
-				navigationIcon = {},
-				title = stringResource(R.string.statistic_title),
-			)
+//			SimpleActionBar(
+//				navigationIcon = {},
+//				title = stringResource(R.string.statistic_title),
+//			)
 		},
 		content = {
 			
-			RowFilters()
 			
 			//TODO show tab bar with tabs: balance, income, expense
 			
 			val pagerState = rememberPagerState(
 				pageCount = { 3 },
 			)
-			HorizontalPager(
-				state = pagerState,
+			
+			Column(
+				modifier = Modifier
+					.fillMaxSize()
+					.verticalScroll(rememberScrollState())
 			) {
-				when (page) {
-					is StatisticStateHolder.Page.Data -> when (it) {
-						0 -> PageDataBalance(page, params, listener)
-						1 -> PageDataIncome(page, params, listener)
+				RowFilters()
+				HorizontalPager(
+					modifier = Modifier.fillMaxSize(),
+					state = pagerState,
+				) {
+					when (page) {
+						is StatisticStateHolder.Page.Data -> {
+							
+							when (it) {
+								0 -> PageDataBalance(page, params, listener)
+								1 -> PageDataIncome(page, params, listener)
 //						2 -> PageDataExpense(page, params,listener)
-						else -> Unit
+								else -> Unit
+							}
+						}
+						
+						is StatisticStateHolder.Page.Loading -> BoxLoading()
+						is StatisticStateHolder.Page.LoadingError -> PageLoadingError(page)
 					}
-					
-					is StatisticStateHolder.Page.Loading -> BoxLoading()
-					is StatisticStateHolder.Page.LoadingError -> PageLoadingError(page)
 				}
 			}
 		}
@@ -126,6 +137,9 @@ private fun RowFilters() {
 	val preferences by remember { inject<StatisticPreferences>() }
 	val financialManager by remember { inject<FinancialManager>() }
 	val accounts by financialManager.getAccountListAsFlow().collectAsState(emptyList())
+	val selectedAccountIds = preferences.accountIds.collectValue()
+	val categories by financialManager.getCategoryListAsFlow().collectAsState(emptyList())
+	val selectedCategoryIds = preferences.categoryIds.collectValue()
 	
 	Row(
 		modifier = Modifier.fillMaxWidth(),
@@ -135,47 +149,8 @@ private fun RowFilters() {
 		PopupMenu(
 			anchor = {
 				CardText(
-					text = preferences.selectedPeriod.collectValue().stringName,
-					onClick = { expand() },
-				)
-			},
-			items = {
-				StatisticSelectedPeriod.entries.forEach {
-					PopupMenuItem(
-						text = it.stringName,
-						onClick = { preferences.selectedPeriod.set(it) }
-					)
-				}
-			}
-		)
-		
-		Spacer(Modifier.width(8.dp))
-		
-		PopupMenu(
-			anchor = {
-				CardText(
-					text = preferences.currency.collectValue().name,
-					onClick = { expand() },
-				)
-			},
-			items = {
-				FinancialCurrency.entries.forEach {
-					PopupMenuItem(
-						text = it.name,
-						onClick = { preferences.currency.set(it) }
-					)
-				}
-			}
-		)
-		
-		Spacer(Modifier.width(8.dp))
-		
-		val selectedAccountIds = preferences.accountIds.collectValue()
-		
-		PopupMenu(
-			anchor = {
-				CardText(
 					text = when (val count = selectedAccountIds.size) {
+						accounts.size -> stringResource(R.string.statistic_params_account_all)
 						0 -> stringResource(R.string.statistic_params_account_not_selected)
 						1 -> stringResource(R.string.statistic_params_account_one)
 						else -> stringResource(
@@ -226,7 +201,111 @@ private fun RowFilters() {
 				)
 			}
 		)
+		
+		Spacer(Modifier.width(8.dp))
+		
+		PopupMenu(
+			anchor = {
+				CardText(
+					text = when (val count = selectedCategoryIds.size) {
+						categories.size -> stringResource(R.string.statistic_params_category_all)
+						0 -> stringResource(R.string.statistic_params_category_not_selected)
+						1 -> stringResource(R.string.statistic_params_category_one)
+						else -> stringResource(
+							R.string.statistic_params_category_many,
+							count
+						)
+					},
+					onClick = { expand() }
+				)
+			},
+			items = {
+				VerticalGrid(
+					modifier = Modifier
+						.sizeIn(
+							maxWidth = 300.dp,
+							maxHeight = 400.dp
+						)
+						.verticalScroll(rememberScrollState())
+						.padding(8.dp),
+					columns = VerticalGridCells.Fixed(2),
+					itemsCount = categories.size,
+					verticalSpace = 8.dp,
+					horizontalSpace = 8.dp,
+					content = {
+						val category = categories[it]
+						ItemVisibilitySelectable(
+							title = category.name,
+							icon = {
+								if (category.icon != null) {
+									Icon(
+										imageVector = category.icon.imageVector,
+										contentDescription = category.name
+									)
+								}
+							},
+							isSelected = category.id in selectedCategoryIds,
+							onClick = {
+								preferences.categoryIds.update {
+									it.toMutableList().apply {
+										if (category.id in this) {
+											remove(category.id)
+										} else {
+											add(category.id)
+										}
+									}
+								}
+							}
+						)
+					}
+				)
+			}
+		)
 	}
+	
+	
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.Center,
+	) {
+		
+		PopupMenu(
+			anchor = {
+				CardText(
+					text = preferences.selectedPeriod.collectValue().stringName,
+					onClick = { expand() },
+				)
+			},
+			items = {
+				StatisticSelectedPeriod.entries.forEach {
+					PopupMenuItem(
+						text = it.stringName,
+						onClick = { preferences.selectedPeriod.set(it) }
+					)
+				}
+			}
+		)
+		
+		Spacer(Modifier.width(8.dp))
+		
+		PopupMenu(
+			anchor = {
+				CardText(
+					text = preferences.currency.collectValue().name,
+					onClick = { expand() },
+				)
+			},
+			items = {
+				FinancialCurrency.entries.forEach {
+					PopupMenuItem(
+						text = it.name,
+						onClick = { preferences.currency.set(it) }
+					)
+				}
+			}
+		)
+	}
+	
 }
 
 @Preview(showBackground = true)
@@ -264,7 +343,7 @@ private fun ColumnScope.PageDataBalance(
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
+//			.verticalScroll(rememberScrollState())
 	) {
 		val currentMonth = StatisticMonth(Calendar.getInstance())
 		val entryCurrent = page.values[currentMonth]

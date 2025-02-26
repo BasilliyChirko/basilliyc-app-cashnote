@@ -148,4 +148,81 @@ fun <T1, T2, T3, T4, R> CoroutineScope.flowZip(
 	return resultFlow
 }
 
+fun <T1, T2, T3, T4, T5, R> CoroutineScope.flowZip(
+	flow1: Flow<T1>,
+	flow2: Flow<T2>,
+	flow3: Flow<T3>,
+	flow4: Flow<T4>,
+	flow5: Flow<T5>,
+	transform: (T1, T2, T3, T4, T5) -> R,
+): Flow<R> {
+	
+	val flows = ArrayList<ZippedFlowInstance<*>>()
+	val zippedFlow1 = ZippedFlowInstance(flow = flow1).also { flows.add(it) }
+	val zippedFlow2 = ZippedFlowInstance(flow = flow2).also { flows.add(it) }
+	val zippedFlow3 = ZippedFlowInstance(flow = flow3).also { flows.add(it) }
+	val zippedFlow4 = ZippedFlowInstance(flow = flow4).also { flows.add(it) }
+	val zippedFlow5 = ZippedFlowInstance(flow = flow5).also { flows.add(it) }
+	val resultFlow = MutableSharedFlow<R>()
+	
+	fun together() {
+		if (flows.all { it.isValueSet.value }) {
+			val result = transform(
+				zippedFlow1.get(),
+				zippedFlow2.get(),
+				zippedFlow3.get(),
+				zippedFlow4.get(),
+				zippedFlow5.get(),
+			)
+			launch { resultFlow.emit(result) }
+		}
+	}
+	
+	flows.forEach {
+		launch { it.collect { together() } }
+	}
+	
+	return resultFlow
+}
+
+fun <T1, T2, T3, T4, T5, T6, R> CoroutineScope.flowZip(
+	flow1: Flow<T1>,
+	flow2: Flow<T2>,
+	flow3: Flow<T3>,
+	flow4: Flow<T4>,
+	flow5: Flow<T5>,
+	flow6: Flow<T6>,
+	transform: (T1, T2, T3, T4, T5, T6) -> R,
+): Flow<R> {
+	
+	val flows = ArrayList<ZippedFlowInstance<*>>()
+	val zippedFlow1 = ZippedFlowInstance(flow = flow1).also { flows.add(it) }
+	val zippedFlow2 = ZippedFlowInstance(flow = flow2).also { flows.add(it) }
+	val zippedFlow3 = ZippedFlowInstance(flow = flow3).also { flows.add(it) }
+	val zippedFlow4 = ZippedFlowInstance(flow = flow4).also { flows.add(it) }
+	val zippedFlow5 = ZippedFlowInstance(flow = flow5).also { flows.add(it) }
+	val zippedFlow6 = ZippedFlowInstance(flow = flow6).also { flows.add(it) }
+	val resultFlow = MutableSharedFlow<R>()
+	
+	fun together() {
+		if (flows.all { it.isValueSet.value }) {
+			val result = transform(
+				zippedFlow1.get(),
+				zippedFlow2.get(),
+				zippedFlow3.get(),
+				zippedFlow4.get(),
+				zippedFlow5.get(),
+				zippedFlow6.get(),
+			)
+			launch { resultFlow.emit(result) }
+		}
+	}
+	
+	flows.forEach {
+		launch { it.collect { together() } }
+	}
+	
+	return resultFlow
+}
+
 

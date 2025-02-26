@@ -10,11 +10,8 @@ class StatisticPreferences : BasePreferences() {
 	
 	val accountIds = longList("accountIds", emptyList())
 	
+	val categoryIds = longList("categoryIds", emptyList())
+	
 	val selectedPeriod = enum("selectedPeriod", StatisticSelectedPeriod.ThreeMonths)
-
-//	val showMonthCount = int("showMonthCount", 3) //Zero means all
-
-//	val showCurrentMonth = boolean("showCurrentMonth", true)
-
 	
 }

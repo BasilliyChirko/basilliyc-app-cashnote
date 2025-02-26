@@ -55,6 +55,7 @@ class StatisticStateHolder(
 		val selectedPeriod: StatisticSelectedPeriod,
 		val currency: FinancialCurrency,
 		val accounts: List<FinancialAccount>,
+		val categories: List<FinancialCategory>,
 	)
 	
 	sealed interface Result {

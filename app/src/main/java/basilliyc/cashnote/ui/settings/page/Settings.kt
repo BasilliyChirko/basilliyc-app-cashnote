@@ -232,7 +232,7 @@ private fun ColumnScope.SettingsAccountList() {
 		val preferences = rememberInject<AppPreferences>()
 		MenuRowSwitch(
 			title = stringResource(R.string.account_params_show_accounts_list_in_single_line),
-			checked = preferences.accountListSingleLine.collectValue(),
+			checked = preferences.accountListSingleLine.collectAsState(),
 			onCheckedChange = {
 				preferences.accountListSingleLine.value = it
 			}
@@ -240,7 +240,7 @@ private fun ColumnScope.SettingsAccountList() {
 		HorizontalDivider()
 		MenuRowSwitch(
 			title = stringResource(R.string.account_params_quick_transaction),
-			checked = preferences.accountListQuickTransaction.collectValue(),
+			checked = preferences.accountListQuickTransaction.collectAsState(),
 			onCheckedChange = {
 				preferences.accountListQuickTransaction.value = it
 			}

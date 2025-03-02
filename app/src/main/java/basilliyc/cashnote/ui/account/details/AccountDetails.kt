@@ -45,11 +45,10 @@ import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.PageLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
-import basilliyc.cashnote.ui.components.PopupMenuState
+import basilliyc.cashnote.ui.components.PopupState
 import basilliyc.cashnote.ui.components.SimpleActionBar
 import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundPageGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
@@ -228,7 +227,7 @@ private fun PageData(
 }
 
 @Composable
-private fun PopupMenuState.PageDataOptionsMenu(
+private fun PopupState.PageDataOptionsMenu(
 	page: AccountDetailsState.Page.Data,
 	listener: AccountDetailsListener,
 ) {

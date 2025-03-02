@@ -2,6 +2,7 @@ package basilliyc.cashnote.utils
 
 import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
+import basilliyc.cashnote.data.FinancialCurrency
 import basilliyc.cashnote.ui.theme.colorGreen500
 import basilliyc.cashnote.ui.theme.colorRed500
 import java.util.Locale
@@ -26,6 +27,15 @@ inline fun anyTry(block: () -> Unit) {
 	}
 }
 
+inline fun <T> tryOrNull(block: () -> T): T? {
+	return try {
+		block()
+	} catch (ignore: Throwable) {
+//		Logcat("TEST").error(ignore)
+		null
+	}
+}
+
 inline fun <reified T> Any?.castOrNull(): T? {
 	if (this == null) return null
 	if (this is T) return this as T
@@ -35,7 +45,7 @@ inline fun <reified T> Any?.castOrNull(): T? {
 private val locale = Locale("en", "US")
 
 @SuppressLint("DefaultLocale")
-fun Double.toPriceString(showPlus: Boolean): String {
+fun Double.toPriceString(showPlus: Boolean, withCoins: Boolean = true, currency: FinancialCurrency? = null): String {
 	val splitDot = String.format(locale, "%.2f", this.absoluteValue).split('.')
 	
 	val coins = splitDot[1]
@@ -53,7 +63,11 @@ fun Double.toPriceString(showPlus: Boolean): String {
 		else -> ""
 	}
 	
-	return "$symbol $decimal.$coins".trim()
+	return if (withCoins) {
+		"$symbol $decimal.$coins ${currency?.symbol ?: ""}".trim()
+	} else {
+		"$symbol $decimal ${currency?.symbol ?: ""}".trim()
+	}
 }
 
 fun Double.toPriceWithCoins(withZeroCoins: Boolean = true): String {
@@ -69,6 +83,14 @@ fun Double.toPriceColor(): Color {
 		this == 0.0 -> Color.Unspecified
 		this > 0 -> colorGreen500
 		else -> colorRed500
+	}
+}
+
+fun Double.toPercent(): String {
+	val percent = (this * 100).toInt()
+	return when {
+		percent == 0 && this > 0 -> "<1%"
+		else -> "$percent%"
 	}
 }
 

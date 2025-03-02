@@ -54,7 +54,10 @@ interface FinancialTransactionDao {
 	@Query("SELECT * FROM FinancialTransaction ORDER BY date DESC")
 	fun getPagingSource(): PagingSource<Int, FinancialTransaction>
 	
-	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId AND categoryId=:categoryId AND date>=:periodStart AND date<=:periodEnd")
+	@Query("SELECT * FROM FinancialTransaction WHERE date>=:startDate ORDER BY date DESC")
+	fun getListByStartDateAsFlow(startDate: Long): Flow<List<FinancialTransaction> >
+	
+	@Query("SELECT * FROM FinancialTransaction WHERE accountId=:accountId AND categoryId=:categoryId AND date>=:periodStart AND date<=:periodEnd ORDER BY date DESC")
 	suspend fun getListForStatistic(
 		accountId: Long,
 		categoryId: Long,

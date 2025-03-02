@@ -42,7 +42,6 @@ import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.menu.MenuRowPopupColor
 import basilliyc.cashnote.ui.components.menu.MenuRowSwitch
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.ScaffoldBox
 import basilliyc.cashnote.utils.showToast

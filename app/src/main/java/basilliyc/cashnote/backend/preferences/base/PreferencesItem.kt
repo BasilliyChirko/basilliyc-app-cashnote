@@ -13,7 +13,10 @@ class PreferencesItem<T : Any>(
 	val defaultValue: T,
 	val onWrite: SharedPreferences.Editor.(value: T) -> Unit,
 	val onRead: SharedPreferences.() -> T,
+	val onRemove: SharedPreferences.Editor.() -> Unit = { remove(key) },
 ) {
+	
+	private var valueField: T? = null
 	
 	var value: T
 		get() = get()
@@ -32,6 +35,7 @@ class PreferencesItem<T : Any>(
 	}
 	
 	fun set(value: T) {
+		valueField = value
 		
 		preferences.edit().apply {
 			onWrite(value)
@@ -41,23 +45,33 @@ class PreferencesItem<T : Any>(
 	}
 	
 	fun remove() {
-		preferences.edit().remove(key).apply()
+		valueField = null
+		preferences.edit().apply { onRemove() }.apply()
 		mutableStateFlow.tryEmit(defaultValue)
 	}
 	
 	fun get(): T {
+		valueField?.let { return it }
+		
 		if (!preferences.contains(key)) {
-			return defaultValue
+			return defaultValue.also { valueField = it }
 		}
 		
-		return preferences.onRead()
+		return preferences.onRead().also { valueField = it }
+	}
+	
+	inline fun update(transform: (T) -> T) {
+		set(transform(get()))
 	}
 	
 	private val mutableStateFlow by lazy { MutableStateFlow(get()) }
 	val flow by lazy { mutableStateFlow.asStateFlow() }
 	
 	@Composable
-	fun collectValue() = flow.collectAsState().value
+	fun collectAsState() = flow.collectAsState().value
 	
-	
+}
+
+fun PreferencesItem<Boolean>.toggle() {
+	update { !it }
 }

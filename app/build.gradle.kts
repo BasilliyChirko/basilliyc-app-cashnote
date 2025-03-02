@@ -86,6 +86,8 @@ dependencies {
 	implementation(libs.bundles.room)
 	ksp(libs.room.compiler)
 	
+	implementation(libs.bundles.retrofit)
+	
 	implementation(platform(libs.firebase.bom))
 	implementation(libs.firebase.analytics)
 	implementation(libs.firebase.crashlytics)
@@ -94,6 +96,8 @@ dependencies {
 	implementation(libs.kotlinx.collections.immutable)
 	
 	implementation(libs.compose.material.icons)
+	
+	implementation(libs.vico.compose.m3)
 	
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)

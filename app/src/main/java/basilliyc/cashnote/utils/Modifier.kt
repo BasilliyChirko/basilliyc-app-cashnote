@@ -13,3 +13,13 @@ fun Modifier.applyIf(
 	}
 	return this
 }
+@Composable
+fun Modifier.applyIf(
+	condition: Boolean,
+	block: @Composable Modifier.() -> Modifier
+): Modifier {
+	if (condition) {
+		return block()
+	}
+	return this
+}

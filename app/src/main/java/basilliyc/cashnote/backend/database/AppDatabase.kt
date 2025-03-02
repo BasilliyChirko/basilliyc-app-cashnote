@@ -4,11 +4,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import basilliyc.cashnote.data.FinancialAccount
-import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialCategoryToFinancialAccountParams
+import basilliyc.cashnote.data.FinancialCurrencyRate
 import basilliyc.cashnote.data.FinancialStatistic
 import basilliyc.cashnote.data.FinancialStatisticParams
+import basilliyc.cashnote.data.FinancialTransaction
 
 @Database(
 	entities = [
@@ -18,9 +19,10 @@ import basilliyc.cashnote.data.FinancialStatisticParams
 		FinancialStatistic::class,
 		FinancialStatisticParams::class,
 		FinancialCategoryToFinancialAccountParams::class,
+		FinancialCurrencyRate::class,
 	],
 	exportSchema = true,
-	version = 2, //previous version: 2
+	version = 3, //previous version: 2
 )
 @TypeConverters(AppDatabaseConverters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -29,4 +31,5 @@ abstract class AppDatabase : RoomDatabase() {
 	abstract fun categoryDao(): FinancialCategoryDao
 	abstract fun statisticDao(): FinancialStatisticDao
 	abstract fun categoryToAccountParamsDao(): FinancialCategoryToFinancialAccountParamsDao
+	abstract fun currencyRateDao(): FinancialCurrencyRateDao
 }

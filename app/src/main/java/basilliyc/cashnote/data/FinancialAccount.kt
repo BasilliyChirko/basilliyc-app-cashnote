@@ -13,6 +13,8 @@ data class FinancialAccount(
 	val position: Int,
 )
 
-enum class FinancialCurrency {
-	UAH, USD, EUR,
+enum class FinancialCurrency(val symbol: String, val code: Int) {
+	UAH("₴", 980),
+	USD("$", 840),
+	EUR("€", 978),
 }

@@ -62,7 +62,7 @@ class SettingsViewModel : BaseViewModel(), SettingsListener {
 	
 	override fun onBackupCreateClicked(activity: Activity) {
 		val timestamp = System.currentTimeMillis()
-		val version = AppValues.BackupVersion
+		val version = AppValues.BACKUP_VERSION
 		val fileName = "CashNoteBackup_${version}_$timestamp.json"
 		
 		val file = File(activity.cacheDir, fileName)

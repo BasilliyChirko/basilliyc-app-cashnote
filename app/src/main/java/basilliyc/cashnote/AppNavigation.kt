@@ -17,7 +17,7 @@ import basilliyc.cashnote.ui.category.deletion.CategoryExtendedDeletion
 import basilliyc.cashnote.ui.category.form.CategoryForm
 import basilliyc.cashnote.ui.category.list.CategoryList
 import basilliyc.cashnote.ui.settings.page.AppSettings
-import basilliyc.cashnote.ui.statistic.AccountStatistic
+import basilliyc.cashnote.ui.statistic.Statistic
 import basilliyc.cashnote.ui.transaction.form.TransactionForm
 import basilliyc.cashnote.ui.transaction.history.TransactionHistory
 import basilliyc.cashnote.utils.LocalNavController
@@ -68,9 +68,9 @@ sealed interface AppNavigation {
 }
 
 fun NavGraphBuilder.createNavigationGraph() = this.apply {
-	composable<AppNavigation.AccountList> { AccountList() }
-	composable<AppNavigation.Statistic> { AccountStatistic() }
 	composable<AppNavigation.Settings> { AppSettings() }
+
+	composable<AppNavigation.AccountList> { AccountList() }
 	composable<AppNavigation.AccountForm> { AccountForm() }
 	composable<AppNavigation.CategoryList> { CategoryList() }
 	composable<AppNavigation.CategoryForm> { CategoryForm() }
@@ -78,6 +78,8 @@ fun NavGraphBuilder.createNavigationGraph() = this.apply {
 	composable<AppNavigation.AccountDetails> { AccountDetails() }
 	composable<AppNavigation.TransactionForm> { TransactionForm() }
 	dialog<AppNavigation.CategoryExtendedDeletion> { CategoryExtendedDeletion() }
+
+	composable<AppNavigation.Statistic> { Statistic() }
 }
 
 

@@ -40,11 +40,11 @@ import basilliyc.cashnote.data.FinancialAccount
 import basilliyc.cashnote.data.FinancialCategory
 import basilliyc.cashnote.data.FinancialTransaction
 import basilliyc.cashnote.ui.base.handleResult
+import basilliyc.cashnote.ui.components.BackButton
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
-import basilliyc.cashnote.ui.symbol
 import basilliyc.cashnote.ui.theme.backgroundCardGradient
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.Button
@@ -115,8 +115,6 @@ private fun Page(
 	listener: TransactionHistoryListener,
 ) {
 	
-	val listState = rememberLazyListState()
-	
 	ScaffoldBox(
 		topBar = {
 			SimpleActionBar(
@@ -132,6 +130,11 @@ private fun Page(
 					)
 				},
 				actions = { },
+				navigationIcon = {
+					if (page.showBackButton) {
+						BackButton()
+					}
+				}
 			)
 		},
 		content = {

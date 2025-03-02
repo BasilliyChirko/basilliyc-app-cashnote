@@ -127,5 +127,7 @@ private fun PageData(page: AccountParamsStateHolder.Page.Data, listener: Account
 			checked = page.statisticParams.showSecondaryValueForAccount,
 			onCheckedChange = listener::onStatisticShowSecondaryValueForAccountChanged
 		)
+		
+		
 	}
 }

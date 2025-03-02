@@ -1,3 +1,5 @@
+@file:Suppress("SameParameterValue", "unused")
+
 package basilliyc.cashnote.backend.preferences.base
 
 import android.content.Context
@@ -16,6 +18,15 @@ abstract class BasePreferences(
 		)
 	}
 	
+	protected val fields = ArrayList<PreferencesItem<*>>()
+	protected val fieldsNullable = ArrayList<PreferencesItemNullable<*>>()
+	
+	fun clear() {
+		fields.forEach { it.remove() }
+		fieldsNullable.forEach { it.remove() }
+		prefs.edit().clear().apply()
+	}
+	
 	protected fun boolean(
 		key: String,
 		defaultValue: Boolean,
@@ -25,7 +36,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putBoolean(key, it) },
 		onRead = { getBoolean(key, false) },
-	)
+	).also { fields.add(it) }
 	
 	protected fun booleanOrNull(
 		key: String,
@@ -36,7 +47,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putBoolean(key, it) },
 		onRead = { getBoolean(key, false) },
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected fun int(
 		key: String,
@@ -47,7 +58,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putInt(key, it) },
 		onRead = { getInt(key, 0) },
-	)
+	).also { fields.add(it) }
 	
 	protected fun intOrNull(
 		key: String,
@@ -58,7 +69,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putInt(key, it) },
 		onRead = { getInt(key, 0) },
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected fun long(
 		key: String,
@@ -69,7 +80,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putLong(key, it) },
 		onRead = { getLong(key, 0L) },
-	)
+	).also { fields.add(it) }
 	
 	protected fun longOrNull(
 		key: String,
@@ -80,7 +91,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putLong(key, it) },
 		onRead = { getLong(key, 0L) },
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected fun float(
 		key: String,
@@ -91,7 +102,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putFloat(key, it) },
 		onRead = { getFloat(key, 0F) },
-	)
+	).also { fields.add(it) }
 	
 	protected fun floatOrNull(
 		key: String,
@@ -102,7 +113,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putFloat(key, it) },
 		onRead = { getFloat(key, 0F) },
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected fun double(
 		key: String,
@@ -112,7 +123,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		convertToString = { it.toString() },
 		convertFromString = { it.toDouble() }
-	)
+	).also { fields.add(it) }
 	
 	protected fun doubleOrNull(
 		key: String,
@@ -122,7 +133,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		convertToString = { it.toString() },
 		convertFromString = { it.toDouble() }
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected inline fun <reified T : Any> custom(
 		key: String,
@@ -135,7 +146,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putString(key, convertToString(it)) },
 		onRead = { convertFromString(getString(key, "")!!) }
-	)
+	).also { fields.add(it) }
 	
 	protected inline fun <reified T : Any> customOrNull(
 		key: String,
@@ -148,7 +159,7 @@ abstract class BasePreferences(
 		defaultValue = defaultValue,
 		onWrite = { putString(key, convertToString(it)) },
 		onRead = { convertFromString(getString(key, "")!!) }
-	)
+	).also { fieldsNullable.add(it) }
 	
 	protected inline fun <reified T : Enum<T>> enum(
 		key: String,
@@ -163,7 +174,7 @@ abstract class BasePreferences(
 			convertFromString = { name ->
 				values.first { it.name == name } as T
 			}
-		)
+		).also { fields.add(it) }
 	}
 	
 	protected inline fun <reified T : Enum<T>> enumOrNull(
@@ -179,7 +190,82 @@ abstract class BasePreferences(
 			convertFromString = { name ->
 				values.first { it.name == name } as T
 			}
-		)
+		).also { fieldsNullable.add(it) }
 	}
+	
+	protected fun string(
+		key: String,
+		defaultValue: String,
+	) = PreferencesItem<String>(
+		preferences = prefs,
+		key = key,
+		defaultValue = defaultValue,
+		onWrite = { putString(key, it) },
+		onRead = { getString(key, "")!! }
+	).also { fields.add(it) }
+	
+	protected fun stringOrNull(
+		key: String,
+		defaultValue: String? = null,
+	) = PreferencesItemNullable<String>(
+		preferences = prefs,
+		key = key,
+		defaultValue = defaultValue,
+		onWrite = { putString(key, it) },
+		onRead = { getString(key, "")!! }
+	).also { fieldsNullable.add(it) }
+	
+	protected fun intList(
+		key: String,
+		defaultValue: List<Int>,
+	) = custom<List<Int>>(
+		key = key,
+		defaultValue = defaultValue,
+		convertToString = { it.joinToString(",") },
+		convertFromString = {
+			if (it.isEmpty()) return@custom emptyList()
+			it.split(",").map { it.toInt() }
+		}
+	).also { fields.add(it) }
+	
+	protected fun intListOrNull(
+		key: String,
+		defaultValue: List<Int>? = null,
+	) = customOrNull<List<Int>>(
+		key = key,
+		defaultValue = defaultValue,
+		convertToString = { it.joinToString(",") },
+		convertFromString = {
+			if (it.isEmpty()) return@customOrNull emptyList()
+			it.split(",").map { it.toInt() }
+		}
+	).also { fieldsNullable.add(it) }
+	
+	protected fun longList(
+		key: String,
+		defaultValue: List<Long>,
+	) = custom<List<Long>>(
+		key = key,
+		defaultValue = defaultValue,
+		convertToString = { it.joinToString(",") },
+		convertFromString = {
+			if (it.isEmpty()) return@custom emptyList()
+			it.split(",").map { it.toLong() }
+		}
+	).also { fields.add(it) }
+	
+	protected fun longListOrNull(
+		key: String,
+		defaultValue: List<Long>? = null,
+	) = customOrNull<List<Long>>(
+		key = key,
+		defaultValue = defaultValue,
+		convertToString = { it.joinToString(",") },
+		convertFromString = {
+			if (it.isEmpty()) return@customOrNull emptyList()
+			it.split(",").map { it.toLong() }
+		}
+	).also { fieldsNullable.add(it) }
+	
 	
 }

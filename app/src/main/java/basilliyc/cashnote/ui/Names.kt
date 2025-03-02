@@ -31,26 +31,28 @@ val StatisticSelectedPeriod.stringName
 		}
 	)
 
-val StatisticMonth.stringName
-	get() = @Composable {
-		val monthName = stringResource(
-			when (this.month) {
-				0 -> R.string.statistic_month_january
-				1 -> R.string.statistic_month_february
-				2 -> R.string.statistic_month_march
-				3 -> R.string.statistic_month_april
-				4 -> R.string.statistic_month_may
-				5 -> R.string.statistic_month_june
-				6 -> R.string.statistic_month_july
-				7 -> R.string.statistic_month_august
-				8 -> R.string.statistic_month_september
-				9 -> R.string.statistic_month_october
-				10 -> R.string.statistic_month_november
-				11 -> R.string.statistic_month_december
-				else -> throw IllegalStateException("Unknown month: $this")
-			}
-		)
-		
-		"$monthName ${this.year}"
-	}
+val StatisticMonth.stringNameFull
+	@Composable
+	get() = "$stringNameMonth ${this.year}"
+
+val StatisticMonth.stringNameMonth
+	@Composable
+	get() = stringResource(
+		when (this.month) {
+			0 -> R.string.statistic_month_january
+			1 -> R.string.statistic_month_february
+			2 -> R.string.statistic_month_march
+			3 -> R.string.statistic_month_april
+			4 -> R.string.statistic_month_may
+			5 -> R.string.statistic_month_june
+			6 -> R.string.statistic_month_july
+			7 -> R.string.statistic_month_august
+			8 -> R.string.statistic_month_september
+			9 -> R.string.statistic_month_october
+			10 -> R.string.statistic_month_november
+			11 -> R.string.statistic_month_december
+			else -> throw IllegalStateException("Unknown month: $this")
+		}
+	)
+	
 

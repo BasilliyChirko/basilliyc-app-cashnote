@@ -52,8 +52,10 @@ import basilliyc.cashnote.data.StatisticSelectedPeriod
 import basilliyc.cashnote.ui.base.handleResult
 import basilliyc.cashnote.ui.components.BoxLoading
 import basilliyc.cashnote.ui.components.CardText
+import basilliyc.cashnote.ui.components.ColumnChart
 import basilliyc.cashnote.ui.components.IconButton
 import basilliyc.cashnote.ui.components.ItemVisibilitySelectable
+import basilliyc.cashnote.ui.components.LineChart
 import basilliyc.cashnote.ui.components.PopupMenu
 import basilliyc.cashnote.ui.components.PopupMenuItem
 import basilliyc.cashnote.ui.components.SimpleActionBar
@@ -61,6 +63,8 @@ import basilliyc.cashnote.ui.components.VerticalGrid
 import basilliyc.cashnote.ui.components.VerticalGridCells
 import basilliyc.cashnote.ui.components.rememberPopupState
 import basilliyc.cashnote.ui.stringName
+import basilliyc.cashnote.ui.stringNameFull
+import basilliyc.cashnote.ui.stringNameMonth
 import basilliyc.cashnote.ui.theme.colorGrey99
 import basilliyc.cashnote.utils.DefaultPreview
 import basilliyc.cashnote.utils.ScaffoldColumn
@@ -70,6 +74,8 @@ import basilliyc.cashnote.utils.toPercent
 import basilliyc.cashnote.utils.toPriceColor
 import basilliyc.cashnote.utils.toPriceString
 import java.util.Calendar
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.getValue
 
 @Composable
@@ -131,6 +137,7 @@ private fun Page(
 			HorizontalPager(
 				modifier = Modifier.fillMaxSize(),
 				state = pagerState,
+				beyondViewportPageCount = 3
 			) {
 				when (page) {
 					is StatisticStateHolder.Page.Data -> {
@@ -369,6 +376,7 @@ private fun ColumnScope.PageDataBalance(
 			page.values.entries.sortedByDescending { it.key }.filter { it.key != currentMonth }
 		val profitCurrent = entryCurrent?.values?.sumOf { it.profit } ?: 0.0
 		
+		
 		val monthlyProfit = entriesAll.let {
 			it.sumOf { it.value.values.sumOf { it.profit } } / it.size
 		}
@@ -390,6 +398,38 @@ private fun ColumnScope.PageDataBalance(
 			textStyle = MaterialTheme.typography.titleMedium,
 		)
 		
+		if (entriesAll.size > 1) {
+			
+			HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+			Text(
+				modifier = Modifier.padding(start = 16.dp),
+				text = stringResource(R.string.statistic_profit_by_month),
+				style = MaterialTheme.typography.titleMedium,
+			)
+			ColumnChart(
+				data = entriesAll.map { (month, categoryMap) ->
+					month.stringNameMonth to categoryMap.values.sumOf { it.profit }
+				}.reversed()
+			)
+			
+			HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+			Text(
+				modifier = Modifier.padding(start = 16.dp),
+				text = stringResource(R.string.statistic_balance_by_month),
+				style = MaterialTheme.typography.titleMedium,
+			)
+			LineChart(
+				data = let {
+					var balance = page.totalBalance - profitCurrent
+					entriesAll.map { (month, categoryMap) ->
+						val profit = categoryMap.values.sumOf { it.profit }
+						(month.stringNameMonth to balance).also { balance -= profit }
+					}.reversed()
+				}
+			)
+			
+		}
+		
 		HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 		
 		RowTableTitle(
@@ -404,7 +444,7 @@ private fun ColumnScope.PageDataBalance(
 			val profit = categoryMap.values.sumOf { it.profit }
 			RowTableValue(
 				values = listOf(
-					month.stringName.invoke(),
+					month.stringNameFull,
 					balance.toPriceString(false, false, params.currency),
 					profit.toPriceString(true, false, params.currency),
 				),
@@ -449,6 +489,20 @@ private fun ColumnScope.PageDataIncome(
 			textStyle = MaterialTheme.typography.titleMedium,
 			valueColor = averageIncome.toPriceColor()
 		)
+		
+		if (entriesAll.size > 1) {
+			HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+			Text(
+				modifier = Modifier.padding(start = 16.dp),
+				text = stringResource(R.string.statistic_income_by_month),
+				style = MaterialTheme.typography.titleMedium,
+			)
+			ColumnChart(
+				data = entriesAll.map { (month, categoryMap) ->
+					month.stringNameMonth to categoryMap.values.sumOf { it.income }
+				}.reversed()
+			)
+		}
 		
 		//total values for each category for all period
 		val categoryTotal = HashMap<FinancialCategory, Double>()
@@ -495,7 +549,7 @@ private fun ColumnScope.PageDataIncome(
 			val popupState = rememberPopupState()
 			RowTableValue(
 				values = listOf(
-					month.stringName.invoke(),
+					month.stringNameFull,
 					income.toPriceString(true, false, params.currency),
 				),
 				endingIcon = if (popupState.isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
@@ -568,6 +622,19 @@ private fun ColumnScope.PageDataExpense(
 			valueColor = averageExpense.toPriceColor()
 		)
 		
+		if (entriesAll.size > 1) {
+			HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+			Text(
+				modifier = Modifier.padding(start = 16.dp),
+				text = stringResource(R.string.statistic_expense_by_month),
+				style = MaterialTheme.typography.titleMedium,
+			)
+			ColumnChart(
+				data = entriesAll.map { (month, categoryMap) ->
+					month.stringNameMonth to categoryMap.values.sumOf { it.expense }
+				}.reversed()
+			)
+		}
 		
 		//total values for each category for all period
 		val categoryTotal = HashMap<FinancialCategory, Double>()
@@ -613,7 +680,7 @@ private fun ColumnScope.PageDataExpense(
 			val popupState = rememberPopupState()
 			RowTableValue(
 				values = listOf(
-					month.stringName.invoke(),
+					month.stringNameFull,
 					expense.toPriceString(true, false, params.currency),
 				),
 				endingIcon = if (popupState.isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,

@@ -97,6 +97,8 @@ dependencies {
 	
 	implementation(libs.compose.material.icons)
 	
+	implementation(libs.vico.compose.m3)
+	
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)

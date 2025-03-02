@@ -205,6 +205,10 @@
     <string name="statistic_expand">Expand</string>
     <string name="statistic_total_expense">Total expense</string>
     <string name="statistic_average_expense">Monthly expense</string>
+    <string name="statistic_profit_by_month">Profit by month</string>
+    <string name="statistic_balance_by_month">Balance by month</string>
+    <string name="statistic_income_by_month">Income by month</string>
+    <string name="statistic_expense_by_month">Expense by month</string>
     <plurals name="category_list_item_used_in_accounts_count">
         <item quantity="one">In %d account</item>
         <item quantity="other">In %d accounts</item>

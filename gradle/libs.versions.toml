@@ -24,6 +24,8 @@ retrofit = "2.9.0"
 retrofit-coroutines = "0.9.2"
 okhttp3-logging = "5.0.0-alpha.2"
 google-gson = "2.10.1"
+vico = "2.0.2"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,7 +62,7 @@ retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "convert
 retrofit-coroutines = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlin-coroutines-adapter", version.ref = "retrofit-coroutines" }
 okhttp3-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3-logging" }
 google-gson = { group = "com.google.code.gson", name = "gson", version.ref = "google-gson" }
-
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

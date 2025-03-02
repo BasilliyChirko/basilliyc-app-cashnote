@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.ArrowDropUp
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -135,9 +136,9 @@ private fun Page(
 					is StatisticStateHolder.Page.Data -> {
 						
 						when (it) {
-							0 -> PageDataBalance(page, params, listener)
-							1 -> PageDataIncome(page, params, listener)
-//						2 -> PageDataExpense(page, params,listener)
+							0 -> PageDataBalance(page, params)
+							1 -> PageDataIncome(page, params)
+							2 -> PageDataExpense(page, params)
 							else -> Unit
 						}
 					}
@@ -356,7 +357,6 @@ private fun PageLoadingError(
 private fun ColumnScope.PageDataBalance(
 	page: StatisticStateHolder.Page.Data,
 	params: StatisticStateHolder.Params,
-	listener: StatisticListener,
 ) {
 	Column(
 		modifier = Modifier
@@ -379,15 +379,15 @@ private fun ColumnScope.PageDataBalance(
 			textStyle = MaterialTheme.typography.titleLarge,
 		)
 		RowHeadline(
-			title = stringResource(R.string.statistic_current_profit),
-			value = profitCurrent.toPriceString(true, true, params.currency),
-			textStyle = MaterialTheme.typography.titleMedium,
-		)
-		RowHeadline(
 			title = stringResource(R.string.statistic_average_profit),
 			value = monthlyProfit.toPriceString(true, true, params.currency),
 			textStyle = MaterialTheme.typography.titleMedium,
 			valueColor = monthlyProfit.toPriceColor()
+		)
+		RowHeadline(
+			title = stringResource(R.string.statistic_current_profit),
+			value = profitCurrent.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleMedium,
 		)
 		
 		HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -424,7 +424,6 @@ private fun ColumnScope.PageDataBalance(
 private fun ColumnScope.PageDataIncome(
 	page: StatisticStateHolder.Page.Data,
 	params: StatisticStateHolder.Params,
-	listener: StatisticListener,
 ) {
 	Column(
 		modifier = Modifier
@@ -435,10 +434,7 @@ private fun ColumnScope.PageDataIncome(
 			.map { it.key to it.value.filter { it.key.id in params.categoryIds && it.value.income > 0.0 } }
 		
 		//Total values for all period
-		var totalIncome = 0.0
-		entriesAll.forEach { (month, categoryMap) ->
-			totalIncome += categoryMap.values.sumOf { it.income }
-		}
+		val totalIncome = entriesAll.sumOf { it.second.values.sumOf { it.income } }
 		val averageIncome = totalIncome / entriesAll.size
 		RowHeadline(
 			modifier = Modifier.padding(top = 8.dp),
@@ -502,7 +498,7 @@ private fun ColumnScope.PageDataIncome(
 					month.stringName.invoke(),
 					income.toPriceString(true, false, params.currency),
 				),
-				endingIcon = Icons.Outlined.ArrowDropDown,
+				endingIcon = if (popupState.isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
 				onClick = { popupState.toggle() }
 			)
 			
@@ -538,27 +534,126 @@ private fun ColumnScope.PageDataIncome(
 			
 		}
 		
-		//Average values
-
-//	RowTitles(
-//		titles = listOf(
-//			"",
-//			stringResource(R.string.statistic_income),
-//			stringResource(R.string.statistic_expense),
-//		)
-//	)
+		
 	}
 	
 }
-//
-//@Composable
-//private fun ColumnScope.PageDataExpense(
-//	page: StatisticStateHolder.Page.Data,
-//params: StatisticStateHolder.Params,
-//	listener: StatisticListener,
-//) {
-//
-//}
+
+@Composable
+private fun ColumnScope.PageDataExpense(
+	page: StatisticStateHolder.Page.Data,
+	params: StatisticStateHolder.Params,
+) {
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.verticalScroll(rememberScrollState()),
+	) {
+		val entriesAll = page.values.entries.sortedByDescending { it.key }
+			.map { it.key to it.value.filter { it.key.id in params.categoryIds && it.value.expense < 0.0 } }
+		
+		val totalExpense = entriesAll.sumOf { it.second.values.sumOf { it.expense } }
+		val averageExpense = totalExpense / entriesAll.size
+		RowHeadline(
+			modifier = Modifier.padding(top = 8.dp),
+			title = stringResource(R.string.statistic_total_expense),
+			value = totalExpense.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleLarge,
+			valueColor = totalExpense.toPriceColor()
+		)
+		RowHeadline(
+			title = stringResource(R.string.statistic_average_expense),
+			value = averageExpense.toPriceString(true, true, params.currency),
+			textStyle = MaterialTheme.typography.titleMedium,
+			valueColor = averageExpense.toPriceColor()
+		)
+		
+		
+		//total values for each category for all period
+		val categoryTotal = HashMap<FinancialCategory, Double>()
+		entriesAll.forEach { (month, categoryMap) ->
+			categoryMap.forEach {
+				categoryTotal[it.key] = (categoryTotal[it.key] ?: 0.0) + it.value.expense
+			}
+		}
+		RowTableTitle(
+			titles = listOf(
+				stringResource(R.string.statistic_category),
+				stringResource(R.string.statistic_total),
+				stringResource(R.string.statistic_percent),
+				stringResource(R.string.statistic_average),
+			)
+		)
+		categoryTotal.toList().sortedBy { it.second }.forEach { (category, total) ->
+			RowTableValue(
+				values = listOf(
+					category.name,
+					total.toPriceString(true, false, params.currency),
+					(total / totalExpense).toPercent(),
+					(total / entriesAll.size).toPriceString(
+						true,
+						false
+					) + " " + params.currency.symbol,
+				),
+			)
+		}
+		
+		HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+		
+		//Values for each month
+		RowTableTitle(
+			titles = listOf(
+				stringResource(R.string.statistic_month),
+				stringResource(R.string.statistic_expense),
+			),
+			endingIcon = true
+		)
+		entriesAll.forEach { (month, categoryMap) ->
+			val expense = categoryMap.values.sumOf { it.expense }
+			val popupState = rememberPopupState()
+			RowTableValue(
+				values = listOf(
+					month.stringName.invoke(),
+					expense.toPriceString(true, false, params.currency),
+				),
+				endingIcon = if (popupState.isExpanded) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown,
+				onClick = { popupState.toggle() }
+			)
+			
+			if (popupState.isExpanded) {
+				Column(
+					modifier = Modifier.padding(start = 16.dp)
+				) {
+					RowTableTitle(
+						titles = listOf(
+							stringResource(R.string.statistic_category),
+							stringResource(R.string.statistic_percent),
+							stringResource(R.string.statistic_expense),
+						)
+					)
+					categoryMap.toList().sortedBy { it.second.expense }
+						.forEach { (category, value) ->
+							RowTableValue(
+								values = listOf(
+									category.name,
+									(value.expense / expense).toPercent(),
+									value.expense.toPriceString(
+										true,
+										false,
+										params.currency
+									)
+								),
+							)
+						}
+				}
+				HorizontalDivider(modifier = Modifier.padding(top = 8.dp, start = 16.dp))
+				
+			}
+			
+		}
+		
+	}
+}
 
 @Composable
 private fun RowHeadline(
